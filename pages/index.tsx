@@ -1,39 +1,30 @@
-import { Box, Grid, Icon, Link, Stack, Text, VStack } from '@chakra-ui/react';
-import { ElementType, FunctionComponent } from 'react';
-import { SiGithub } from 'react-icons/si';
+import { Box, Grid, Text, VStack } from '@chakra-ui/react';
+import { FunctionComponent } from 'react';
+import { SocialLinks } from 'components/social-links';
 import { Layout } from '../components/Layout';
-
-const SocialLink: FunctionComponent<{
-  href: string;
-  label: string;
-  text: string;
-  icon: ElementType;
-}> = ({ href, label, text, icon }) => (
-  <Link href={href}>
-    <Icon as={icon} aria-label={label} mr={1} pb="2px" />
-    {text}
-  </Link>
-);
 
 const IndexPage: FunctionComponent = () => (
   <Layout title="atxdao">
     <Box textAlign="center" fontSize="xl">
       <Grid minH="100vh" p={3} mt="5vh">
-        <VStack spacing={[3, 4]}>
+        <VStack spacing={[6, 8]}>
           <Text fontSize={['3.2rem', '4rem', '5rem']} lineHeight={1}>
             atxdao
           </Text>
-          <Text pr={3} pt={2}>
-            contact us:
-          </Text>
-          <Stack textAlign="left">
-            <SocialLink
-              href="https://github.com/atxdao"
-              icon={SiGithub}
-              text="atxdao"
-              label="github"
-            />
-          </Stack>
+          <SocialLinks
+            fontSize="4xl"
+            spacing={4}
+            socialLinks={[
+              {
+                social: 'discord',
+                href: 'https://discord.gg/3uGPbZhk3U',
+              },
+              {
+                social: 'github',
+                href: 'https://github.com/atxdao',
+              },
+            ]}
+          />
         </VStack>
       </Grid>
     </Box>
