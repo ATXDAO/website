@@ -9,7 +9,9 @@
     "type-check": "tsc",
     "lint": "eslint components pages styles"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@chakra-ui/system": "^1.7.1"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/chakra-ui/chakra-ui.git",
