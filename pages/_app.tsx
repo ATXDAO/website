@@ -1,7 +1,7 @@
 import type { NextComponentType, NextPageContext } from 'next';
 import type { NextRouter } from 'next/router';
 import { FunctionComponent } from 'react';
-import { UIProvider } from '../components/UIProvider';
+import { UIProvider } from 'components/ui-provider';
 
 export interface AppRenderProps {
   pageProps: Record<string, unknown>;
@@ -27,4 +27,4 @@ const App: FunctionComponent<AppRenderProps> = ({
 
 export default App;
 
-export { getServerSideProps } from '../components/UIProvider';
+export { getServerSideProps } from 'components/ui-provider';

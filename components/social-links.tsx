@@ -30,7 +30,7 @@ interface SocialLinkProps {
 export const SocialLinks: FC<
   ButtonGroupProps & { socialLinks: SocialLinkProps[] }
 > = ({ socialLinks, fontSize, ...props }) => (
-  <ButtonGroup variant="ghost" color="gray.600" {...props}>
+  <ButtonGroup variant="ghost" {...props}>
     {socialLinks.map(({ href, social }) => (
       <IconButton
         as="a"

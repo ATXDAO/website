@@ -1,8 +1,16 @@
-import { Box, Grid, Text, useColorModeValue, VStack } from '@chakra-ui/react';
+import {
+  Box,
+  Grid,
+  Text,
+  Spacer,
+  useColorModeValue,
+  VStack,
+} from '@chakra-ui/react';
 import { FunctionComponent } from 'react';
 import { SocialLinks } from 'components/social-links';
-import { Logo } from 'components/Logo';
-import { Layout } from '../components/Layout';
+import { Logo } from 'components/logo';
+import { Layout } from 'components/layout';
+import { SubscribeForm } from 'components/subscribe-form';
 
 const IndexPage: FunctionComponent = () => (
   <Layout title="atxdao">
@@ -31,7 +39,9 @@ const IndexPage: FunctionComponent = () => (
               },
             ]}
           />
+          <SubscribeForm />
         </VStack>
+        <Spacer />
       </Grid>
     </Box>
   </Layout>

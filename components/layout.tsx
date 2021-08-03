@@ -1,5 +1,5 @@
 import { Container, Flex } from '@chakra-ui/react';
-import { ColorModeSwitcher } from 'components/ColorModeSwitcher';
+import { ColorModeSwitcher } from 'components/color-mode-switcher';
 import Head from 'next/head';
 import { FunctionComponent, ReactNode } from 'react';
 
