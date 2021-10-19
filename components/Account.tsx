@@ -1,10 +1,8 @@
-/* eslint-disable import/no-default-export */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import MetaMaskOnboarding from '@metamask/onboarding';
 import { useWeb3React } from '@web3-react/core';
 import { UserRejectedRequestError } from '@web3-react/injected-connector';
-import { Button } from '@chakra-ui/react';
 import { FC, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Button } from '@chakra-ui/react';
 import { injected } from '../connectors';
 import useENSName from '../hooks/useENSName';
 import { formatEtherscanLink, shortenHex } from '../util';
@@ -46,7 +44,9 @@ const Account: FC<AccountProps> = ({ triedToEagerConnect }) => {
   if (typeof account !== 'string') {
     const hasMetaMaskOrWeb3Available =
       MetaMaskOnboarding.isMetaMaskInstalled() ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any)?.ethereum ||
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any)?.web3;
 
     return (
@@ -92,4 +92,5 @@ const Account: FC<AccountProps> = ({ triedToEagerConnect }) => {
   );
 };
 
+// eslint-disable-next-line import/no-default-export
 export default Account;
