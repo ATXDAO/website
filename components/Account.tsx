@@ -1,24 +1,21 @@
-import MetaMaskOnboarding from "@metamask/onboarding";
-import { useWeb3React } from "@web3-react/core";
-import { UserRejectedRequestError } from "@web3-react/injected-connector";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { injected } from "../connectors";
-import useENSName from "../hooks/useENSName";
-import { formatEtherscanLink, shortenHex } from "../util";
+/* eslint-disable import/no-default-export */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import MetaMaskOnboarding from '@metamask/onboarding';
+import { useWeb3React } from '@web3-react/core';
+import { UserRejectedRequestError } from '@web3-react/injected-connector';
+import { Button } from '@chakra-ui/react';
+import { FC, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { injected } from '../connectors';
+import useENSName from '../hooks/useENSName';
+import { formatEtherscanLink, shortenHex } from '../util';
 
-type Props = {
+type AccountProps = {
   triedToEagerConnect: boolean;
 };
 
-const Account = ({ triedToEagerConnect }: Props) => {
-  const {
-    active,
-    error,
-    activate,
-    chainId,
-    account,
-    setError,
-  } = useWeb3React();
+const Account: FC<AccountProps> = ({ triedToEagerConnect }) => {
+  const { active, error, activate, chainId, account, setError } =
+    useWeb3React();
 
   // initialize metamask onboarding
   const onboarding = useRef<MetaMaskOnboarding>();
@@ -28,7 +25,7 @@ const Account = ({ triedToEagerConnect }: Props) => {
   }, []);
 
   // manage connecting state for injected connector
-  const [connecting, setConnecting] = useState(false);
+  const [, setConnecting] = useState(false);
   useEffect(() => {
     if (active || error) {
       setConnecting(false);
@@ -36,7 +33,7 @@ const Account = ({ triedToEagerConnect }: Props) => {
     }
   }, [active, error]);
 
-  const ENSName = useENSName(account);
+  const ENSName = useENSName(account || '');
 
   if (error) {
     return null;
@@ -46,7 +43,7 @@ const Account = ({ triedToEagerConnect }: Props) => {
     return null;
   }
 
-  if (typeof account !== "string") {
+  if (typeof account !== 'string') {
     const hasMetaMaskOrWeb3Available =
       MetaMaskOnboarding.isMetaMaskInstalled() ||
       (window as any)?.ethereum ||
@@ -55,28 +52,28 @@ const Account = ({ triedToEagerConnect }: Props) => {
     return (
       <div>
         {hasMetaMaskOrWeb3Available ? (
-          <button
+          <Button
             onClick={() => {
               setConnecting(true);
 
-              activate(injected, undefined, true).catch((error) => {
+              activate(injected, undefined, true).catch((_error) => {
                 // ignore the error if it's a user rejected request
-                if (error instanceof UserRejectedRequestError) {
+                if (_error instanceof UserRejectedRequestError) {
                   setConnecting(false);
                 } else {
-                  setError(error);
+                  setError(_error);
                 }
               });
             }}
           >
             {MetaMaskOnboarding.isMetaMaskInstalled()
-              ? "Connect to MetaMask"
-              : "Connect to Wallet"}
-          </button>
+              ? 'Connect to MetaMask'
+              : 'Connect to Wallet'}
+          </Button>
         ) : (
-          <button onClick={() => onboarding.current?.startOnboarding()}>
+          <Button onClick={() => onboarding.current?.startOnboarding()}>
             Install Metamask
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -85,9 +82,9 @@ const Account = ({ triedToEagerConnect }: Props) => {
   return (
     <a
       {...{
-        href: formatEtherscanLink("Account", [chainId, account]),
-        target: "_blank",
-        rel: "noopener noreferrer",
+        href: formatEtherscanLink('Account', [chainId || 1, account]),
+        target: '_blank',
+        rel: 'noopener noreferrer',
       }}
     >
       {ENSName || `${shortenHex(account, 4)}`}
