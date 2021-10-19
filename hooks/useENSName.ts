@@ -1,19 +1,22 @@
-import type { Web3Provider } from "@ethersproject/providers";
-import { useWeb3React } from "@web3-react/core";
-import { useEffect, useState } from "react";
+/* eslint-disable consistent-return */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import type { Web3Provider } from '@ethersproject/providers';
+import { useWeb3React } from '@web3-react/core';
+import { useEffect, useState } from 'react';
 
 export default function useENSName(address: string) {
   const { library, chainId } = useWeb3React<Web3Provider>();
-  const [ENSName, setENSName] = useState("");
+  const [ENSName, setENSName] = useState('');
 
   useEffect(() => {
-    if (library && typeof address === "string") {
+    if (library && typeof address === 'string') {
       let stale = false;
 
       library
         .lookupAddress(address)
         .then((name) => {
-          if (!stale && typeof name === "string") {
+          if (!stale && typeof name === 'string') {
             setENSName(name);
           }
         })
@@ -21,7 +24,7 @@ export default function useENSName(address: string) {
 
       return () => {
         stale = true;
-        setENSName("");
+        setENSName('');
       };
     }
   }, [library, address, chainId]);

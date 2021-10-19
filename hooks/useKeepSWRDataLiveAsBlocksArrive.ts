@@ -1,5 +1,9 @@
-import { useEffect, useRef } from "react";
-import useBlockNumber from "./useBlockNumber";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable consistent-return */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+import { useEffect, useRef } from 'react';
+import useBlockNumber from './useBlockNumber';
 
 export default function useKeepSWRDataLiveAsBlocksArrive(
   mutate: () => Promise<any>
