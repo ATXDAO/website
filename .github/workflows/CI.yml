@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  lint-and-build:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+      - uses: c-hive/gha-yarn-cache@v1
+      - name: Install Deps
+        run: yarn install
+      - name: Typecheck
+        run: yarn type-check
+      - name: Lint js
+        run: yarn lint
+      - name: Build
+        run: yarn build
