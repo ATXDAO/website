@@ -42,7 +42,7 @@ const MintForm: FC = () => {
   const [statusMessage] = useState('');
   const [status] = useState<'unsubmitted' | 'error' | 'success'>('unsubmitted');
   const contract = useMintContract(
-    '0x9dC649EcC876eCBF13180431Fea693cE71a050e7'
+    '0xEC6Ce99088d170472E5e0Bc0fd4cfd6d9a152E8A'
   );
   if (!contract) throw Error('missing contract');
   const onSubmit = async (e: { preventDefault: () => void }) => {
