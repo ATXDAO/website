@@ -2,34 +2,28 @@
   "name": "chakra-nextjs-ts",
   "version": "1.0.9",
   "private": "true",
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build && next export",
-    "start": "next start",
-    "type-check": "tsc",
-    "lint": "eslint components pages styles",
-    "compile-contract-types": "typechain --target ethers-v5 --out-dir './contracts/types' './contracts/*.json'",
-    "postinstall": "yarn compile-contract-types"
-  },
-  "dependencies": {
-    "@chakra-ui/system": "^1.7.1",
-    "@types/jsonp": "^0.2.1",
-    "jsonp": "^0.2.1",
-    "query-string": "^7.0.1",
-    "semantic-ui-react": "^2.0.4"
+  "bugs": {
+    "url": "https://github.com/chakra-ui/chakra-ui/issues"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/chakra-ui/chakra-ui.git",
     "directory": "examples/nextjs-typescript"
   },
-  "bugs": {
-    "url": "https://github.com/chakra-ui/chakra-ui/issues"
-  },
   "license": "MIT",
-  "devDependencies": {
+  "scripts": {
+    "build": "next build && next export",
+    "compile-contract-types": "typechain --target ethers-v5 --out-dir './contracts/types' './contracts/*.json'",
+    "dev": "next dev",
+    "postinstall": "yarn compile-contract-types",
+    "lint": "eslint components pages styles",
+    "start": "next start",
+    "type-check": "tsc"
+  },
+  "dependencies": {
     "@chakra-ui/icons": "1.0.14",
     "@chakra-ui/react": "1.6.5",
+    "@chakra-ui/system": "^1.7.1",
     "@chakra-ui/theme-tools": "1.1.8",
     "@emotion/react": "^11.4.0",
     "@emotion/styled": "^11.3.0",
@@ -40,7 +34,7 @@
     "@ethersproject/wallet": "^5.4.0",
     "@metamask/onboarding": "^1.0.1",
     "@typechain/ethers-v5": "^7.0.1",
-    "@types/faker": "^5.5.7",
+    "@types/jsonp": "^0.2.1",
     "@types/node": "^16.4.10",
     "@types/react": "^17.0.15",
     "@types/react-dom": "^17.0.9",
@@ -60,10 +54,11 @@
     "eslint-plugin-react": "^7.24.0",
     "eslint-plugin-react-hooks": "^4.2.0",
     "ethers": "^5.4.5",
-    "faker": "^5.5.3",
     "framer-motion": "^4.1.17",
+    "jsonp": "^0.2.1",
     "next": "^11.0.1",
     "prettier": "^2.3.2",
+    "query-string": "^7.0.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-icons": "^4.2.0",

@@ -1,10 +1,11 @@
+import { Button } from '@chakra-ui/react';
 import MetaMaskOnboarding from '@metamask/onboarding';
 import { useWeb3React } from '@web3-react/core';
 import { UserRejectedRequestError } from '@web3-react/injected-connector';
 import { FC, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Button } from '@chakra-ui/react';
+import { useENSName } from 'hooks/web3';
 import { injected } from '../connectors';
-import useENSName from '../hooks/useENSName';
+
 import { formatEtherscanLink, shortenHex } from '../util';
 
 type AccountProps = {

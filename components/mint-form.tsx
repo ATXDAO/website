@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { AddIcon } from '@chakra-ui/icons';
-import { Form } from 'semantic-ui-react';
 import {
   Alert,
   AlertDescription,
@@ -15,9 +14,9 @@ import {
   Stack,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { Dispatch, FC, SetStateAction, useState } from 'react';
 import { parseUnits } from '@ethersproject/units';
-import useMintContract from '../hooks/useMintContract';
+import { useMintContract } from 'hooks/web3';
+import { Dispatch, FC, SetStateAction, useState } from 'react';
 
 const TextInput: FC<
   InputProps & { setValue: Dispatch<SetStateAction<string>> }
@@ -56,7 +55,7 @@ const MintForm: FC = () => {
 
   return (
     <Container p={6} maxWidth="420px" display="block" overflow="auto">
-      <Form onSubmit={onSubmit} error={!!errorMessage}>
+      <FormControl onSubmit={onSubmit} error={!!errorMessage}>
         <Stack spacing={3}>
           <TextInput
             type="value"
@@ -91,7 +90,7 @@ const MintForm: FC = () => {
             <AlertDescription mt={-1}>{statusMessage}</AlertDescription>
           </Alert>
         </Stack>
-      </Form>
+      </FormControl>
     </Container>
   );
 };

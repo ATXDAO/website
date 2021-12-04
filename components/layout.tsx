@@ -1,14 +1,12 @@
 /* eslint-disable no-console */
-import { Container, Flex, Button } from '@chakra-ui/react';
+import { Button, Container, Flex } from '@chakra-ui/react';
+import { useWeb3React } from '@web3-react/core';
 import { ColorModeSwitcher } from 'components/color-mode-switcher';
+import { useEagerConnect, useENSName } from 'hooks/web3';
 import Head from 'next/head';
 import { FunctionComponent, ReactNode } from 'react';
-import { useWeb3React } from '@web3-react/core';
-import useEagerConnect from '../hooks/useEagerConnect';
-
-import useENSName from '../hooks/useENSName';
-import Account from './Account';
-import { shortenHex, formatEtherscanLink } from '../util';
+import { formatEtherscanLink, shortenHex } from '../util';
+import Account from './account';
 
 type Props = {
   children?: ReactNode;
@@ -49,9 +47,7 @@ export const Layout: FunctionComponent<Props> = ({
             {active ? (
               <Button onClick={disconnect}>Disconnect</Button>
             ) : (
-              <Button>
-                <Account triedToEagerConnect={triedToEagerConnect} />
-              </Button>
+              <Account triedToEagerConnect={triedToEagerConnect} />
             )}
             {active ? (
               <Button>
