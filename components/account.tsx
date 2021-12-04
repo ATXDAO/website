@@ -2,10 +2,9 @@ import { Button } from '@chakra-ui/react';
 import MetaMaskOnboarding from '@metamask/onboarding';
 import { useWeb3React } from '@web3-react/core';
 import { UserRejectedRequestError } from '@web3-react/injected-connector';
-import { FC, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useENSName } from 'hooks/web3';
+import { FC, useEffect, useRef, useState } from 'react';
 import { injected } from '../connectors';
-
 import { formatEtherscanLink, shortenHex } from '../util';
 
 type AccountProps = {
@@ -19,7 +18,7 @@ const Account: FC<AccountProps> = ({ triedToEagerConnect }) => {
   // initialize metamask onboarding
   const onboarding = useRef<MetaMaskOnboarding>();
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     onboarding.current = new MetaMaskOnboarding();
   }, []);
 

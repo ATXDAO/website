@@ -1,3 +1,4 @@
+/* eslint-disable react/function-component-definition */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { AddIcon } from '@chakra-ui/icons';
 import {
@@ -55,7 +56,7 @@ const MintForm: FC = () => {
 
   return (
     <Container p={6} maxWidth="420px" display="block" overflow="auto">
-      <FormControl onSubmit={onSubmit} error={!!errorMessage}>
+      <FormControl onSubmit={onSubmit} error={errorMessage || undefined}>
         <Stack spacing={3}>
           <TextInput
             type="value"

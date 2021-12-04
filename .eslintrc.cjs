@@ -7,10 +7,12 @@ module.exports = {
   ignorePatterns: ['.eslintrc.cjs', 'next.config.js', 'jest.config.js'],
   plugins: ['@typescript-eslint', 'eslint-comments', 'promise', 'prettier'],
   extends: [
+    'airbnb',
     'airbnb-typescript',
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
   ],
+  parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 12,
     sourceType: 'module',
@@ -61,11 +63,14 @@ module.exports = {
         typedefs: true,
       },
     ],
+    'react/function-component-definition': [0],
+    'react/require-default-props': [0],
+    'react/jsx-no-bind': [0],
   },
   overrides: [
     {
       files: ['components/**/*.ts*'],
-      excludedFiles: ['*.cjs'],
+      excludedFiles: ['*.cjs', 'contracts/**/*'],
       rules: { 'import/no-default-export': 'error' },
     },
   ],

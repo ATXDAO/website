@@ -4,16 +4,16 @@ import { useWeb3React } from '@web3-react/core';
 import { ColorModeSwitcher } from 'components/color-mode-switcher';
 import { useEagerConnect, useENSName } from 'hooks/web3';
 import Head from 'next/head';
-import { FunctionComponent, ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
 import { formatEtherscanLink, shortenHex } from '../util';
 import Account from './account';
 
-type Props = {
+interface LayoutProps {
   children?: ReactNode;
   title?: string;
-};
+}
 
-export const Layout: FunctionComponent<Props> = ({
+export const Layout: FC<LayoutProps> = ({
   children,
   title = 'This is the default title',
 }) => {

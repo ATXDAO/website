@@ -2,6 +2,11 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import type { BigNumberish } from '@ethersproject/bignumber';
+import type {
+  ExternalProvider,
+  JsonRpcFetchFunc,
+} from '@ethersproject/providers';
+import { Web3Provider } from '@ethersproject/providers';
 import { formatUnits } from '@ethersproject/units';
 
 export function shortenHex(hex: string, length = 4) {
@@ -40,3 +45,9 @@ export const parseBalance = (
   decimals = 18,
   decimalsToDisplay = 3
 ) => parseFloat(formatUnits(value, decimals)).toFixed(decimalsToDisplay);
+
+export function getLibrary(
+  provider: ExternalProvider | JsonRpcFetchFunc
+): Web3Provider {
+  return new Web3Provider(provider);
+}
