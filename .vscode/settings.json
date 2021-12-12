@@ -1,3 +1,12 @@
 {
-  "editor.maxTokenizationLineLength": 120
+  "editor.maxTokenizationLineLength": 120,
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "eslint.autoFixOnSave": true,
+    "eslint.run": true,
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "typescript.updateImportsOnFileMove.enabled": "always",
 }
