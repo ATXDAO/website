@@ -37,7 +37,7 @@ const TextInput: FC<
         placeholder={placeholder}
         aria-label={placeholder}
         _placeholder={{ color: useColorModeValue('gray.600', 'gray.200') }}
-        onChange={e => setValue(e.target.value)}
+        onChange={(e) => setValue(e.target.value)}
         {...props}
       />
     </InputGroup>
@@ -57,7 +57,7 @@ const SubscribeForm: FC = () => {
   );
   const [statusMessage, setStatusMessage] = useState('');
 
-  const onSubmit: FormEventHandler = async event => {
+  const onSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
     const qs = stringify({
       MERGE0: email,
