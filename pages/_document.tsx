@@ -18,7 +18,7 @@ export default class Document extends NextDocument {
   // eslint-disable-next-line class-methods-use-this
   render(): JSX.Element {
     return (
-      <Html lang='en'>
+      <Html lang="en">
         <Head>
           <Global styles={fonts} />
           <link rel="alternate icon" href="/favicon.ico" />
