@@ -3,20 +3,21 @@
 import {
   Box,
   Grid,
-  Text,
   Spacer,
+  Text,
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react';
-import { SocialLinks } from 'components/social-links';
-import { Logo } from 'components/logo';
 import { Layout } from 'components/layout';
-import { SubscribeForm } from 'components/subscribe-form';
+import { Logo } from 'components/logo';
 import { MintForm } from 'components/mint-form';
-import { useWeb3React } from '@web3-react/core';
+import { SocialLinks } from 'components/social-links';
+import { SubscribeForm } from 'components/subscribe-form';
+import { useAccount } from 'wagmi';
 
 const IndexPage = () => {
-  const { active } = useWeb3React();
+  const [{ data: accountData }] = useAccount();
+
   return (
     <Layout title="atxdao">
       <Box textAlign="center" fontSize="xl">
@@ -44,7 +45,7 @@ const IndexPage = () => {
                 },
               ]}
             />
-            {active ? <MintForm /> : <SubscribeForm />}
+            {accountData?.address ? <MintForm /> : <SubscribeForm />}
           </VStack>
           <Spacer />
         </Grid>

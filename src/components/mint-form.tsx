@@ -16,8 +16,10 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { parseUnits } from '@ethersproject/units';
-import { useMintContract } from 'hooks/web3';
+import MINT_ABI from 'contracts/mint.json';
 import { Dispatch, FC, SetStateAction, useState } from 'react';
+import { useContractWrite, useProvider } from 'wagmi';
+import { Overrides } from 'ethers';
 
 const TextInput: FC<
   InputProps & { setValue: Dispatch<SetStateAction<string>> }
@@ -41,14 +43,20 @@ const MintForm: FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [statusMessage] = useState('');
   const [status] = useState<'unsubmitted' | 'error' | 'success'>('unsubmitted');
-  const contract = useMintContract(
-    '0xF61be28561137259375cbE88f28D4F163B09c94C'
-  );
-  if (!contract) throw Error('missing contract');
+  const provider = useProvider();
+
   const onSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     try {
-      await contract.mint({ value: parseUnits(values) });
+      await useContractWrite(
+        {
+          addressOrName: '0xF61be28561137259375cbE88f28D4F163B09c94C',
+          contractInterface: MINT_ABI,
+          signerOrProvider: provider,
+        },
+        'mint',
+        { overrides: { value: parseUnits(values) } as Overrides }
+      );
     } catch (err) {
       setErrorMessage((err as Error).message);
     }
