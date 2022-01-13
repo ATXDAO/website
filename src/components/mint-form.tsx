@@ -18,9 +18,14 @@ import {
 import { parseUnits } from '@ethersproject/units';
 import MINT_ABI from 'contracts/mint.json';
 import { Mint } from 'contracts/types';
-import { Overrides } from 'ethers';
-import { Dispatch, FC, SetStateAction, useState } from 'react';
-import { useContractWrite, useProvider } from 'wagmi';
+import {
+  Dispatch,
+  FC,
+  FormEventHandler,
+  SetStateAction,
+  useState,
+} from 'react';
+import { useContract, useProvider } from 'wagmi';
 
 const TextInput: FC<
   InputProps & { setValue: Dispatch<SetStateAction<string>> }
@@ -46,20 +51,21 @@ const MintForm: FC = () => {
   const [status] = useState<'unsubmitted' | 'error' | 'success'>('unsubmitted');
   const provider = useProvider();
 
-  const onSubmit = async (e: { preventDefault: () => void }) => {
+  const mintContract = useContract<Mint>({
+    addressOrName: '0xF61be28561137259375cbE88f28D4F163B09c94C',
+    contractInterface: MINT_ABI,
+    signerOrProvider: provider,
+  });
+
+  const onSubmit: FormEventHandler<HTMLDivElement> = async (e) => {
     e.preventDefault();
+    console.log('asdf');
     try {
-      await useContractWrite<Mint>(
-        {
-          addressOrName: '0xF61be28561137259375cbE88f28D4F163B09c94C',
-          contractInterface: MINT_ABI,
-          signerOrProvider: provider,
-        },
-        'mint',
-        { overrides: { value: parseUnits(values) } as Overrides }
-      );
+      await mintContract.mint({ value: parseUnits(values) });
+      console.log('asdf');
     } catch (err) {
       setErrorMessage((err as Error).message);
+      console.log('asdf');
     }
   };
 
