@@ -17,9 +17,10 @@ import {
 } from '@chakra-ui/react';
 import { parseUnits } from '@ethersproject/units';
 import MINT_ABI from 'contracts/mint.json';
+import { Mint } from 'contracts/types';
+import { Overrides } from 'ethers';
 import { Dispatch, FC, SetStateAction, useState } from 'react';
 import { useContractWrite, useProvider } from 'wagmi';
-import { Overrides } from 'ethers';
 
 const TextInput: FC<
   InputProps & { setValue: Dispatch<SetStateAction<string>> }
@@ -48,7 +49,7 @@ const MintForm: FC = () => {
   const onSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     try {
-      await useContractWrite(
+      await useContractWrite<Mint>(
         {
           addressOrName: '0xF61be28561137259375cbE88f28D4F163B09c94C',
           contractInterface: MINT_ABI,
