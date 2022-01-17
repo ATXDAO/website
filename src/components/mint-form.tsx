@@ -13,11 +13,13 @@ import {
   InputLeftElement,
   InputProps,
   Stack,
+  Link,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { parseUnits } from '@ethersproject/units';
 import MINT_ABI from 'contracts/mint.json';
 import { Mint } from 'contracts/types';
+import { ContractTransaction } from 'ethers';
 import {
   Dispatch,
   FC,
@@ -25,7 +27,23 @@ import {
   SetStateAction,
   useState,
 } from 'react';
-import { useContract, useProvider } from 'wagmi';
+import { useContract, useSigner } from 'wagmi';
+
+const etherscanUrl = (tx: ContractTransaction) =>
+  `https://etherscan.io/tx/${tx.hash}`;
+
+const tryParseError = (errorMsg: string) => {
+  const requireRevertError = errorMsg.match(
+    /execution reverted: ([^"]+)"/
+  )?.[1];
+  if (requireRevertError) {
+    return requireRevertError;
+  }
+  if (errorMsg.match(/err: (insufficient funds)/)?.[1]) {
+    return 'insufficient funds for price + gas';
+  }
+  return errorMsg;
+};
 
 const TextInput: FC<
   InputProps & { setValue: Dispatch<SetStateAction<string>> }
@@ -47,66 +65,80 @@ const TextInput: FC<
 const MintForm: FC = () => {
   const [values, setValue] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [statusMessage] = useState('');
-  const [status] = useState<'unsubmitted' | 'error' | 'success'>('unsubmitted');
-  const provider = useProvider();
+  const [transaction, setTransaction] = useState<
+    ContractTransaction | undefined
+  >();
+  const [status, setStatus] = useState<'unsubmitted' | 'error' | 'success'>(
+    'unsubmitted'
+  );
+  const [{ data: signer, error: signerError, loading: signerLoading }] =
+    useSigner();
 
   const mintContract = useContract<Mint>({
     addressOrName: '0xF61be28561137259375cbE88f28D4F163B09c94C',
     contractInterface: MINT_ABI,
-    signerOrProvider: provider,
+    signerOrProvider: signer,
   });
 
-  const onSubmit: FormEventHandler<HTMLDivElement> = async (e) => {
+  const onSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
-    console.log('asdf');
     try {
-      await mintContract.mint({ value: parseUnits(values) });
-      console.log('asdf');
+      setTransaction(await mintContract.mint({ value: parseUnits(values) }));
     } catch (err) {
-      setErrorMessage((err as Error).message);
-      console.log('asdf');
+      setStatus('error');
+      setErrorMessage(tryParseError((err as Error).message));
     }
   };
 
   return (
     <Container p={6} maxWidth="420px" display="block" overflow="auto">
-      <FormControl onSubmit={onSubmit} error={errorMessage || undefined}>
-        <Stack spacing={3}>
-          <TextInput
-            type="value"
-            name="value"
-            value={values}
-            setValue={setValue}
-            placeholder="ΞETH"
-          />
-          <Button
-            type="submit"
-            boxShadow="lg"
-            fontWeight="600"
-            _hover={{ boxShadow: 'md' }}
-            _active={{ boxShadow: 'lg' }}
-          >
-            Mint
-          </Button>
-          <FormControl hidden={status !== 'unsubmitted'}>
-            <FormHelperText>
-              {errorMessage !== '' ? errorMessage : 'Provide correct ΞETH.'}
-            </FormHelperText>
-          </FormControl>
-          <Alert
-            status={status === 'success' ? 'success' : 'error'}
-            fontSize="md"
-            alignItems="center"
-            justifyContent="center"
-            textAlign="center"
-            hidden={status === 'unsubmitted'}
-          >
-            <AddIcon />
-            <AlertDescription mt={-1}>{statusMessage}</AlertDescription>
-          </Alert>
-        </Stack>
-      </FormControl>
+      <form onSubmit={onSubmit}>
+        <FormControl error={errorMessage || undefined}>
+          <Stack spacing={3}>
+            <TextInput
+              type="value"
+              name="value"
+              value={values}
+              setValue={setValue}
+              placeholder="ΞETH"
+            />
+            <Button
+              type="submit"
+              disabled={!!(signerLoading || signerError)}
+              boxShadow="lg"
+              fontWeight="600"
+              _hover={{ boxShadow: 'md' }}
+              _active={{ boxShadow: 'lg' }}
+            >
+              Mint
+            </Button>
+            <FormControl hidden={status !== 'unsubmitted'}>
+              <FormHelperText>Provide correct ΞETH.</FormHelperText>
+            </FormControl>
+            <Alert
+              status={status === 'success' ? 'success' : 'error'}
+              fontSize="md"
+              alignItems="center"
+              justifyContent="center"
+              textAlign="center"
+              hidden={status === 'unsubmitted'}
+            >
+              {status === 'success' ? (
+                <>
+                  <AddIcon />
+                  <AlertDescription mt={-1}>
+                    {transaction && (
+                      <Link href={etherscanUrl(transaction)}> Status</Link>
+                    )}
+                  </AlertDescription>
+                </>
+              ) : (
+                <AlertDescription mt={-1}>{errorMessage}</AlertDescription>
+              )}
+            </Alert>
+          </Stack>
+        </FormControl>
+      </form>
     </Container>
   );
 };
