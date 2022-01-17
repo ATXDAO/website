@@ -12,6 +12,10 @@ jobs:
   lint-and-build:
     name: Test
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_ALCHEMY_ID: ${{ secrets.NEXT_PUBLIC_ALCHEMY_ID }}
+      NEXT_PUBLIC_ETHERSCAN_API_KEY: ${{ secrets.NEXT_PUBLIC_ETHERSCAN_API_KEY }}
+      NEXT_PUBLIC_INFURA_ID: ${{ secrets.NEXT_PUBLIC_INFURA_ID }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2

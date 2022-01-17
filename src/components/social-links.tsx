@@ -6,11 +6,11 @@ import {
 } from '@chakra-ui/react';
 import { ElementType, FC } from 'react';
 import {
+  FaDiscord,
   FaEnvelope,
   FaGithub,
   FaLinkedin,
   FaTwitter,
-  FaDiscord,
 } from 'react-icons/fa';
 
 type Social = 'github' | 'linkedin' | 'email' | 'twitter' | 'discord';

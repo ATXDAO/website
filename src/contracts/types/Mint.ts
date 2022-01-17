@@ -19,6 +19,7 @@ import { Listener, Provider } from "@ethersproject/providers";
 import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
 
 export interface MintInterface extends utils.Interface {
+  contractName: "Mint";
   functions: {
     "_mintPrice()": FunctionFragment;
     "_mintQuantity()": FunctionFragment;
@@ -214,6 +215,7 @@ export type TransferEvent = TypedEvent<
 export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
 export interface Mint extends BaseContract {
+  contractName: "Mint";
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
