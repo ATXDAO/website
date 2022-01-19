@@ -5,19 +5,19 @@ interface MerkleTreeData {
   proofs: Record<string, string[]>;
 }
 
-type SupportedNetworkId = 1 | 3;
+export type SupportedNetwork = 'mainnet' | 'ropsten';
 
 interface ContractData {
   address: string;
   merkleTree: MerkleTreeData;
 }
 
-export const contractData: Record<SupportedNetworkId, ContractData> = {
-  1: {
+export const contractsByNetwork: Record<SupportedNetwork, ContractData> = {
+  mainnet: {
     address: 'XXX',
     merkleTree: require('./zilker-merkle-tree.json') as MerkleTreeData,
   },
-  3: {
+  ropsten: {
     address: '0xc38d8da0c1ca6314474a3442103f543551f0f177',
     merkleTree: require('./ropsten-merkle-tree.json') as MerkleTreeData,
   },

@@ -9,26 +9,20 @@ import {
   Container,
   FormControl,
   FormHelperText,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  InputProps,
   Stack,
   Link,
-  useColorModeValue,
+  Text,
+  Box,
+  Code,
+  Image,
 } from '@chakra-ui/react';
-import { parseUnits } from '@ethersproject/units';
+import { parseEther } from '@ethersproject/units';
 import MINT_ABI from 'contracts/mint.json';
 import { Mint } from 'contracts/types';
 import { ContractTransaction } from 'ethers';
-import {
-  Dispatch,
-  FC,
-  FormEventHandler,
-  SetStateAction,
-  useState,
-} from 'react';
-import { useContract, useSigner } from 'wagmi';
+import { FC, useState } from 'react';
+import { contractsByNetwork, SupportedNetwork } from 'util/constants';
+import { useAccount, useContract, useNetwork, useSigner } from 'wagmi';
 
 const etherscanUrl = (tx: ContractTransaction) =>
   `https://etherscan.io/tx/${tx.hash}`;
@@ -46,25 +40,8 @@ const tryParseError = (errorMsg: string) => {
   return errorMsg;
 };
 
-const TextInput: FC<
-  InputProps & { setValue: Dispatch<SetStateAction<string>> }
-> = ({ placeholder, children, setValue, ...props }) => (
-  <FormControl isRequired>
-    <InputGroup>
-      <InputLeftElement>{children}</InputLeftElement>
-      <Input
-        placeholder={placeholder}
-        aria-label={placeholder}
-        _placeholder={{ color: useColorModeValue('gray.600', 'gray.200') }}
-        onChange={(e) => setValue(e.target.value)}
-        {...props}
-      />
-    </InputGroup>
-  </FormControl>
-);
-
 const MintForm: FC = () => {
-  const [values, setValue] = useState('');
+  const [{ data: accountData }] = useAccount();
   const [errorMessage, setErrorMessage] = useState('');
   const [transaction, setTransaction] = useState<
     ContractTransaction | undefined
@@ -75,16 +52,23 @@ const MintForm: FC = () => {
   const [{ data: signer, error: signerError, loading: signerLoading }] =
     useSigner();
 
+  const [{ data: networkData }] = useNetwork();
+  const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
+  const contractData = contractsByNetwork[networkName as SupportedNetwork];
+
+  const proof = accountData
+    ? contractData.merkleTree.proofs[accountData?.address]
+    : undefined;
+
   const mintContract = useContract<Mint>({
     addressOrName: '0xF61be28561137259375cbE88f28D4F163B09c94C',
     contractInterface: MINT_ABI,
     signerOrProvider: signer,
   });
 
-  const onSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
-    e.preventDefault();
+  const onMint = async () => {
     try {
-      setTransaction(await mintContract.mint({ value: parseUnits(values) }));
+      setTransaction(await mintContract.mint({ value: parseEther('0.63') }));
     } catch (err) {
       setStatus('error');
       setErrorMessage(tryParseError((err as Error).message));
@@ -92,54 +76,54 @@ const MintForm: FC = () => {
   };
 
   return (
-    <Container p={6} maxWidth="420px" display="block" overflow="auto">
-      <form onSubmit={onSubmit}>
-        <FormControl error={errorMessage || undefined}>
-          <Stack spacing={3}>
-            <TextInput
-              type="value"
-              name="value"
-              value={values}
-              setValue={setValue}
-              placeholder="ΞETH"
-            />
-            <Button
-              type="submit"
-              disabled={!!(signerLoading || signerError)}
-              boxShadow="lg"
-              fontWeight="600"
-              _hover={{ boxShadow: 'md' }}
-              _active={{ boxShadow: 'lg' }}
-            >
-              Mint
-            </Button>
-            <FormControl hidden={status !== 'unsubmitted'}>
-              <FormHelperText>Provide correct ΞETH.</FormHelperText>
-            </FormControl>
-            <Alert
-              status={status === 'success' ? 'success' : 'error'}
-              fontSize="md"
-              alignItems="center"
-              justifyContent="center"
-              textAlign="center"
-              hidden={status === 'unsubmitted'}
-            >
-              {status === 'success' ? (
-                <>
-                  <AddIcon />
-                  <AlertDescription mt={-1}>
-                    {transaction && (
-                      <Link href={etherscanUrl(transaction)}> Status</Link>
-                    )}
-                  </AlertDescription>
-                </>
-              ) : (
-                <AlertDescription mt={-1}>{errorMessage}</AlertDescription>
-              )}
-            </Alert>
+    <Container p={6} maxWidth="420px" display="block" overflow="none">
+      <FormControl error={errorMessage || undefined}>
+        <Stack spacing={3}>
+          <Image
+            src="https://cloudflare-ipfs.com/ipfs/QmeJVHwX4fv6hiRWgM5YkyAstYWGgMkXxjxRxbBv8XTcPh/26.png"
+            borderRadius="50%"
+          />
+          <Stack spacing={2} hidden={!!proof}>
+            <Text>Your address is not on the whitelist. </Text>
+            <Code>{accountData && accountData.address}</Code>
           </Stack>
-        </FormControl>
-      </form>
+          <Button
+            type="submit"
+            onClick={onMint}
+            disabled={!!(!proof || signerLoading || signerError)}
+            boxShadow="lg"
+            fontWeight="600"
+            _hover={{ boxShadow: 'md' }}
+            _active={{ boxShadow: 'lg' }}
+          >
+            Mint
+          </Button>
+          <FormControl hidden={status !== 'unsubmitted'}>
+            <FormHelperText>Provide correct ΞETH.</FormHelperText>
+          </FormControl>
+          <Alert
+            status={status === 'success' ? 'success' : 'error'}
+            fontSize="md"
+            alignItems="center"
+            justifyContent="center"
+            textAlign="center"
+            hidden={status === 'unsubmitted'}
+          >
+            {status === 'success' ? (
+              <>
+                <AddIcon />
+                <AlertDescription mt={-1}>
+                  {transaction && (
+                    <Link href={etherscanUrl(transaction)}> Status</Link>
+                  )}
+                </AlertDescription>
+              </>
+            ) : (
+              <AlertDescription mt={-1}>{errorMessage}</AlertDescription>
+            )}
+          </Alert>
+        </Stack>
+      </FormControl>
     </Container>
   );
 };
