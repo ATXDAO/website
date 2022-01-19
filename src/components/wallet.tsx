@@ -46,7 +46,7 @@ export const Wallet: FC = () => {
 
   const [{ data: networkData }, switchNetwork] = useNetwork();
 
-  const avatar = accountData?.ens?.avatar || providerAvatar;
+  const avatar = accountData?.ens?.avatar || providerAvatar || undefined;
 
   return accountData ? (
     <Menu>
@@ -57,12 +57,12 @@ export const Wallet: FC = () => {
         pl={4}
       >
         <HStack mx={-1} spacing={1}>
-          <Text>
+          <Text fontSize="lg" mr={1}>
             {accountData.ens?.name
               ? accountData.ens.name
               : shortenAddress(accountData.address)}
           </Text>
-          <Avatar fontWeight="700" size="sm" src={avatar || undefined}>
+          <Avatar fontWeight="700" size="sm" src={avatar}>
             <AvatarBadge boxSize="1.25em" bg="green.500" />
           </Avatar>
           <TriangleDownIcon ml={3} mr={-1} w={3} h3={4} color="gray.400" />
