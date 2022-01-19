@@ -1,9 +1,9 @@
 import { BaseProvider, WebSocketProvider } from '@ethersproject/providers';
+import { UIProvider } from 'components/ui-provider';
 import { providers } from 'ethers';
 import type { NextComponentType, NextPageContext } from 'next';
 import type { NextRouter } from 'next/router';
 import { FunctionComponent } from 'react';
-import { UIProvider } from 'components/ui-provider';
 import { Connector, defaultChains, Provider as WagmiProvider } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';

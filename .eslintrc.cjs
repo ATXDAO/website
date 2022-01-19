@@ -37,6 +37,7 @@ module.exports = {
     'no-unused-expressions': 0,
     '@typescript-eslint/no-unused-expressions': 0,
     'import/extensions': 0,
+    'import/order': 0,
     'import/prefer-default-export': 'off',
     'react/jsx-one-expression-per-line': 'off',
     'eslint-comments/disable-enable-pair': 0,

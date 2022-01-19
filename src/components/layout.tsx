@@ -1,12 +1,10 @@
-/* eslint-disable no-console */
+import { Wallet } from './wallet';
 import { Center, Container, Flex, Spacer } from '@chakra-ui/react';
 import { ColorModeSwitcher } from 'components/color-mode-switcher';
 import Head from 'next/head';
-import { FC, ReactNode } from 'react';
-import { Wallet } from './wallet';
+import { FC } from 'react';
 
-interface LayoutProps {
-  children?: ReactNode;
+interface LayoutProps extends FC {
   title?: string;
 }
 
