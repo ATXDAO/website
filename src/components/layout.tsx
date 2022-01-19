@@ -34,11 +34,12 @@ export const Layout: FC<LayoutProps> = ({
         <Flex py={4} justifyContent="flex-end" alignItems="center">
           <Center hidden={!connected}>
             <Logo
-              boxSize="32px"
+              visibility={['hidden', 'visible']}
+              boxSize={['0', '48px']}
               fill={useColorModeValue('gray.800', 'gray.100')}
               mr={2}
             />
-            <Text fontSize="3xl">ATX DAO</Text>
+            <Text fontSize={['2xl', '3xl']}>ATX DAO</Text>
           </Center>
           <Spacer />
           <Center>

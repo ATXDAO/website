@@ -57,7 +57,7 @@ export const Wallet: FC = () => {
         pl={4}
       >
         <HStack mx={-1} spacing={1}>
-          <Text fontSize="lg" mr={1}>
+          <Text fontSize={['md', 'lg']} mr={1}>
             {accountData.ens?.name
               ? accountData.ens.name
               : shortenAddress(accountData.address)}

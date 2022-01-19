@@ -6,7 +6,6 @@ import {
   Button,
   Container,
   FormControl,
-  FormHelperText,
   Stack,
   Link,
   Text,
@@ -84,7 +83,10 @@ const MintForm: FC = () => {
           <Image
             src={`https://ipfs.io/ipfs/QmeJVHwX4fv6hiRWgM5YkyAstYWGgMkXxjxRxbBv8XTcPh/${pfpId}.png`}
             borderRadius="50%"
-            minHeight="360px"
+            maxHeight="360px"
+            width="auto"
+            height="auto"
+            display="block"
           />
           <Stack spacing={2} hidden={!!proof}>
             <Text>Your address is not on the whitelist. </Text>
@@ -101,9 +103,6 @@ const MintForm: FC = () => {
           >
             Mint
           </Button>
-          <FormControl hidden={status !== 'unsubmitted'}>
-            <FormHelperText>Provide correct ΞETH.</FormHelperText>
-          </FormControl>
           <Alert
             status={status === 'success' ? 'success' : 'error'}
             fontSize="md"
