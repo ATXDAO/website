@@ -1,6 +1,4 @@
 /* eslint-disable react/function-component-definition */
-
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { AddIcon } from '@chakra-ui/icons';
 import {
   Alert,
@@ -12,7 +10,6 @@ import {
   Stack,
   Link,
   Text,
-  Box,
   Code,
   Image,
 } from '@chakra-ui/react';
@@ -20,14 +17,14 @@ import { parseEther } from '@ethersproject/units';
 import MINT_ABI from 'contracts/mint.json';
 import { Mint } from 'contracts/types';
 import { ContractTransaction } from 'ethers';
-import { FC, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { contractsByNetwork, SupportedNetwork } from 'util/constants';
 import { useAccount, useContract, useNetwork, useSigner } from 'wagmi';
 
-const etherscanUrl = (tx: ContractTransaction) =>
+const etherscanUrl = (tx: ContractTransaction): string =>
   `https://etherscan.io/tx/${tx.hash}`;
 
-const tryParseError = (errorMsg: string) => {
+const tryParseError = (errorMsg: string): string => {
   const requireRevertError = errorMsg.match(
     /execution reverted: ([^"]+)"/
   )?.[1];
@@ -66,7 +63,7 @@ const MintForm: FC = () => {
     signerOrProvider: signer,
   });
 
-  const onMint = async () => {
+  const onMint = async (): Promise<void> => {
     try {
       setTransaction(await mintContract.mint({ value: parseEther('0.63') }));
     } catch (err) {
@@ -75,13 +72,19 @@ const MintForm: FC = () => {
     }
   };
 
+  const pfpId = useMemo(
+    () => Math.floor(Math.random() * 150) + 26,
+    [accountData?.address]
+  );
+
   return (
     <Container p={6} maxWidth="420px" display="block" overflow="none">
       <FormControl error={errorMessage || undefined}>
-        <Stack spacing={3}>
+        <Stack spacing={8}>
           <Image
-            src="https://cloudflare-ipfs.com/ipfs/QmeJVHwX4fv6hiRWgM5YkyAstYWGgMkXxjxRxbBv8XTcPh/26.png"
+            src={`https://ipfs.io/ipfs/QmeJVHwX4fv6hiRWgM5YkyAstYWGgMkXxjxRxbBv8XTcPh/${pfpId}.png`}
             borderRadius="50%"
+            minHeight="360px"
           />
           <Stack spacing={2} hidden={!!proof}>
             <Text>Your address is not on the whitelist. </Text>
