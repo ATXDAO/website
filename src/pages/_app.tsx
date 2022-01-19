@@ -4,12 +4,7 @@ import type { NextComponentType, NextPageContext } from 'next';
 import type { NextRouter } from 'next/router';
 import { FunctionComponent } from 'react';
 import { UIProvider } from 'components/ui-provider';
-import {
-  chain,
-  Connector,
-  defaultChains,
-  Provider as WagmiProvider,
-} from 'wagmi';
+import { Connector, defaultChains, Provider as WagmiProvider } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 import { WalletLinkConnector } from 'wagmi/connectors/walletLink';
@@ -20,15 +15,20 @@ const etherscan = process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY as string;
 const infuraId = process.env.NEXT_PUBLIC_INFURA_ID as string;
 
 // Pick chains
-const chains = defaultChains;
-const defaultChain = chain.mainnet;
+const supportedChainIds = new Set([1, 4]); // mainnet, ropsten
+
+const chains = defaultChains.filter((_chain) =>
+  supportedChainIds.has(_chain.id)
+);
+
+const defaultChain = defaultChains.find((chain) => chain.id === 1);
 
 // Set up connectors
 type ConnectorsConfig = { chainId?: number };
 const connectors = ({ chainId }: ConnectorsConfig): Connector[] => {
   const rpcUrl =
     chains.find((x) => x.id === chainId)?.rpcUrls?.[0] ??
-    defaultChain.rpcUrls[0];
+    defaultChain?.rpcUrls[0];
   return [
     new InjectedConnector({ chains }),
     new WalletConnectConnector({
@@ -54,14 +54,11 @@ const isChainSupported = (chainId?: number): boolean =>
   chains.some((x) => x.id === chainId);
 
 const provider = ({ chainId }: ProviderConfig): BaseProvider =>
-  providers.getDefaultProvider(
-    isChainSupported(chainId) ? chainId : defaultChain.id,
-    {
-      alchemy,
-      etherscan,
-      infuraId,
-    }
-  );
+  providers.getDefaultProvider(isChainSupported(chainId) ? chainId : 1, {
+    alchemy,
+    etherscan,
+    infuraId,
+  });
 const webSocketProvider = ({
   chainId,
 }: ProviderConfig): WebSocketProvider | undefined =>
