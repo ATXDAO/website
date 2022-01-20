@@ -1,18 +1,18 @@
 // eslint-disable react/function-component-definition
+import { PfpImage } from './pfp-image';
 import { LinkIcon } from '@chakra-ui/icons';
 import {
   Alert,
   AlertDescription,
   Button,
+  Center,
+  Code,
   Container,
+  Flex,
   FormControl,
   Stack,
   Text,
-  Code,
-  Image,
   Tooltip,
-  Flex,
-  Center,
 } from '@chakra-ui/react';
 import { ATXDAONFTV2 } from 'contracts/types';
 import { BigNumber, ContractTransaction } from 'ethers';
@@ -150,14 +150,7 @@ const MintForm: FC = () => {
     <Container p={6} maxWidth="400px" display="block" overflow="none">
       <FormControl error={errorMessage || undefined}>
         <Stack spacing={8}>
-          <Image
-            src={`https://ipfs.io/ipfs/QmeJVHwX4fv6hiRWgM5YkyAstYWGgMkXxjxRxbBv8XTcPh/${pfpId}.png`}
-            fallbackSrc="/img/zilker-placeholder.png"
-            borderRadius="50%"
-            maxHeight="360px"
-            width="auto"
-            height="auto"
-          />
+          <PfpImage active={status === 'success'} pfpId={pfpId} />
           <Stack spacing={2} hidden={!!proof}>
             <Text>Your address is not on the whitelist. </Text>
             <Code>{accountData && accountData.address}</Code>

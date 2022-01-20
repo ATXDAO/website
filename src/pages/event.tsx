@@ -1,14 +1,13 @@
 /* eslint-disable no-console */
 import {
-  VStack,
-  Box,
-  Container,
   Center,
-  Heading,
-  Image,
+  Container,
   Flex,
-  Spacer,
+  Heading,
   HStack,
+  Image,
+  Spacer,
+  VStack,
 } from '@chakra-ui/react';
 import { Layout } from 'components/layout';
 import { ATXDAONFTV2 } from 'contracts/types';
