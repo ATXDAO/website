@@ -1,28 +1,34 @@
 import { Logo } from './logo';
 import { Wallet } from './wallet';
+import { ArrowDownIcon, ArrowUpIcon } from '@chakra-ui/icons';
 import {
   Center,
   Container,
   Flex,
+  IconButton,
   Spacer,
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
 import { ColorModeSwitcher } from 'components/color-mode-switcher';
 import Head from 'next/head';
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, useState } from 'react';
 
 interface LayoutProps {
   children: ReactNode;
   title?: string;
   connected: boolean;
+  canToggleHeader?: boolean;
 }
 
 export const Layout: FC<LayoutProps> = ({
   children,
   connected,
+  canToggleHeader = false,
   title = 'This is the default title',
 }) => {
+  const [toggleHeader, setToggleHeader] = useState(true);
+
   return (
     <div>
       <Head>
@@ -32,7 +38,7 @@ export const Layout: FC<LayoutProps> = ({
       </Head>
       <Container maxWidth="1200px">
         <Flex py={4} justifyContent="flex-end" alignItems="center">
-          <Center hidden={!connected}>
+          <Center hidden={!connected || !toggleHeader}>
             <Logo
               visibility={['hidden', 'visible']}
               boxSize={['0', '48px']}
@@ -42,7 +48,16 @@ export const Layout: FC<LayoutProps> = ({
             <Text fontSize={['2xl', '3xl']}>ATX DAO</Text>
           </Center>
           <Spacer />
-          <Center>
+          <IconButton
+            size="sm"
+            variant="ghost"
+            icon={toggleHeader ? <ArrowUpIcon /> : <ArrowDownIcon />}
+            hidden={!canToggleHeader}
+            aria-label="toggle header"
+            onClick={() => setToggleHeader(!toggleHeader)}
+          />
+          <Spacer />
+          <Center hidden={!toggleHeader}>
             <ColorModeSwitcher justifySelf="flex-end" />
             <Wallet />
           </Center>

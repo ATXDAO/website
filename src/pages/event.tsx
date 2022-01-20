@@ -13,7 +13,7 @@ const EventPage: NextPage = () => {
         <Box className="before" />
         <Box className="after" />
       </Box>
-      <Layout title="atxdao" connected={!!accountData}>
+      <Layout title="atxdao" connected={!!accountData} canToggleHeader>
         <Head>
           <link rel="stylesheet" href="/css/fireworks.css" />
         </Head>
