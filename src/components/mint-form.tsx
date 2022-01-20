@@ -12,6 +12,8 @@ import {
   Code,
   Image,
   useTimeout,
+  useTooltip,
+  Tooltip,
 } from '@chakra-ui/react';
 import { ATXDAONFTV2 } from 'contracts/types';
 import { BigNumber, ContractTransaction } from 'ethers';
@@ -56,6 +58,8 @@ const MintForm: FC = () => {
   const [{ data: signer, error: signerError, loading: signerLoading }] =
     useSigner();
 
+  const [buttonText, setButtonText] = useState<string>('Loading...');
+
   const provider = useProvider();
 
   const [mintPrice, setMintPrice] = useState<BigNumber | undefined>();
@@ -84,6 +88,16 @@ const MintForm: FC = () => {
 
   const isMintableLoading = typeof isMintable === 'undefined';
   const isMintPriceLoading = typeof mintPrice === 'undefined';
+
+  useEffect(() => {
+    if (isMintableLoading || isMintPriceLoading || signerLoading) {
+      setButtonText('Loading...');
+    } else if (!isMintable) {
+      setButtonText('Minting disabled');
+    } else if (!proof) {
+      setButtonText('Not on the whitelist!');
+    }
+  }, [isMintable, signerLoading, isMintPriceLoading]);
 
   // mintContract._mintPrice();
 
@@ -116,35 +130,40 @@ const MintForm: FC = () => {
         <Stack spacing={8}>
           <Image
             src={`https://ipfs.io/ipfs/QmeJVHwX4fv6hiRWgM5YkyAstYWGgMkXxjxRxbBv8XTcPh/${pfpId}.png`}
+            fallbackSrc="/img/zilker-placeholder.png"
             borderRadius="50%"
             maxHeight="360px"
             width="auto"
             height="auto"
-            display="block"
           />
           <Stack spacing={2} hidden={!!proof}>
             <Text>Your address is not on the whitelist. </Text>
             <Code>{accountData && accountData.address}</Code>
           </Stack>
-          <Button
-            type="submit"
-            onClick={onMint}
-            disabled={
-              !!(
-                !proof ||
-                signerLoading ||
-                signerError ||
-                isMintPriceLoading ||
-                !isMintable
-              )
-            }
-            boxShadow="lg"
-            fontWeight="600"
-            _hover={{ boxShadow: 'md' }}
-            _active={{ boxShadow: 'lg' }}
-          >
-            Mint
-          </Button>
+          <Tooltip>
+            <Button
+              isLoading={
+                isMintableLoading || isMintPriceLoading || signerLoading
+              }
+              type="submit"
+              onClick={onMint}
+              disabled={
+                !!(
+                  !proof ||
+                  signerLoading ||
+                  signerError ||
+                  isMintPriceLoading ||
+                  !isMintable
+                )
+              }
+              boxShadow="lg"
+              fontWeight="600"
+              _hover={{ boxShadow: 'md' }}
+              _active={{ boxShadow: 'lg' }}
+            >
+              Mint
+            </Button>
+          </Tooltip>
           <Alert
             status={status === 'success' ? 'success' : 'error'}
             fontSize="md"
