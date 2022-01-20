@@ -161,7 +161,7 @@ const MintForm: FC = () => {
               _hover={{ boxShadow: 'md' }}
               _active={{ boxShadow: 'lg' }}
             >
-              Mint
+              {buttonText}
             </Button>
           </Tooltip>
           <Alert
