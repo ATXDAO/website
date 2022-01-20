@@ -15,7 +15,7 @@ const etherscan = process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY as string;
 const infuraId = process.env.NEXT_PUBLIC_INFURA_ID as string;
 
 // Pick chains
-const supportedChainIds = new Set([1, 3]); // mainnet, ropsten
+const supportedChainIds = new Set([1, 3, 4]); // mainnet, ropsten
 
 const chains = defaultChains.filter((_chain) =>
   supportedChainIds.has(_chain.id)
