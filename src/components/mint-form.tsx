@@ -1,4 +1,4 @@
-/* eslint-disable react/function-component-definition */
+// eslint-disable react/function-component-definition
 import { AddIcon } from '@chakra-ui/icons';
 import {
   Alert,
@@ -12,13 +12,14 @@ import {
   Code,
   Image,
 } from '@chakra-ui/react';
-import { parseEther } from '@ethersproject/units';
-import MINT_ABI from 'contracts/mint.json';
-import { Mint } from 'contracts/types';
-import { ContractTransaction } from 'ethers';
-import { FC, useMemo, useState } from 'react';
+import { ATXDAONFTV2 } from 'contracts/types';
+import { BigNumber, ContractTransaction } from 'ethers';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { contractsByNetwork, SupportedNetwork } from 'util/constants';
 import { useAccount, useContract, useNetwork, useSigner } from 'wagmi';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const ATXDAONFT_V2_ABI = require('../contracts/ATXDAONFT_V2.json');
 
 const etherscanUrl = (tx: ContractTransaction): string =>
   `https://etherscan.io/tx/${tx.hash}`;
@@ -48,23 +49,47 @@ const MintForm: FC = () => {
   const [{ data: signer, error: signerError, loading: signerLoading }] =
     useSigner();
 
+  const [mintPrice, setMintPrice] = useState<BigNumber | undefined>();
+  const [isMintable, setIsMintable] = useState<boolean | undefined>();
+
   const [{ data: networkData }] = useNetwork();
   const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
-  const contractData = contractsByNetwork[networkName as SupportedNetwork];
+  const { address: contractAddress, merkleTree } =
+    contractsByNetwork[networkName as SupportedNetwork];
 
   const proof = accountData
-    ? contractData.merkleTree.proofs[accountData?.address]
+    ? merkleTree.proofs[accountData?.address.toLowerCase()]
     : undefined;
 
-  const mintContract = useContract<Mint>({
-    addressOrName: '0xF61be28561137259375cbE88f28D4F163B09c94C',
-    contractInterface: MINT_ABI,
+  const mintContract = useContract<ATXDAONFTV2>({
+    addressOrName: contractAddress,
+    contractInterface: ATXDAONFT_V2_ABI,
     signerOrProvider: signer,
   });
 
+  useEffect(() => {
+    // eslint-disable-next-line no-underscore-dangle
+    mintContract._mintPrice().then((price) => setMintPrice(price));
+    mintContract.isMintable().then((mintable) => setIsMintable(mintable));
+  }, [accountData?.address, contractAddress]);
+
+  const isMintableLoading = typeof isMintable === 'undefined';
+  const isMintPriceLoading = typeof mintPrice === 'undefined';
+
+  // mintContract._mintPrice();
+
   const onMint = async (): Promise<void> => {
+    if (!proof || isMintableLoading || isMintPriceLoading) {
+      // eslint-disable-next-line no-console
+      console.error({
+        proof,
+        isMintableLoading,
+        isMintPriceLoading,
+      });
+      return;
+    }
     try {
-      setTransaction(await mintContract.mint({ value: parseEther('0.63') }));
+      setTransaction(await mintContract.mint(proof, { value: mintPrice }));
     } catch (err) {
       setStatus('error');
       setErrorMessage(tryParseError((err as Error).message));
@@ -77,7 +102,7 @@ const MintForm: FC = () => {
   );
 
   return (
-    <Container p={6} maxWidth="420px" display="block" overflow="none">
+    <Container p={6} maxWidth="400px" display="block" overflow="none">
       <FormControl error={errorMessage || undefined}>
         <Stack spacing={8}>
           <Image
@@ -121,7 +146,18 @@ const MintForm: FC = () => {
                 </AlertDescription>
               </>
             ) : (
-              <AlertDescription mt={-1}>{errorMessage}</AlertDescription>
+              <AlertDescription mt={-1}>
+                <Text mb={4}>{errorMessage}</Text>
+                <Text
+                  as="pre"
+                  fontSize="8px"
+                  textAlign="left"
+                  lineHeight="8px"
+                  hidden={!proof}
+                >
+                  {JSON.stringify(proof, undefined, 4)}
+                </Text>
+              </AlertDescription>
             )}
           </Alert>
         </Stack>
