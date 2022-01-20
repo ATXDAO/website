@@ -1,5 +1,5 @@
 // eslint-disable react/function-component-definition
-import { AddIcon } from '@chakra-ui/icons';
+import { LinkIcon } from '@chakra-ui/icons';
 import {
   Alert,
   AlertDescription,
@@ -7,16 +7,16 @@ import {
   Container,
   FormControl,
   Stack,
-  Link,
   Text,
   Code,
   Image,
-  useTimeout,
-  useTooltip,
   Tooltip,
+  Flex,
+  Center,
 } from '@chakra-ui/react';
 import { ATXDAONFTV2 } from 'contracts/types';
 import { BigNumber, ContractTransaction } from 'ethers';
+import { getAddress, isAddress } from 'ethers/lib/utils';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { contractsByNetwork, SupportedNetwork } from 'util/constants';
 import {
@@ -29,9 +29,6 @@ import {
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ATXDAONFT_V2_ABI = require('../contracts/ATXDAONFT_V2.json');
-
-const etherscanUrl = (tx: ContractTransaction): string =>
-  `https://etherscan.io/tx/${tx.hash}`;
 
 const tryParseError = (errorMsg: string): string => {
   const requireRevertError = errorMsg.match(
@@ -58,17 +55,22 @@ const MintForm: FC = () => {
   const [{ data: signer, error: signerError, loading: signerLoading }] =
     useSigner();
 
-  const [buttonText, setButtonText] = useState<string>('Loading...');
+  const [buttonText, setButtonText] = useState('Loading...');
 
   const provider = useProvider();
 
   const [mintPrice, setMintPrice] = useState<BigNumber | undefined>();
   const [isMintable, setIsMintable] = useState<boolean | undefined>();
+  const [isMinting, setIsMinting] = useState(false);
+  const [hasMinted, setHasMinted] = useState(false);
 
   const [{ data: networkData }] = useNetwork();
   const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
-  const { address: contractAddress, merkleTree } =
-    contractsByNetwork[networkName as SupportedNetwork];
+  const {
+    address: contractAddress,
+    merkleTree,
+    blockExplorer,
+  } = contractsByNetwork[networkName as SupportedNetwork];
 
   const proof = accountData
     ? merkleTree.proofs[accountData?.address.toLowerCase()]
@@ -84,6 +86,11 @@ const MintForm: FC = () => {
     // eslint-disable-next-line no-underscore-dangle
     mintContract._mintPrice().then((price) => setMintPrice(price));
     mintContract.isMintable().then((mintable) => setIsMintable(mintable));
+    if (accountData?.address && isAddress(accountData?.address)) {
+      mintContract
+        .hasMinted(getAddress(accountData?.address))
+        .then((_hasMinted) => setHasMinted(_hasMinted));
+    }
   }, [accountData?.address, contractAddress]);
 
   const isMintableLoading = typeof isMintable === 'undefined';
@@ -96,8 +103,14 @@ const MintForm: FC = () => {
       setButtonText('Minting disabled');
     } else if (!proof) {
       setButtonText('Not on the whitelist!');
+    } else if (hasMinted) {
+      setButtonText('Already minted!');
+    } else if (isMinting) {
+      setButtonText('Minting...');
+    } else {
+      setButtonText('Mint');
     }
-  }, [isMintable, signerLoading, isMintPriceLoading]);
+  }, [isMintable, signerLoading, isMintPriceLoading, hasMinted]);
 
   // mintContract._mintPrice();
 
@@ -112,7 +125,13 @@ const MintForm: FC = () => {
       return;
     }
     try {
-      setTransaction(await mintContract.mint(proof, { value: mintPrice }));
+      setIsMinting(true);
+      const tx = await mintContract.mint(proof, { value: mintPrice });
+      setTransaction(tx);
+      await tx.wait(1);
+      setButtonText('Minted!');
+      setIsMinting(false);
+      setStatus('success');
     } catch (err) {
       setStatus('error');
       setErrorMessage(tryParseError((err as Error).message));
@@ -143,9 +162,12 @@ const MintForm: FC = () => {
           <Tooltip>
             <Button
               isLoading={
-                isMintableLoading || isMintPriceLoading || signerLoading
+                isMintableLoading ||
+                isMintPriceLoading ||
+                signerLoading ||
+                isMinting
               }
-              type="submit"
+              loadingText={buttonText}
               onClick={onMint}
               disabled={
                 !!(
@@ -153,7 +175,10 @@ const MintForm: FC = () => {
                   signerLoading ||
                   signerError ||
                   isMintPriceLoading ||
-                  !isMintable
+                  !isMintable ||
+                  buttonText === 'Minted!' ||
+                  hasMinted ||
+                  isMinting
                 )
               }
               boxShadow="lg"
@@ -173,14 +198,25 @@ const MintForm: FC = () => {
             hidden={status === 'unsubmitted'}
           >
             {status === 'success' ? (
-              <>
-                <AddIcon />
-                <AlertDescription mt={-1}>
+              <AlertDescription mt={-1}>
+                <Flex>
+                  <Center>Successfully minted!</Center>
                   {transaction && (
-                    <Link href={etherscanUrl(transaction)}> Status</Link>
+                    <Center>
+                      <Button
+                        rightIcon={<LinkIcon />}
+                        as="a"
+                        size="xs"
+                        ml={2}
+                        target="_blank"
+                        href={`${blockExplorer}/tx/${transaction.hash}`}
+                      >
+                        Etherscan
+                      </Button>
+                    </Center>
                   )}
-                </AlertDescription>
-              </>
+                </Flex>
+              </AlertDescription>
             ) : (
               <AlertDescription mt={-1}>
                 <Text mb={4}>{errorMessage}</Text>

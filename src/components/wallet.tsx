@@ -77,7 +77,11 @@ export const Wallet: FC = () => {
                 key={chain.id}
                 onClick={
                   networkData.chain?.id !== chain.id
-                    ? switchNetwork && (() => switchNetwork(chain.id))
+                    ? switchNetwork &&
+                      (() =>
+                        switchNetwork(chain.id).then(() =>
+                          window.location.reload()
+                        ))
                     : undefined
                 }
               >
