@@ -2,6 +2,7 @@ import { Logo } from './logo';
 import { Wallet } from './wallet';
 import { ArrowDownIcon, ArrowUpIcon } from '@chakra-ui/icons';
 import {
+  Box,
   Center,
   Container,
   Flex,
@@ -11,6 +12,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { ColorModeSwitcher } from 'components/color-mode-switcher';
+import { useFireworks } from 'hooks/app-hooks';
 import Head from 'next/head';
 import { FC, ReactNode, useState } from 'react';
 
@@ -28,13 +30,21 @@ export const Layout: FC<LayoutProps> = ({
   title = 'This is the default title',
 }) => {
   const [toggleHeader, setToggleHeader] = useState(true);
+  const [fireworks] = useFireworks();
 
   return (
-    <div>
+    <>
+      {fireworks && (
+        <Box className="pyro">
+          <Box className="before" />
+          <Box className="after" />
+        </Box>
+      )}
       <Head>
         <title>{title}</title>
         <meta charSet="utf-8" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+        {fireworks && <link rel="stylesheet" href="/css/fireworks.css" />}
       </Head>
       <Container maxWidth="1200px">
         <Flex py={4} justifyContent="flex-end" alignItems="center">
@@ -64,6 +74,6 @@ export const Layout: FC<LayoutProps> = ({
         </Flex>
         {children}
       </Container>
-    </div>
+    </>
   );
 };

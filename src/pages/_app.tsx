@@ -1,6 +1,7 @@
 import { BaseProvider, WebSocketProvider } from '@ethersproject/providers';
 import { UIProvider } from 'components/ui-provider';
 import { providers } from 'ethers';
+import { AppProvider } from 'hooks/app-hooks';
 import type { NextComponentType, NextPageContext } from 'next';
 import type { NextRouter } from 'next/router';
 import { FunctionComponent } from 'react';
@@ -91,7 +92,9 @@ const App: FunctionComponent<AppRenderProps> = ({
     webSocketProvider={webSocketProvider}
   >
     <UIProvider cookies={cookies}>
-      <Component {...pageProps} />
+      <AppProvider>
+        <Component {...pageProps} />
+      </AppProvider>
     </UIProvider>
   </WagmiProvider>
 );
