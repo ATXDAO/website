@@ -11,11 +11,14 @@ import {
 } from '@chakra-ui/react';
 import { Layout } from 'components/layout';
 import { ATXDAONFTV2 } from 'contracts/types';
-import { BigNumber, Event } from 'ethers';
 import { useFireworks } from 'hooks/app-hooks';
 import { NextPage } from 'next';
 import { useEffect } from 'react';
-import { contractsByNetwork, SupportedNetwork } from 'util/constants';
+import {
+  contractsByNetwork,
+  SupportedNetwork,
+  EventArgs,
+} from 'util/constants';
 import {
   useAccount,
   useContract,
@@ -26,8 +29,6 @@ import {
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ATXDAONFT_V2_ABI = require('../contracts/ATXDAONFT_V2.json');
-
-type EventArgs = [from: string, to: string, tokenId: BigNumber, event: Event];
 
 const EventPage: NextPage = () => {
   // first thing's first

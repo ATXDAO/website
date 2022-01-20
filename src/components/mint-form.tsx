@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // eslint-disable react/function-component-definition
 import { PfpImage } from './pfp-image';
 import { LinkIcon } from '@chakra-ui/icons';
@@ -18,11 +19,16 @@ import { ATXDAONFTV2 } from 'contracts/types';
 import { BigNumber, ContractTransaction } from 'ethers';
 import { getAddress, isAddress } from 'ethers/lib/utils';
 import { useFireworks } from 'hooks/app-hooks';
-import { FC, useEffect, useMemo, useState } from 'react';
-import { contractsByNetwork, SupportedNetwork } from 'util/constants';
+import { FC, useEffect, useState } from 'react';
+import {
+  contractsByNetwork,
+  EventArgs,
+  SupportedNetwork,
+} from 'util/constants';
 import {
   useAccount,
   useContract,
+  useContractEvent,
   useNetwork,
   useProvider,
   useSigner,
@@ -141,16 +147,29 @@ const MintForm: FC = () => {
     }
   };
 
-  const pfpId = useMemo(
-    () => Math.floor(Math.random() * 150) + 26,
-    [accountData?.address]
+  const [pfpId, setPfpId] = useState<number | undefined>();
+
+  useContractEvent(
+    {
+      addressOrName: contractAddress,
+      contractInterface: ATXDAONFT_V2_ABI,
+    },
+    'Transfer',
+    async (args: EventArgs) => {
+      const [from, to, tokenId, event] = args;
+      console.log({ from, to, tokenId, event });
+      if (to.toLowerCase() === accountData?.address.toLowerCase()) {
+        console.log('your nft was minted!!', tokenId.toNumber());
+        setPfpId(tokenId.toNumber());
+      }
+    }
   );
 
   return (
     <Container p={6} maxWidth="400px" display="block" overflow="none">
       <FormControl error={errorMessage || undefined}>
         <Stack spacing={8}>
-          <PfpImage active={status === 'success'} pfpId={pfpId} />
+          <PfpImage active={!!pfpId && status === 'success'} pfpId={pfpId} />
           <Stack spacing={2} hidden={!!proof}>
             <Text>Your address is not on the whitelist. </Text>
             <Code>{accountData && accountData.address}</Code>
