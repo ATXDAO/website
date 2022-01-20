@@ -47,7 +47,12 @@ export const Layout: FC<LayoutProps> = ({
         {fireworks && <link rel="stylesheet" href="/css/fireworks.css" />}
       </Head>
       <Container maxWidth="1200px">
-        <Flex py={4} justifyContent="flex-end" alignItems="center">
+        <Flex
+          py={4}
+          justifyContent="flex-end"
+          alignItems="center"
+          height={toggleHeader ? undefined : '30px'}
+        >
           <Center hidden={!connected || !toggleHeader}>
             <Logo
               visibility={['hidden', 'visible']}

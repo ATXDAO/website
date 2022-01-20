@@ -95,7 +95,7 @@ const EventPage: NextPage = () => {
     <Layout title="atxdao" connected={!!accountData} canToggleHeader>
       <Container width="100%" height="100%">
         <VStack spacing={10}>
-          <Heading>mint.atxdao.com</Heading>
+          <Heading fontSize="4rem">mint.atxdao.com</Heading>
           <Flex height="55vh">
             <Center>
               <HStack
@@ -111,17 +111,30 @@ const EventPage: NextPage = () => {
               </HStack>
             </Center>
           </Flex>
-          <Flex width="100%">
+          <HStack spacing={12}>
             <Spacer />
-            <Center>
-              <Heading>POAP:</Heading>
-            </Center>
+            <Image
+              maxWidth="12vw"
+              maxHeight="20vh"
+              src="/img/sponsors/dexible.png"
+            />
+            <Image
+              maxWidth="12vw"
+              maxHeight="20vh"
+              src="/img/sponsors/quai.png"
+            />
+            <Image
+              maxWidth="12vw"
+              maxHeight="20vh"
+              src="/img/sponsors/pionex.png"
+            />
+            <Image
+              maxWidth="20vw"
+              maxHeight="20vh"
+              src="/img/zilker-poap.png"
+            />
             <Spacer />
-            <Center>
-              <Image width="12rem" src="/img/zilker-poap.png" />
-            </Center>
-            <Spacer />
-          </Flex>
+          </HStack>
         </VStack>
       </Container>
     </Layout>
