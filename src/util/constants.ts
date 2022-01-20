@@ -14,7 +14,7 @@ interface ContractData {
 
 export const contractsByNetwork: Record<SupportedNetwork, ContractData> = {
   mainnet: {
-    address: 'XXX',
+    address: '0x63f8F23ce0f3648097447622209E95A391c44b00',
     merkleTree: require('./zilker-merkle-tree.json') as MerkleTreeData,
   },
   ropsten: {
