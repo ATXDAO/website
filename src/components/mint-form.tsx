@@ -30,6 +30,7 @@ import {
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ATXDAONFT_V2_ABI = require('../contracts/ATXDAONFT_V2.json');
+const nfts = require('../nfts');
 
 const tryParseError = (errorMsg: string): string => {
   const requireRevertError = errorMsg.match(
@@ -151,7 +152,10 @@ const MintForm: FC = () => {
       <FormControl error={errorMessage || undefined}>
         <Stack spacing={8}>
           <Image
-            src={`https://ipfs.io/ipfs/QmeJVHwX4fv6hiRWgM5YkyAstYWGgMkXxjxRxbBv8XTcPh/${pfpId}.png`}
+            src={
+              nfts[pfpId] ||
+              `https://ipfs.io/ipfs/QmeJVHwX4fv6hiRWgM5YkyAstYWGgMkXxjxRxbBv8XTcPh/${pfpId}.png`
+            }
             fallbackSrc="/img/zilker-placeholder.png"
             borderRadius="50%"
             maxHeight="360px"
