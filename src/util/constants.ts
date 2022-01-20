@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import { BigNumber } from 'ethers';
+
 /* eslint-disable global-require */
 interface MerkleTreeData {
   root: string;
@@ -12,6 +14,13 @@ interface ContractData {
   address: string;
   merkleTree: MerkleTreeData;
 }
+
+export type EventArgs = [
+  from: string,
+  to: string,
+  tokenId: BigNumber,
+  event: Event
+];
 
 export const contractsByNetwork: Record<SupportedNetwork, ContractData> = {
   mainnet: {

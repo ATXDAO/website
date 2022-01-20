@@ -1,27 +1,34 @@
+/* eslint-disable no-console */
 // eslint-disable react/function-component-definition
+import { PfpImage } from './pfp-image';
 import { LinkIcon } from '@chakra-ui/icons';
 import {
   Alert,
   AlertDescription,
   Button,
+  Center,
+  Code,
   Container,
+  Flex,
   FormControl,
   Stack,
   Text,
-  Code,
-  Image,
   Tooltip,
-  Flex,
-  Center,
 } from '@chakra-ui/react';
 import { ATXDAONFTV2 } from 'contracts/types';
 import { BigNumber, ContractTransaction } from 'ethers';
 import { getAddress, isAddress } from 'ethers/lib/utils';
-import { FC, useEffect, useMemo, useState } from 'react';
-import { contractsByNetwork, SupportedNetwork } from 'util/constants';
+import { useFireworks } from 'hooks/app-hooks';
+import { FC, useEffect, useState } from 'react';
+import {
+  contractsByNetwork,
+  EventArgs,
+  SupportedNetwork,
+} from 'util/constants';
 import {
   useAccount,
   useContract,
+  useContractEvent,
   useNetwork,
   useProvider,
   useSigner,
@@ -44,6 +51,7 @@ const tryParseError = (errorMsg: string): string => {
 };
 
 const MintForm: FC = () => {
+  const [, setFireworks] = useFireworks();
   const [{ data: accountData }] = useAccount();
   const [errorMessage, setErrorMessage] = useState('');
   const [transaction, setTransaction] = useState<
@@ -128,33 +136,39 @@ const MintForm: FC = () => {
       setIsMinting(true);
       const tx = await mintContract.mint(proof, { value: mintPrice });
       setTransaction(tx);
-      await tx.wait(1);
-      setButtonText('Minted!');
-      setIsMinting(false);
-      setStatus('success');
     } catch (err) {
       setStatus('error');
       setErrorMessage(tryParseError((err as Error).message));
     }
   };
 
-  const pfpId = useMemo(
-    () => Math.floor(Math.random() * 150) + 26,
-    [accountData?.address]
+  const [pfpId, setPfpId] = useState<number | undefined>();
+
+  useContractEvent(
+    {
+      addressOrName: contractAddress,
+      contractInterface: ATXDAONFT_V2_ABI,
+    },
+    'Transfer',
+    async (args: EventArgs) => {
+      const [from, to, tokenId, event] = args;
+      console.log({ from, to, tokenId, event });
+      if (to.toLowerCase() === accountData?.address.toLowerCase()) {
+        console.log('your nft was minted!!', tokenId.toNumber());
+        setPfpId(tokenId.toNumber());
+        setButtonText('Minted!');
+        setIsMinting(false);
+        setStatus('success');
+        setFireworks(true);
+      }
+    }
   );
 
   return (
     <Container p={6} maxWidth="400px" display="block" overflow="none">
       <FormControl error={errorMessage || undefined}>
         <Stack spacing={8}>
-          <Image
-            src={`https://ipfs.io/ipfs/QmeJVHwX4fv6hiRWgM5YkyAstYWGgMkXxjxRxbBv8XTcPh/${pfpId}.png`}
-            fallbackSrc="/img/zilker-placeholder.png"
-            borderRadius="50%"
-            maxHeight="360px"
-            width="auto"
-            height="auto"
-          />
+          <PfpImage active={!!pfpId && status === 'success'} pfpId={pfpId} />
           <Stack spacing={2} hidden={!!proof}>
             <Text>Your address is not on the whitelist. </Text>
             <Code>{accountData && accountData.address}</Code>

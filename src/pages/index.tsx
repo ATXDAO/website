@@ -1,15 +1,13 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { Box, Grid, Text, useColorModeValue, VStack } from '@chakra-ui/react';
 import { Layout } from 'components/layout';
 import { Logo } from 'components/logo';
 import { MintForm } from 'components/mint-form';
 import { SocialLinks } from 'components/social-links';
 import { SubscribeForm } from 'components/subscribe-form';
+import { NextPage } from 'next';
 import { useAccount } from 'wagmi';
 
-const IndexPage = () => {
+const IndexPage: NextPage = () => {
   const [{ data: accountData }] = useAccount();
 
   return (
