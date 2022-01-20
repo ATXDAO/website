@@ -1,17 +1,57 @@
+/* eslint-disable no-console */
 import { VStack, Box, Container } from '@chakra-ui/react';
 import { Layout } from 'components/layout';
+import { ATXDAONFTV2 } from 'contracts/types';
+import { BigNumber, Event } from 'ethers';
 import { useFireworks } from 'hooks/app-hooks';
 import { NextPage } from 'next';
 import { useEffect } from 'react';
-import { useAccount } from 'wagmi';
+import { contractsByNetwork, SupportedNetwork } from 'util/constants';
+import {
+  useAccount,
+  useContract,
+  useContractEvent,
+  useNetwork,
+  useProvider,
+} from 'wagmi';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const ATXDAONFT_V2_ABI = require('../contracts/ATXDAONFT_V2.json');
+
+type EventArgs = [from: string, to: string, tokenId: BigNumber, event: Event];
 
 const EventPage: NextPage = () => {
-  const [{ data: accountData }] = useAccount();
+  // first thing's first
   const [, setFireworks] = useFireworks();
-
   useEffect(() => {
     setFireworks(true);
   });
+  const [{ data: accountData }] = useAccount();
+  const provider = useProvider();
+  const [{ data: networkData }] = useNetwork();
+  const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
+  const { address: contractAddress } =
+    contractsByNetwork[networkName as SupportedNetwork];
+
+  const mintContract = useContract<ATXDAONFTV2>({
+    addressOrName: contractAddress,
+    contractInterface: ATXDAONFT_V2_ABI,
+    signerOrProvider: provider,
+  });
+
+  useContractEvent(
+    {
+      addressOrName: contractAddress,
+      contractInterface: ATXDAONFT_V2_ABI,
+    },
+    'Transfer',
+    async (args: EventArgs) => {
+      const [from, to, tokenId, event] = args;
+      console.log({ from, to, tokenId, event });
+      const tokenUri = await mintContract.tokenURI(tokenId);
+      console.log('tokenUri', tokenUri);
+    }
+  );
 
   return (
     <Layout title="atxdao" connected={!!accountData} canToggleHeader>
