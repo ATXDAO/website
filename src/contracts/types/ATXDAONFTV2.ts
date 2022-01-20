@@ -20,26 +20,29 @@ import {
   utils,
 } from 'ethers';
 
-export interface MintInterface extends utils.Interface {
-  contractName: 'Mint';
+export interface ATXDAONFTV2Interface extends utils.Interface {
+  contractName: 'ATXDAONFTV2';
   functions: {
     '_mintPrice()': FunctionFragment;
-    '_mintQuantity()': FunctionFragment;
     'approve(address,uint256)': FunctionFragment;
     'balanceOf(address)': FunctionFragment;
+    'baseExtension()': FunctionFragment;
     'endMint()': FunctionFragment;
     'getApproved(uint256)': FunctionFragment;
+    'hasMinted(address)': FunctionFragment;
     'isApprovedForAll(address,address)': FunctionFragment;
     'isMintable()': FunctionFragment;
-    'mint()': FunctionFragment;
-    'mintSpecial(address[],string)': FunctionFragment;
+    'mint(bytes32[])': FunctionFragment;
+    'mintSpecial(address[],string,bool)': FunctionFragment;
     'name()': FunctionFragment;
     'owner()': FunctionFragment;
     'ownerOf(uint256)': FunctionFragment;
     'renounceOwnership()': FunctionFragment;
+    'resetHasMinted(address[])': FunctionFragment;
     'safeTransferFrom(address,address,uint256)': FunctionFragment;
     'setApprovalForAll(address,bool)': FunctionFragment;
-    'startMint(uint256,uint256,string)': FunctionFragment;
+    'setMerkleRoot(bytes32)': FunctionFragment;
+    'startMint(uint256,string,bytes32)': FunctionFragment;
     'supportsInterface(bytes4)': FunctionFragment;
     'sweepEth()': FunctionFragment;
     'symbol()': FunctionFragment;
@@ -53,19 +56,20 @@ export interface MintInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: '_mintQuantity',
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: 'approve',
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: 'balanceOf', values: [string]): string;
+  encodeFunctionData(
+    functionFragment: 'baseExtension',
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: 'endMint', values?: undefined): string;
   encodeFunctionData(
     functionFragment: 'getApproved',
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: 'hasMinted', values: [string]): string;
   encodeFunctionData(
     functionFragment: 'isApprovedForAll',
     values: [string, string]
@@ -74,10 +78,10 @@ export interface MintInterface extends utils.Interface {
     functionFragment: 'isMintable',
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: 'mint', values?: undefined): string;
+  encodeFunctionData(functionFragment: 'mint', values: [BytesLike[]]): string;
   encodeFunctionData(
     functionFragment: 'mintSpecial',
-    values: [string[], string]
+    values: [string[], string, boolean]
   ): string;
   encodeFunctionData(functionFragment: 'name', values?: undefined): string;
   encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
@@ -90,6 +94,10 @@ export interface MintInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: 'resetHasMinted',
+    values: [string[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: 'safeTransferFrom',
     values: [string, string, BigNumberish]
   ): string;
@@ -98,8 +106,12 @@ export interface MintInterface extends utils.Interface {
     values: [string, boolean]
   ): string;
   encodeFunctionData(
+    functionFragment: 'setMerkleRoot',
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
     functionFragment: 'startMint',
-    values: [BigNumberish, BigNumberish, string]
+    values: [BigNumberish, string, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: 'supportsInterface',
@@ -121,17 +133,18 @@ export interface MintInterface extends utils.Interface {
   ): string;
 
   decodeFunctionResult(functionFragment: '_mintPrice', data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: '_mintQuantity',
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: 'approve', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'balanceOf', data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: 'baseExtension',
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: 'endMint', data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: 'getApproved',
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: 'hasMinted', data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: 'isApprovedForAll',
     data: BytesLike
@@ -150,11 +163,19 @@ export interface MintInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: 'resetHasMinted',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: 'safeTransferFrom',
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: 'setApprovalForAll',
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: 'setMerkleRoot',
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: 'startMint', data: BytesLike): Result;
@@ -216,13 +237,13 @@ export type TransferEvent = TypedEvent<
 
 export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
-export interface Mint extends BaseContract {
-  contractName: 'Mint';
+export interface ATXDAONFTV2 extends BaseContract {
+  contractName: 'ATXDAONFTV2';
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: MintInterface;
+  interface: ATXDAONFTV2Interface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
@@ -246,8 +267,6 @@ export interface Mint extends BaseContract {
   functions: {
     _mintPrice(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    _mintQuantity(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -255,6 +274,8 @@ export interface Mint extends BaseContract {
     ): Promise<ContractTransaction>;
 
     balanceOf(owner: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+
+    baseExtension(overrides?: CallOverrides): Promise<[string]>;
 
     endMint(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -265,6 +286,8 @@ export interface Mint extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
+    hasMinted(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
+
     isApprovedForAll(
       owner: string,
       operator: string,
@@ -274,12 +297,14 @@ export interface Mint extends BaseContract {
     isMintable(overrides?: CallOverrides): Promise<[boolean]>;
 
     mint(
+      proof: BytesLike[],
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     mintSpecial(
       recipients: string[],
       tokenURI: string,
+      _dynamic: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -293,6 +318,11 @@ export interface Mint extends BaseContract {
     ): Promise<[string]>;
 
     renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    resetHasMinted(
+      recipients: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -317,10 +347,15 @@ export interface Mint extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    setMerkleRoot(
+      root: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     startMint(
       mintPrice: BigNumberish,
-      mintQuantity: BigNumberish,
       tokenURI: string,
+      _root: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -355,8 +390,6 @@ export interface Mint extends BaseContract {
 
   _mintPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
-  _mintQuantity(overrides?: CallOverrides): Promise<BigNumber>;
-
   approve(
     to: string,
     tokenId: BigNumberish,
@@ -364,6 +397,8 @@ export interface Mint extends BaseContract {
   ): Promise<ContractTransaction>;
 
   balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+  baseExtension(overrides?: CallOverrides): Promise<string>;
 
   endMint(
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -374,6 +409,8 @@ export interface Mint extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
+  hasMinted(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+
   isApprovedForAll(
     owner: string,
     operator: string,
@@ -383,12 +420,14 @@ export interface Mint extends BaseContract {
   isMintable(overrides?: CallOverrides): Promise<boolean>;
 
   mint(
+    proof: BytesLike[],
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   mintSpecial(
     recipients: string[],
     tokenURI: string,
+    _dynamic: boolean,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -399,6 +438,11 @@ export interface Mint extends BaseContract {
   ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
   renounceOwnership(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  resetHasMinted(
+    recipients: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -423,10 +467,15 @@ export interface Mint extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  setMerkleRoot(
+    root: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   startMint(
     mintPrice: BigNumberish,
-    mintQuantity: BigNumberish,
     tokenURI: string,
+    _root: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -458,8 +507,6 @@ export interface Mint extends BaseContract {
   callStatic: {
     _mintPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
-    _mintQuantity(overrides?: CallOverrides): Promise<BigNumber>;
-
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -468,12 +515,16 @@ export interface Mint extends BaseContract {
 
     balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
 
+    baseExtension(overrides?: CallOverrides): Promise<string>;
+
     endMint(overrides?: CallOverrides): Promise<void>;
 
     getApproved(
       tokenId: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    hasMinted(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
     isApprovedForAll(
       owner: string,
@@ -483,11 +534,12 @@ export interface Mint extends BaseContract {
 
     isMintable(overrides?: CallOverrides): Promise<boolean>;
 
-    mint(overrides?: CallOverrides): Promise<void>;
+    mint(proof: BytesLike[], overrides?: CallOverrides): Promise<void>;
 
     mintSpecial(
       recipients: string[],
       tokenURI: string,
+      _dynamic: boolean,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -498,6 +550,11 @@ export interface Mint extends BaseContract {
     ownerOf(tokenId: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    resetHasMinted(
+      recipients: string[],
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     'safeTransferFrom(address,address,uint256)'(
       from: string,
@@ -520,10 +577,12 @@ export interface Mint extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setMerkleRoot(root: BytesLike, overrides?: CallOverrides): Promise<void>;
+
     startMint(
       mintPrice: BigNumberish,
-      mintQuantity: BigNumberish,
       tokenURI: string,
+      _root: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -598,8 +657,6 @@ export interface Mint extends BaseContract {
   estimateGas: {
     _mintPrice(overrides?: CallOverrides): Promise<BigNumber>;
 
-    _mintQuantity(overrides?: CallOverrides): Promise<BigNumber>;
-
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -607,6 +664,8 @@ export interface Mint extends BaseContract {
     ): Promise<BigNumber>;
 
     balanceOf(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    baseExtension(overrides?: CallOverrides): Promise<BigNumber>;
 
     endMint(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -617,6 +676,8 @@ export interface Mint extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    hasMinted(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
     isApprovedForAll(
       owner: string,
       operator: string,
@@ -626,12 +687,14 @@ export interface Mint extends BaseContract {
     isMintable(overrides?: CallOverrides): Promise<BigNumber>;
 
     mint(
+      proof: BytesLike[],
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     mintSpecial(
       recipients: string[],
       tokenURI: string,
+      _dynamic: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -645,6 +708,11 @@ export interface Mint extends BaseContract {
     ): Promise<BigNumber>;
 
     renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    resetHasMinted(
+      recipients: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -669,10 +737,15 @@ export interface Mint extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    setMerkleRoot(
+      root: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     startMint(
       mintPrice: BigNumberish,
-      mintQuantity: BigNumberish,
       tokenURI: string,
+      _root: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -708,8 +781,6 @@ export interface Mint extends BaseContract {
   populateTransaction: {
     _mintPrice(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    _mintQuantity(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     approve(
       to: string,
       tokenId: BigNumberish,
@@ -721,12 +792,19 @@ export interface Mint extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    baseExtension(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     endMint(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     getApproved(
       tokenId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    hasMinted(
+      arg0: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -739,12 +817,14 @@ export interface Mint extends BaseContract {
     isMintable(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     mint(
+      proof: BytesLike[],
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     mintSpecial(
       recipients: string[],
       tokenURI: string,
+      _dynamic: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -758,6 +838,11 @@ export interface Mint extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    resetHasMinted(
+      recipients: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -782,10 +867,15 @@ export interface Mint extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    setMerkleRoot(
+      root: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     startMint(
       mintPrice: BigNumberish,
-      mintQuantity: BigNumberish,
       tokenURI: string,
+      _root: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

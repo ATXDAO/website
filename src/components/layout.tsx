@@ -1,17 +1,26 @@
-/* eslint-disable no-console */
-import { Center, Container, Flex, Spacer } from '@chakra-ui/react';
+import { Logo } from './logo';
+import { Wallet } from './wallet';
+import {
+  Center,
+  Container,
+  Flex,
+  Spacer,
+  Text,
+  useColorModeValue,
+} from '@chakra-ui/react';
 import { ColorModeSwitcher } from 'components/color-mode-switcher';
 import Head from 'next/head';
 import { FC, ReactNode } from 'react';
-import { Wallet } from './wallet';
 
 interface LayoutProps {
-  children?: ReactNode;
+  children: ReactNode;
   title?: string;
+  connected: boolean;
 }
 
 export const Layout: FC<LayoutProps> = ({
   children,
+  connected,
   title = 'This is the default title',
 }) => {
   return (
@@ -23,9 +32,15 @@ export const Layout: FC<LayoutProps> = ({
       </Head>
       <Container maxWidth="1200px">
         <Flex py={4} justifyContent="flex-end" alignItems="center">
-          <Flex justifyContent="space-between" alignItems="center">
-            <nav />
-          </Flex>
+          <Center hidden={!connected}>
+            <Logo
+              visibility={['hidden', 'visible']}
+              boxSize={['0', '48px']}
+              fill={useColorModeValue('gray.800', 'gray.100')}
+              mr={2}
+            />
+            <Text fontSize={['2xl', '3xl']}>ATX DAO</Text>
+          </Center>
           <Spacer />
           <Center>
             <ColorModeSwitcher justifySelf="flex-end" />

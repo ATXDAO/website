@@ -1,38 +1,36 @@
-/* eslint-disable react/function-component-definition */
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-import { AddIcon } from '@chakra-ui/icons';
+// eslint-disable react/function-component-definition
+import { LinkIcon } from '@chakra-ui/icons';
 import {
   Alert,
   AlertDescription,
   Button,
   Container,
   FormControl,
-  FormHelperText,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  InputProps,
   Stack,
-  Link,
-  useColorModeValue,
+  Text,
+  Code,
+  Image,
+  Tooltip,
+  Flex,
+  Center,
 } from '@chakra-ui/react';
-import { parseUnits } from '@ethersproject/units';
-import MINT_ABI from 'contracts/mint.json';
-import { Mint } from 'contracts/types';
-import { ContractTransaction } from 'ethers';
+import { ATXDAONFTV2 } from 'contracts/types';
+import { BigNumber, ContractTransaction } from 'ethers';
+import { getAddress, isAddress } from 'ethers/lib/utils';
+import { FC, useEffect, useMemo, useState } from 'react';
+import { contractsByNetwork, SupportedNetwork } from 'util/constants';
 import {
-  Dispatch,
-  FC,
-  FormEventHandler,
-  SetStateAction,
-  useState,
-} from 'react';
-import { useContract, useSigner } from 'wagmi';
+  useAccount,
+  useContract,
+  useNetwork,
+  useProvider,
+  useSigner,
+} from 'wagmi';
 
-const etherscanUrl = (tx: ContractTransaction) =>
-  `https://etherscan.io/tx/${tx.hash}`;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const ATXDAONFT_V2_ABI = require('../contracts/ATXDAONFT_V2.json');
 
-const tryParseError = (errorMsg: string) => {
+const tryParseError = (errorMsg: string): string => {
   const requireRevertError = errorMsg.match(
     /execution reverted: ([^"]+)"/
   )?.[1];
@@ -45,25 +43,8 @@ const tryParseError = (errorMsg: string) => {
   return errorMsg;
 };
 
-const TextInput: FC<
-  InputProps & { setValue: Dispatch<SetStateAction<string>> }
-> = ({ placeholder, children, setValue, ...props }) => (
-  <FormControl isRequired>
-    <InputGroup>
-      <InputLeftElement>{children}</InputLeftElement>
-      <Input
-        placeholder={placeholder}
-        aria-label={placeholder}
-        _placeholder={{ color: useColorModeValue('gray.600', 'gray.200') }}
-        onChange={(e) => setValue(e.target.value)}
-        {...props}
-      />
-    </InputGroup>
-  </FormControl>
-);
-
 const MintForm: FC = () => {
-  const [values, setValue] = useState('');
+  const [{ data: accountData }] = useAccount();
   const [errorMessage, setErrorMessage] = useState('');
   const [transaction, setTransaction] = useState<
     ContractTransaction | undefined
@@ -74,71 +55,185 @@ const MintForm: FC = () => {
   const [{ data: signer, error: signerError, loading: signerLoading }] =
     useSigner();
 
-  const mintContract = useContract<Mint>({
-    addressOrName: '0xF61be28561137259375cbE88f28D4F163B09c94C',
-    contractInterface: MINT_ABI,
-    signerOrProvider: signer,
+  const [buttonText, setButtonText] = useState('Loading...');
+
+  const provider = useProvider();
+
+  const [mintPrice, setMintPrice] = useState<BigNumber | undefined>();
+  const [isMintable, setIsMintable] = useState<boolean | undefined>();
+  const [isMinting, setIsMinting] = useState(false);
+  const [hasMinted, setHasMinted] = useState(false);
+
+  const [{ data: networkData }] = useNetwork();
+  const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
+  const {
+    address: contractAddress,
+    merkleTree,
+    blockExplorer,
+  } = contractsByNetwork[networkName as SupportedNetwork];
+
+  const proof = accountData
+    ? merkleTree.proofs[accountData?.address.toLowerCase()]
+    : undefined;
+
+  const mintContract = useContract<ATXDAONFTV2>({
+    addressOrName: contractAddress,
+    contractInterface: ATXDAONFT_V2_ABI,
+    signerOrProvider: signer || provider,
   });
 
-  const onSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    // eslint-disable-next-line no-underscore-dangle
+    mintContract._mintPrice().then((price) => setMintPrice(price));
+    mintContract.isMintable().then((mintable) => setIsMintable(mintable));
+    if (accountData?.address && isAddress(accountData?.address)) {
+      mintContract
+        .hasMinted(getAddress(accountData?.address))
+        .then((_hasMinted) => setHasMinted(_hasMinted));
+    }
+  }, [accountData?.address, contractAddress]);
+
+  const isMintableLoading = typeof isMintable === 'undefined';
+  const isMintPriceLoading = typeof mintPrice === 'undefined';
+
+  useEffect(() => {
+    if (isMintableLoading || isMintPriceLoading || signerLoading) {
+      setButtonText('Loading...');
+    } else if (!isMintable) {
+      setButtonText('Minting disabled');
+    } else if (!proof) {
+      setButtonText('Not on the whitelist!');
+    } else if (hasMinted) {
+      setButtonText('Already minted!');
+    } else if (isMinting) {
+      setButtonText('Minting...');
+    } else {
+      setButtonText('Mint');
+    }
+  }, [isMintable, signerLoading, isMintPriceLoading, hasMinted]);
+
+  // mintContract._mintPrice();
+
+  const onMint = async (): Promise<void> => {
+    if (!proof || isMintableLoading || isMintPriceLoading) {
+      // eslint-disable-next-line no-console
+      console.error({
+        proof,
+        isMintableLoading,
+        isMintPriceLoading,
+      });
+      return;
+    }
     try {
-      setTransaction(await mintContract.mint({ value: parseUnits(values) }));
+      setIsMinting(true);
+      const tx = await mintContract.mint(proof, { value: mintPrice });
+      setTransaction(tx);
+      await tx.wait(1);
+      setButtonText('Minted!');
+      setIsMinting(false);
+      setStatus('success');
     } catch (err) {
       setStatus('error');
       setErrorMessage(tryParseError((err as Error).message));
     }
   };
 
+  const pfpId = useMemo(
+    () => Math.floor(Math.random() * 150) + 26,
+    [accountData?.address]
+  );
+
   return (
-    <Container p={6} maxWidth="420px" display="block" overflow="auto">
-      <form onSubmit={onSubmit}>
-        <FormControl error={errorMessage || undefined}>
-          <Stack spacing={3}>
-            <TextInput
-              type="value"
-              name="value"
-              value={values}
-              setValue={setValue}
-              placeholder="ΞETH"
-            />
+    <Container p={6} maxWidth="400px" display="block" overflow="none">
+      <FormControl error={errorMessage || undefined}>
+        <Stack spacing={8}>
+          <Image
+            src={`https://ipfs.io/ipfs/QmeJVHwX4fv6hiRWgM5YkyAstYWGgMkXxjxRxbBv8XTcPh/${pfpId}.png`}
+            fallbackSrc="/img/zilker-placeholder.png"
+            borderRadius="50%"
+            maxHeight="360px"
+            width="auto"
+            height="auto"
+          />
+          <Stack spacing={2} hidden={!!proof}>
+            <Text>Your address is not on the whitelist. </Text>
+            <Code>{accountData && accountData.address}</Code>
+          </Stack>
+          <Tooltip>
             <Button
-              type="submit"
-              disabled={!!(signerLoading || signerError)}
+              isLoading={
+                isMintableLoading ||
+                isMintPriceLoading ||
+                signerLoading ||
+                isMinting
+              }
+              loadingText={buttonText}
+              onClick={onMint}
+              disabled={
+                !!(
+                  !proof ||
+                  signerLoading ||
+                  signerError ||
+                  isMintPriceLoading ||
+                  !isMintable ||
+                  buttonText === 'Minted!' ||
+                  hasMinted ||
+                  isMinting
+                )
+              }
               boxShadow="lg"
               fontWeight="600"
               _hover={{ boxShadow: 'md' }}
               _active={{ boxShadow: 'lg' }}
             >
-              Mint
+              {buttonText}
             </Button>
-            <FormControl hidden={status !== 'unsubmitted'}>
-              <FormHelperText>Provide correct ΞETH.</FormHelperText>
-            </FormControl>
-            <Alert
-              status={status === 'success' ? 'success' : 'error'}
-              fontSize="md"
-              alignItems="center"
-              justifyContent="center"
-              textAlign="center"
-              hidden={status === 'unsubmitted'}
-            >
-              {status === 'success' ? (
-                <>
-                  <AddIcon />
-                  <AlertDescription mt={-1}>
-                    {transaction && (
-                      <Link href={etherscanUrl(transaction)}> Status</Link>
-                    )}
-                  </AlertDescription>
-                </>
-              ) : (
-                <AlertDescription mt={-1}>{errorMessage}</AlertDescription>
-              )}
-            </Alert>
-          </Stack>
-        </FormControl>
-      </form>
+          </Tooltip>
+          <Alert
+            status={status === 'success' ? 'success' : 'error'}
+            fontSize="md"
+            alignItems="center"
+            justifyContent="center"
+            textAlign="center"
+            hidden={status === 'unsubmitted'}
+          >
+            {status === 'success' ? (
+              <AlertDescription mt={-1}>
+                <Flex>
+                  <Center>Successfully minted!</Center>
+                  {transaction && (
+                    <Center>
+                      <Button
+                        rightIcon={<LinkIcon />}
+                        as="a"
+                        size="xs"
+                        ml={2}
+                        target="_blank"
+                        href={`${blockExplorer}/tx/${transaction.hash}`}
+                      >
+                        Etherscan
+                      </Button>
+                    </Center>
+                  )}
+                </Flex>
+              </AlertDescription>
+            ) : (
+              <AlertDescription mt={-1}>
+                <Text mb={4}>{errorMessage}</Text>
+                <Text
+                  as="pre"
+                  fontSize="8px"
+                  textAlign="left"
+                  lineHeight="8px"
+                  hidden={!proof}
+                >
+                  {JSON.stringify(proof, undefined, 4)}
+                </Text>
+              </AlertDescription>
+            )}
+          </Alert>
+        </Stack>
+      </FormControl>
     </Container>
   );
 };

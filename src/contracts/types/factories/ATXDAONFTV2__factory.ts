@@ -3,7 +3,7 @@
 /* tslint:disable */
 
 /* eslint-disable */
-import type { Mint, MintInterface } from '../Mint';
+import type { ATXDAONFTV2, ATXDAONFTV2Interface } from '../ATXDAONFTV2';
 import { Provider } from '@ethersproject/providers';
 import { Contract, Signer, utils } from 'ethers';
 
@@ -121,19 +121,6 @@ const _abi = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: '_mintQuantity',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
     inputs: [
       {
         internalType: 'address',
@@ -172,6 +159,19 @@ const _abi = [
   },
   {
     inputs: [],
+    name: 'baseExtension',
+    outputs: [
+      {
+        internalType: 'string',
+        name: '',
+        type: 'string',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
     name: 'endMint',
     outputs: [],
     stateMutability: 'nonpayable',
@@ -191,6 +191,25 @@ const _abi = [
         internalType: 'address',
         name: '',
         type: 'address',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    name: 'hasMinted',
+    outputs: [
+      {
+        internalType: 'bool',
+        name: '',
+        type: 'bool',
       },
     ],
     stateMutability: 'view',
@@ -234,7 +253,13 @@ const _abi = [
     type: 'function',
   },
   {
-    inputs: [],
+    inputs: [
+      {
+        internalType: 'bytes32[]',
+        name: 'proof',
+        type: 'bytes32[]',
+      },
+    ],
     name: 'mint',
     outputs: [],
     stateMutability: 'payable',
@@ -251,6 +276,11 @@ const _abi = [
         internalType: 'string',
         name: 'tokenURI',
         type: 'string',
+      },
+      {
+        internalType: 'bool',
+        name: '_dynamic',
+        type: 'bool',
       },
     ],
     name: 'mintSpecial',
@@ -306,6 +336,19 @@ const _abi = [
   {
     inputs: [],
     name: 'renounceOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'address[]',
+        name: 'recipients',
+        type: 'address[]',
+      },
+    ],
+    name: 'resetHasMinted',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -382,19 +425,32 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: 'uint256',
-        name: 'mintPrice',
-        type: 'uint256',
+        internalType: 'bytes32',
+        name: 'root',
+        type: 'bytes32',
       },
+    ],
+    name: 'setMerkleRoot',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
       {
         internalType: 'uint256',
-        name: 'mintQuantity',
+        name: 'mintPrice',
         type: 'uint256',
       },
       {
         internalType: 'string',
         name: 'tokenURI',
         type: 'string',
+      },
+      {
+        internalType: 'bytes32',
+        name: '_root',
+        type: 'bytes32',
       },
     ],
     name: 'startMint',
@@ -498,12 +554,15 @@ const _abi = [
   },
 ];
 
-export class Mint__factory {
+export class ATXDAONFTV2__factory {
   static readonly abi = _abi;
-  static createInterface(): MintInterface {
-    return new utils.Interface(_abi) as MintInterface;
+  static createInterface(): ATXDAONFTV2Interface {
+    return new utils.Interface(_abi) as ATXDAONFTV2Interface;
   }
-  static connect(address: string, signerOrProvider: Signer | Provider): Mint {
-    return new Contract(address, _abi, signerOrProvider) as Mint;
+  static connect(
+    address: string,
+    signerOrProvider: Signer | Provider
+  ): ATXDAONFTV2 {
+    return new Contract(address, _abi, signerOrProvider) as ATXDAONFTV2;
   }
 }
