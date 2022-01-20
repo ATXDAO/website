@@ -1,5 +1,15 @@
 /* eslint-disable no-console */
-import { VStack, Box, Container } from '@chakra-ui/react';
+import {
+  VStack,
+  Box,
+  Container,
+  Center,
+  Heading,
+  Image,
+  Flex,
+  Spacer,
+  HStack,
+} from '@chakra-ui/react';
 import { Layout } from 'components/layout';
 import { ATXDAONFTV2 } from 'contracts/types';
 import { BigNumber, Event } from 'ethers';
@@ -57,9 +67,33 @@ const EventPage: NextPage = () => {
     <Layout title="atxdao" connected={!!accountData} canToggleHeader>
       <Container width="100%" height="100%">
         <VStack>
-          <Box width="500px" height="500px">
-            Event page
-          </Box>
+          <Heading>mint.atxdao.com</Heading>
+          <Flex height="55vh">
+            <Center>
+              <HStack>
+                <Center width="300px" height="300px">
+                  hi there
+                </Center>
+                <Center width="300px" height="300px">
+                  hi there
+                </Center>
+                <Center width="300px" height="300px">
+                  hi there
+                </Center>
+              </HStack>
+            </Center>
+          </Flex>
+          <Flex width="100%">
+            <Spacer />
+            <Center>
+              <Heading>POAP:</Heading>
+            </Center>
+            <Spacer />
+            <Center>
+              <Image width="12rem" src="/img/zilker-poap.png" />
+            </Center>
+            <Spacer />
+          </Flex>
         </VStack>
       </Container>
     </Layout>
