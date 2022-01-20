@@ -136,11 +136,6 @@ const MintForm: FC = () => {
       setIsMinting(true);
       const tx = await mintContract.mint(proof, { value: mintPrice });
       setTransaction(tx);
-      await tx.wait(1);
-      setButtonText('Minted!');
-      setIsMinting(false);
-      setStatus('success');
-      setFireworks(true);
     } catch (err) {
       setStatus('error');
       setErrorMessage(tryParseError((err as Error).message));
@@ -161,6 +156,10 @@ const MintForm: FC = () => {
       if (to.toLowerCase() === accountData?.address.toLowerCase()) {
         console.log('your nft was minted!!', tokenId.toNumber());
         setPfpId(tokenId.toNumber());
+        setButtonText('Minted!');
+        setIsMinting(false);
+        setStatus('success');
+        setFireworks(true);
       }
     }
   );

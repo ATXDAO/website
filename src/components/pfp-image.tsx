@@ -15,7 +15,6 @@ export const PfpImage: FC<PfpImageProps> = ({
   const ref = createRef<HTMLImageElement>();
   useEffect(() => {
     if (active) {
-      console.log('fading in new pfp...');
       ref.current?.animate(
         { filter: 'grayscale(1%)' },
         {
