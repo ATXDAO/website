@@ -17,6 +17,7 @@ import {
 import { ATXDAONFTV2 } from 'contracts/types';
 import { BigNumber, ContractTransaction } from 'ethers';
 import { getAddress, isAddress } from 'ethers/lib/utils';
+import { useFireworks } from 'hooks/app-hooks';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { contractsByNetwork, SupportedNetwork } from 'util/constants';
 import {
@@ -44,6 +45,7 @@ const tryParseError = (errorMsg: string): string => {
 };
 
 const MintForm: FC = () => {
+  const [, setFireworks] = useFireworks();
   const [{ data: accountData }] = useAccount();
   const [errorMessage, setErrorMessage] = useState('');
   const [transaction, setTransaction] = useState<
@@ -132,6 +134,7 @@ const MintForm: FC = () => {
       setButtonText('Minted!');
       setIsMinting(false);
       setStatus('success');
+      setFireworks(true);
     } catch (err) {
       setStatus('error');
       setErrorMessage(tryParseError((err as Error).message));
