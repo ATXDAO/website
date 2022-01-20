@@ -11,12 +11,19 @@ import {
   Text,
   Code,
   Image,
+  useTimeout,
 } from '@chakra-ui/react';
 import { ATXDAONFTV2 } from 'contracts/types';
 import { BigNumber, ContractTransaction } from 'ethers';
 import { FC, useEffect, useMemo, useState } from 'react';
 import { contractsByNetwork, SupportedNetwork } from 'util/constants';
-import { useAccount, useContract, useNetwork, useSigner } from 'wagmi';
+import {
+  useAccount,
+  useContract,
+  useNetwork,
+  useProvider,
+  useSigner,
+} from 'wagmi';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ATXDAONFT_V2_ABI = require('../contracts/ATXDAONFT_V2.json');
@@ -49,6 +56,8 @@ const MintForm: FC = () => {
   const [{ data: signer, error: signerError, loading: signerLoading }] =
     useSigner();
 
+  const provider = useProvider();
+
   const [mintPrice, setMintPrice] = useState<BigNumber | undefined>();
   const [isMintable, setIsMintable] = useState<boolean | undefined>();
 
@@ -64,7 +73,7 @@ const MintForm: FC = () => {
   const mintContract = useContract<ATXDAONFTV2>({
     addressOrName: contractAddress,
     contractInterface: ATXDAONFT_V2_ABI,
-    signerOrProvider: signer,
+    signerOrProvider: signer || provider,
   });
 
   useEffect(() => {
@@ -120,7 +129,15 @@ const MintForm: FC = () => {
           <Button
             type="submit"
             onClick={onMint}
-            disabled={!!(!proof || signerLoading || signerError)}
+            disabled={
+              !!(
+                !proof ||
+                signerLoading ||
+                signerError ||
+                isMintPriceLoading ||
+                !isMintable
+              )
+            }
             boxShadow="lg"
             fontWeight="600"
             _hover={{ boxShadow: 'md' }}
