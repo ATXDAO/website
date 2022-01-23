@@ -13,11 +13,10 @@ import {
   FormControl,
   Stack,
   Text,
-  Tooltip,
 } from '@chakra-ui/react';
 import { ATXDAONFTV2 } from 'contracts/types';
 import { BigNumber, ContractTransaction } from 'ethers';
-import { getAddress, isAddress } from 'ethers/lib/utils';
+import { formatEther, getAddress, isAddress } from 'ethers/lib/utils';
 import { useFireworks } from 'hooks/app-hooks';
 import { FC, useEffect, useState } from 'react';
 import {
@@ -27,6 +26,7 @@ import {
 } from 'util/constants';
 import {
   useAccount,
+  useBalance,
   useContract,
   useContractEvent,
   useNetwork,
@@ -62,6 +62,7 @@ const MintForm: FC = () => {
   );
   const [{ data: signer, error: signerError, loading: signerLoading }] =
     useSigner();
+  const [{ data: balanceData, loading: isBalanceLoading }] = useBalance();
 
   const [buttonText, setButtonText] = useState('Loading...');
 
@@ -90,6 +91,9 @@ const MintForm: FC = () => {
     signerOrProvider: signer || provider,
   });
 
+  const isBalanceSufficient =
+    mintPrice && balanceData && balanceData.value >= mintPrice;
+
   useEffect(() => {
     // eslint-disable-next-line no-underscore-dangle
     mintContract._mintPrice().then((price) => setMintPrice(price));
@@ -105,7 +109,12 @@ const MintForm: FC = () => {
   const isMintPriceLoading = typeof mintPrice === 'undefined';
 
   useEffect(() => {
-    if (isMintableLoading || isMintPriceLoading || signerLoading) {
+    if (
+      isMintableLoading ||
+      isMintPriceLoading ||
+      signerLoading ||
+      isBalanceLoading
+    ) {
       setButtonText('Loading...');
     } else if (!isMintable) {
       setButtonText('Minting disabled');
@@ -115,8 +124,10 @@ const MintForm: FC = () => {
       setButtonText('Already minted!');
     } else if (isMinting) {
       setButtonText('Minting...');
+    } else if (!isBalanceSufficient) {
+      setButtonText(`Must have at least ${formatEther(mintPrice)} Ξ`);
     } else {
-      setButtonText('Mint');
+      setButtonText(`Mint for ${formatEther(mintPrice)} Ξ`);
     }
   }, [isMintable, signerLoading, isMintPriceLoading, hasMinted]);
 
@@ -173,36 +184,35 @@ const MintForm: FC = () => {
             <Text>Your address is not on the whitelist. </Text>
             <Code>{accountData && accountData.address}</Code>
           </Stack>
-          <Tooltip>
-            <Button
-              isLoading={
-                isMintableLoading ||
-                isMintPriceLoading ||
+          <Button
+            isLoading={
+              isMintableLoading ||
+              isMintPriceLoading ||
+              signerLoading ||
+              isMinting
+            }
+            loadingText={buttonText}
+            onClick={onMint}
+            disabled={
+              !!(
+                !proof ||
                 signerLoading ||
-                isMinting
-              }
-              loadingText={buttonText}
-              onClick={onMint}
-              disabled={
-                !!(
-                  !proof ||
-                  signerLoading ||
-                  signerError ||
-                  isMintPriceLoading ||
-                  !isMintable ||
-                  buttonText === 'Minted!' ||
-                  hasMinted ||
-                  isMinting
-                )
-              }
-              boxShadow="lg"
-              fontWeight="600"
-              _hover={{ boxShadow: 'md' }}
-              _active={{ boxShadow: 'lg' }}
-            >
-              {buttonText}
-            </Button>
-          </Tooltip>
+                signerError ||
+                isMintPriceLoading ||
+                !isMintable ||
+                buttonText === 'Minted!' ||
+                hasMinted ||
+                isMinting ||
+                !isBalanceSufficient
+              )
+            }
+            boxShadow="lg"
+            fontWeight="600"
+            _hover={{ boxShadow: 'md' }}
+            _active={{ boxShadow: 'lg' }}
+          >
+            {buttonText}
+          </Button>
           <Alert
             status={status === 'success' ? 'success' : 'error'}
             fontSize="md"
