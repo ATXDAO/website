@@ -62,7 +62,10 @@ const MintForm: FC = () => {
   );
   const [{ data: signer, error: signerError, loading: signerLoading }] =
     useSigner();
-  const [{ data: balanceData, loading: isBalanceLoading }] = useBalance();
+  const [{ data: balanceData, loading: isBalanceLoading }] = useBalance({
+    addressOrName: accountData?.address,
+    skip: !accountData,
+  });
 
   const [buttonText, setButtonText] = useState('Loading...');
 
@@ -92,7 +95,7 @@ const MintForm: FC = () => {
   });
 
   const isBalanceSufficient =
-    mintPrice && balanceData && balanceData.value >= mintPrice;
+    mintPrice && balanceData && balanceData.value.gte(mintPrice);
 
   useEffect(() => {
     // eslint-disable-next-line no-underscore-dangle
@@ -129,7 +132,13 @@ const MintForm: FC = () => {
     } else {
       setButtonText(`Mint for ${formatEther(mintPrice)} Ξ`);
     }
-  }, [isMintable, signerLoading, isMintPriceLoading, hasMinted]);
+  }, [
+    isMintable,
+    signerLoading,
+    isMintPriceLoading,
+    hasMinted,
+    isBalanceSufficient,
+  ]);
 
   // mintContract._mintPrice();
 
