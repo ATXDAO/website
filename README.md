@@ -22,6 +22,6 @@
 
 #### resources
 
-1. we use [chakra-ui]I(https://chakra-ui.com/docs/getting-started) as our design framework. check out the [docs](https://chakra-ui.com/docs/getting-started)!
+1. we use [chakra-ui](https://chakra-ui.com/docs/getting-started) as our design framework. check out the [docs](https://chakra-ui.com/docs/getting-started)!
 1. we use [nextjs](https://nextjs.org/docs) to statically build the site
 1. and deploy to [github pages](https://pages.github.com/)
