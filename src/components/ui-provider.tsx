@@ -6,9 +6,9 @@ import {
 } from '@chakra-ui/react';
 import { GetServerSidePropsContext } from 'next';
 import { ReactNode } from 'react';
-import myTheme from 'styles/theme';
+import chakraTheme from "../util/chakraTheme"
 
-const theme = extendTheme(myTheme);
+const theme = extendTheme(chakraTheme);
 
 interface ChakraProps {
   cookies: string;

@@ -58,6 +58,7 @@
     "yarn": "^1.22.17"
   },
   "devDependencies": {
+    "@fontsource/montserrat": "^4.5.3",
     "@trivago/prettier-plugin-sort-imports": "^3.1.1",
     "@typescript-eslint/eslint-plugin": "^5.10.1",
     "@typescript-eslint/parser": "^5.10.1",
@@ -72,6 +73,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-react": "^7.28.0",
-    "eslint-plugin-react-hooks": "^4.3.0"
+    "eslint-plugin-react-hooks": "^4.3.0",
+    "react-scroll-parallax": "^3.0.2"
   }
 }
