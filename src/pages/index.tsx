@@ -1,13 +1,24 @@
-import { Box, Grid, Text, useColorModeValue, VStack } from '@chakra-ui/react';
-import { Layout } from 'components/layout';
-import { Logo } from 'components/logo';
-import { MintForm } from 'components/mint-form';
-import { SocialLinks } from 'components/social-links';
+import { Parallax } from 'react-scroll-parallax';
+import Layout from '../components/layout/Layout';
+import {
+  Heading,
+  Center,
+  Box,
+  Grid,
+  Text,
+  useColorModeValue,
+  VStack,
+} from '@chakra-ui/react';
+import Team from '../components/home/team/Team';
 import { SubscribeForm } from 'components/subscribe-form';
-import { NextPage } from 'next';
+import { Logo } from 'components/logo';
+import { SocialLinks } from 'components/social-links';
+import ImportantLinks from '../components/home/links/ImportantLinks';
 import { useAccount } from 'wagmi';
 
-const IndexPage: NextPage = () => {
+function Home() {
+  const contentPaddingX = ['1rem', '2rem', '3rem', '10rem'];
+  const contentPaddingY = '5rem';
   const [{ data: accountData }] = useAccount();
 
   return (
@@ -19,36 +30,21 @@ const IndexPage: NextPage = () => {
               <MintForm />
             ) : (
               <>
-                <Text fontSize={['3.2rem', '4rem', '5rem']} lineHeight={1}>
-                  ATX DAO
-                </Text>
                 <Logo
                   boxSize={['256px', '256px', '384px']}
                   fill={useColorModeValue('gray.800', 'gray.100')}
                 />
+                <Text fontSize={['3.2rem', '4rem', '5rem']} lineHeight={1}>
+                  ATXDAO
+                </Text>
                 <SubscribeForm />
               </>
             )}
-            <SocialLinks
-              fontSize={['2rem', '2rem', '3rem']}
-              color={useColorModeValue('gray.800', 'gray.100')}
-              spacing={[2, 2, 4]}
-              socialLinks={[
-                {
-                  social: 'discord',
-                  href: 'https://discord.gg/3uGPbZhk3U',
-                },
-                {
-                  social: 'github',
-                  href: 'https://github.com/atxdao',
-                },
-              ]}
-            />
           </VStack>
         </Grid>
       </Box>
     </Layout>
   );
-};
+}
 
-export default IndexPage;
+export default Home;
