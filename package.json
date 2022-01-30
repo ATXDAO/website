@@ -13,6 +13,7 @@
   "license": "MIT",
   "scripts": {
     "build": "next build && next export",
+    "test": "cypress open",
     "compile-contract-types": "typechain --target ethers-v5 --out-dir 'src/contracts/types' 'src/contracts/*.json'",
     "dev": "next dev",
     "postinstall": "yarn compile-contract-types",
@@ -59,10 +60,12 @@
   },
   "devDependencies": {
     "@fontsource/montserrat": "^4.5.3",
+    "@openzeppelin/contracts": "^4.4.2",
     "@trivago/prettier-plugin-sort-imports": "^3.1.1",
     "@typescript-eslint/eslint-plugin": "^5.10.1",
     "@typescript-eslint/parser": "^5.10.1",
     "@typescript-eslint/typescript-estree": "^5.10.1",
+    "cypress": "^9.3.1",
     "eslint": "^8.7.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-typescript": "^16.1.0",
@@ -74,6 +77,8 @@
     "eslint-plugin-promise": "^6.0.0",
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",
-    "react-scroll-parallax": "^3.0.2"
+    "hardhat": "^2.8.3",
+    "react-scroll-parallax": "^3.0.2",
+    "the-global-object": "^1.0.2"
   }
 }
