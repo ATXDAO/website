@@ -107,7 +107,7 @@ const SubscribeForm: FC = () => {
             _hover={{ boxShadow: 'md' }}
             _active={{ boxShadow: 'lg' }}
           >
-            Sign up for dao updates
+            Sign up for DAO updates
           </Button>
           <FormControl hidden={status !== 'unsubmitted'}>
             <FormHelperText color="gray.600">
