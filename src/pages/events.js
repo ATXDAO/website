@@ -66,7 +66,6 @@ export async function getServerSideProps(context) {
   await sdk
     .request(`/organizations/${orgID}/events/`)
     .then((response) => {
-      console.log('Response:', response);
       events = response;
     })
     .catch((errInfo) => {
