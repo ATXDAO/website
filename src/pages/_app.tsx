@@ -1,13 +1,13 @@
+import chakraTheme from '../util/chakraTheme';
+import { ChakraProvider } from '@chakra-ui/react';
 import { BaseProvider, WebSocketProvider } from '@ethersproject/providers';
 import { UIProvider } from 'components/ui-provider';
-import { ChakraProvider } from '@chakra-ui/react';
-import chakraTheme from '../util/chakraTheme';
 import { providers } from 'ethers';
 import { AppProvider } from 'hooks/app-hooks';
-import { ParallaxProvider } from 'react-scroll-parallax';
 import type { NextComponentType, NextPageContext } from 'next';
 import type { NextRouter } from 'next/router';
 import { FunctionComponent } from 'react';
+import { ParallaxProvider } from 'react-scroll-parallax';
 import { Connector, defaultChains, Provider as WagmiProvider } from 'wagmi';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';

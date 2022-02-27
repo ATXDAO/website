@@ -10,6 +10,9 @@ jobs:
       NEXT_PUBLIC_ALCHEMY_ID: ${{ secrets.NEXT_PUBLIC_ALCHEMY_ID }}
       NEXT_PUBLIC_ETHERSCAN_API_KEY: ${{ secrets.NEXT_PUBLIC_ETHERSCAN_API_KEY }}
       NEXT_PUBLIC_INFURA_ID: ${{ secrets.NEXT_PUBLIC_INFURA_ID }}
+      EVENTBRITE_API_KEY: ${{ secrets.EVENTBRITE_API_KEY }}
+      ORG_ID: ${{secrets.ORG_ID}}
+
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v2.3.1

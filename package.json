@@ -56,7 +56,7 @@
     "swr": "^1.2.0",
     "typechain": "^7.0.0",
     "typescript": "^4.5.5",
-    "wagmi": "^0.0.1",
+    "wagmi": "^0.2.1",
     "yarn": "^1.22.17"
   },
   "devDependencies": {

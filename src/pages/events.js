@@ -1,9 +1,12 @@
-import Connect from '../components/events/Connect';
 import Event from '../components/events/Event';
 import Layout from '../components/layout/Layout';
+import { Logo } from '../img/logo';
 import { eventData } from '../util/mockData';
 import { Box, Divider, Link } from '@chakra-ui/react';
 import eventbrite from 'eventbrite';
+
+const eventbriteAPI = process.env.EVENTBRITE_API_KEY;
+const orgID = process.env.ORG_ID;
 
 function Events({ events }) {
   const contentPaddingX = ['1rem', '2rem', '3rem', '10rem'];
@@ -11,7 +14,6 @@ function Events({ events }) {
 
   return (
     <Layout>
-      <Connect />
       <Box paddingX={contentPaddingX} paddingTop={contentPaddingY}>
         {events.events.map((obj, i) => (
           <>
@@ -46,6 +48,8 @@ function Events({ events }) {
                     hour12: true,
                   })}
                   description={obj.summary}
+                  link={obj.url}
+                  img={obj.logo.original.url}
                 />
               </Link>
             </Box>
@@ -57,11 +61,10 @@ function Events({ events }) {
 }
 
 export async function getServerSideProps(context) {
-  const sdk = eventbrite({ token: 'KMNE2CUAUC2S5453DFYX' });
-  const ORG_ID = '514468661905';
+  const sdk = eventbrite({ token: `${eventbriteAPI}` });
   let events = null;
   await sdk
-    .request(`/organizations/${ORG_ID}/events/`)
+    .request(`/organizations/${orgID}/events/`)
     .then((response) => {
       console.log('Response:', response);
       events = response;
