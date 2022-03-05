@@ -1,3 +1,4 @@
+import { createDiscountAndNavigate } from '../../pages/events';
 import { limitChars } from '../../util/helpers';
 import { Grid, Box, Heading, Text, Button, Flex, Link } from '@chakra-ui/react';
 import { FaArrowRight } from 'react-icons/fa';
@@ -41,16 +42,26 @@ function Event(props) {
             {limitChars(props.description, 120)}
           </Text>
         </Box>
-        <Link href={props.link} isExternal>
-          <Button
-            variant="unstyled"
-            rightIcon={<FaArrowRight />}
-            textAlign="left"
-            transition="inherit"
-          >
-            Learn More
-          </Button>
-        </Link>
+
+        <Button
+          variant="unstyled"
+          rightIcon={<FaArrowRight />}
+          textAlign="left"
+          transition="inherit"
+          onClick={
+            isMember
+              ? createDiscountAndNavigate.bind(
+                  '',
+                  props.eventId,
+                  props.link,
+                  isMember
+                )
+              : window.open(props.link)
+          }
+          disabled={!(isMember | props.shareable)}
+        >
+          {isMember | props.shareable ? 'RSVP' : 'Members Only'}
+        </Button>
       </Flex>
     </Grid>
   );

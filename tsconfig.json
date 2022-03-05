@@ -6,10 +6,7 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "lib": [
-      "dom",
-      "esnext"
-    ],
+    "lib": ["dom", "esnext"],
     "module": "esnext",
     "moduleResolution": "node",
     "noEmit": true,
@@ -23,12 +20,10 @@
     "allowSyntheticDefaultImports": true,
     "incremental": true
   },
-  "exclude": [
-    "node_modules",
-    "next.config.cjs"
-  ],
+  "exclude": ["node_modules", "next.config.cjs"],
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "src/components/events/handleEventbriteAPI.js"
   ]
 }
