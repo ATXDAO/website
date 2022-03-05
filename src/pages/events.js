@@ -8,7 +8,6 @@ import { useState } from 'react';
 
 const eventbriteAPI = process.env.EVENTBRITE_API_KEY;
 const orgID = process.env.ORG_ID;
-const [isMember, setIsMember] = useState(false);
 
 export function createDiscountAndNavigate(
   eventCode,
@@ -16,51 +15,53 @@ export function createDiscountAndNavigate(
   isMember = false,
   setOptionalCode
 ) {
-  const code = setOptionalCode | Math.floor(Math.random() * 1000000);
-  const body = {
-    discount: {
-      type: 'access',
-      code: `${code}`,
-      event_id: `${eventCode}`,
-      ticket_class_ids: [],
-      quantity_available: 1,
-    },
-  };
-  fetch(`https://www.eventbriteapi.com/v3/organizations/${orgID}/discounts/`, {
-    method: 'post',
-    body: JSON.stringify(body),
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${eventbriteAPI}`,
-    },
-  })
-    .then((response) => {
-      const isJson = response.headers
-        .get('content-type')
-        ?.includes('application/json');
-      const data = isJson ? response.json() : null;
-
-      // check for error response
-      if (!response.ok) {
-        // get error message from body or default to response status
-        const error = data || response.status;
-        return Promise.reject(error);
-      } else {
-        if (isMember) {
-          window.open(`${redirectURL}?discount=${code}`);
-        } else {
-          window.open(redirectURL);
-        }
+  if (isMember) {
+    const code = setOptionalCode | Math.floor(Math.random() * 1000000);
+    const body = {
+      discount: {
+        type: 'access',
+        code: `${code}`,
+        event_id: `${eventCode}`,
+        ticket_class_ids: [],
+        quantity_available: 1,
+      },
+    };
+    fetch(
+      `https://www.eventbriteapi.com/v3/organizations/${orgID}/discounts/`,
+      {
+        method: 'post',
+        body: JSON.stringify(body),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${eventbriteAPI}`,
+        },
       }
-    })
-    .catch((error) => {
-      console.error('There was an error!', error);
-    });
+    )
+      .then((response) => {
+        const isJson = response.headers
+          .get('content-type')
+          ?.includes('application/json');
+        const data = isJson ? response.json() : null;
+
+        // check for error response
+        if (!response.ok) {
+          // get error message from body or default to response status
+          const error = data || response.status;
+          return Promise.reject(error);
+        } else {
+          window.open(`${redirectURL}?discount=${code}`);
+        }
+      })
+      .catch((error) => {
+        console.error('There was an error!', error);
+      });
+  }
 }
 
 function Events({ events }) {
   const contentPaddingX = ['1rem', '2rem', '3rem', '10rem'];
   const contentPaddingY = '3rem';
+  const [isMember, setIsMember] = useState(true);
 
   return (
     <Layout>
@@ -75,35 +76,34 @@ function Events({ events }) {
               />
             )}
             <Box mb={['2rem', '3rem', '5rem']}>
-              <Link href={obj.url} target="_blank">
-                <Event
-                  title={obj.name.text}
-                  date={new Date(obj.start.local).toLocaleString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                  startTime={new Date(obj.start.local).toLocaleTimeString(
-                    'en-US',
-                    {
-                      hour: 'numeric',
-                      minute: 'numeric',
-                      hour12: true,
-                    }
-                  )}
-                  endTime={new Date(obj.end.local).toLocaleTimeString('en-US', {
+              <Event
+                title={obj.name.text}
+                date={new Date(obj.start.local).toLocaleString('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+                startTime={new Date(obj.start.local).toLocaleTimeString(
+                  'en-US',
+                  {
                     hour: 'numeric',
                     minute: 'numeric',
                     hour12: true,
-                  })}
-                  description={obj.summary ? obj.summary : null}
-                  link={obj.url ? obj.url : null}
-                  img={obj.logo ? obj.logo.original.url : null}
-                  eventId={obj.id ? obj.id : null}
-                  shareable={obj.shareable ? obj.shareable : null}
-                />
-              </Link>
+                  }
+                )}
+                endTime={new Date(obj.end.local).toLocaleTimeString('en-US', {
+                  hour: 'numeric',
+                  minute: 'numeric',
+                  hour12: true,
+                })}
+                description={obj.summary ? obj.summary : null}
+                link={obj.url ? obj.url : null}
+                img={obj.logo ? obj.logo.original.url : null}
+                eventId={obj.id ? obj.id : null}
+                shareable={obj.shareable ? obj.shareable : null}
+                isMember={isMember}
+              />
             </Box>
           </>
         ))}

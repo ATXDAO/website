@@ -30,37 +30,34 @@ function Event(props) {
         justifyContent="space-between"
         flexDirection="column"
       >
-        <Box>
-          <Heading mb="2">{props.title}</Heading>
-          <Text fontSize="1.5rem" color="white !important">
-            {props.date}
-          </Text>
-          <Text fontWeight="bold" color="white !important">
-            {props.startTime + ' - ' + props.endTime}
-          </Text>
-          <Text mt="2" fontSize="1.2rem" color="white !important">
-            {limitChars(props.description, 120)}
-          </Text>
-        </Box>
-
+        <Link href={props.link} target="_blank">
+          <Box>
+            <Heading mb="2">{props.title}</Heading>
+            <Text fontSize="1.5rem" color="white !important">
+              {props.date}
+            </Text>
+            <Text fontWeight="bold" color="white !important">
+              {props.startTime + ' - ' + props.endTime}
+            </Text>
+            <Text mt="2" fontSize="1.2rem" color="white !important">
+              {limitChars(props.description, 120)}
+            </Text>
+          </Box>
+        </Link>
         <Button
           variant="unstyled"
           rightIcon={<FaArrowRight />}
           textAlign="left"
           transition="inherit"
-          onClick={
-            isMember
-              ? createDiscountAndNavigate.bind(
-                  '',
-                  props.eventId,
-                  props.link,
-                  isMember
-                )
-              : window.open(props.link)
-          }
-          disabled={!(isMember | props.shareable)}
+          onClick={createDiscountAndNavigate.bind(
+            '',
+            props.eventId,
+            props.link,
+            props.isMember
+          )}
+          disabled={!(props.isMember | props.shareable)}
         >
-          {isMember | props.shareable ? 'RSVP' : 'Members Only'}
+          {props.isMember | props.shareable ? 'RSVP' : 'Members Only'}
         </Button>
       </Flex>
     </Grid>
