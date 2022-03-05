@@ -12,10 +12,10 @@ const orgID = process.env.ORG_ID;
 export function createDiscountAndNavigate(
   eventCode,
   redirectURL,
-  isMember = false,
+  canAccess,
   setOptionalCode
 ) {
-  if (isMember) {
+  if (canAccess) {
     const code = setOptionalCode | Math.floor(Math.random() * 1000000);
     const body = {
       discount: {
@@ -61,7 +61,7 @@ export function createDiscountAndNavigate(
 function Events({ events }) {
   const contentPaddingX = ['1rem', '2rem', '3rem', '10rem'];
   const contentPaddingY = '3rem';
-  const [isMember, setIsMember] = useState(true);
+  const [isMember, setIsMember] = useState(false);
 
   return (
     <Layout>

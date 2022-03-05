@@ -1,9 +1,11 @@
 import { createDiscountAndNavigate } from '../../pages/events';
 import { limitChars } from '../../util/helpers';
 import { Grid, Box, Heading, Text, Button, Flex, Link } from '@chakra-ui/react';
+import { useState } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 
 function Event(props) {
+  const [isRedirecting, setisRedirecting] = useState(true);
   return (
     <Grid
       minHeight="300px"
@@ -30,7 +32,22 @@ function Event(props) {
         justifyContent="space-between"
         flexDirection="column"
       >
-        <Link href={props.link} target="_blank">
+        {props.isMember | props.shareable ? (
+          <Link href={props.link} target="_blank">
+            <Box>
+              <Heading mb="2">{props.title}</Heading>
+              <Text fontSize="1.5rem" color="white !important">
+                {props.date}
+              </Text>
+              <Text fontWeight="bold" color="white !important">
+                {props.startTime + ' - ' + props.endTime}
+              </Text>
+              <Text mt="2" fontSize="1.2rem" color="white !important">
+                {limitChars(props.description, 120)}
+              </Text>
+            </Box>
+          </Link>
+        ) : (
           <Box>
             <Heading mb="2">{props.title}</Heading>
             <Text fontSize="1.5rem" color="white !important">
@@ -43,7 +60,7 @@ function Event(props) {
               {limitChars(props.description, 120)}
             </Text>
           </Box>
-        </Link>
+        )}
         <Button
           variant="unstyled"
           rightIcon={<FaArrowRight />}
@@ -53,11 +70,11 @@ function Event(props) {
             '',
             props.eventId,
             props.link,
-            props.isMember
+            props.isMember | props.shareable
           )}
           disabled={!(props.isMember | props.shareable)}
         >
-          {props.isMember | props.shareable ? 'RSVP' : 'Members Only'}
+          {props.isMember | props.shareable ? 'Get Tickets' : 'Members Only'}
         </Button>
       </Flex>
     </Grid>
