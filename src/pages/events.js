@@ -12,10 +12,11 @@ const orgID = process.env.ORG_ID;
 export function createDiscountAndNavigate(
   eventCode,
   redirectURL,
-  canAccess,
+  isMember,
+  isOpen,
   setOptionalCode
 ) {
-  if (canAccess) {
+  if (isMember) {
     const code = setOptionalCode | Math.floor(Math.random() * 1000000);
     const body = {
       discount: {
@@ -55,6 +56,8 @@ export function createDiscountAndNavigate(
       .catch((error) => {
         console.error('There was an error!', error);
       });
+  } else if (!isMember && isOpen) {
+    window.open(`${redirectURL}`);
   }
 }
 

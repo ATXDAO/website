@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 
 function Event(props) {
-  const [isRedirecting, setisRedirecting] = useState(true);
   return (
     <Grid
       minHeight="300px"
@@ -70,7 +69,8 @@ function Event(props) {
             '',
             props.eventId,
             props.link,
-            props.isMember | props.shareable
+            props.isMember,
+            props.shareable
           )}
           disabled={!(props.isMember | props.shareable)}
         >
