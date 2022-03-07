@@ -16,20 +16,16 @@ import {
   Text,
   useRadioGroup,
 } from '@chakra-ui/react';
-import { ATXDAONFTV2 } from 'contracts/types';
+import { ATXDAOUkraineNFT } from 'contracts/types';
 import { BigNumber, ContractTransaction } from 'ethers';
-import {
-  formatEther,
-  getAddress,
-  isAddress,
-  parseEther,
-} from 'ethers/lib/utils';
+import { formatEther, parseEther } from 'ethers/lib/utils';
 import { useFireworks } from 'hooks/app-hooks';
 import { FC, useEffect, useState } from 'react';
 import {
-  contractsByNetwork,
+  mintContractByNetwork,
   EventArgs,
   SupportedNetwork,
+  UKRAINE_ETH_ADDRESS,
 } from 'util/constants';
 import {
   useAccount,
@@ -42,7 +38,7 @@ import {
 } from 'wagmi';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const ATXDAONFT_V2_ABI = require('../contracts/ATXDAONFT_V2.json');
+const UKRAINE_NFT_ABI = require('../contracts/ATXDAOUkraineNFT.json');
 
 const TIERS = {
   '0': '0.0512',
@@ -87,16 +83,15 @@ const UkraineMintForm: FC = () => {
   const [mintPrice, setMintPrice] = useState<BigNumber>(parseEther(TIERS[0]));
   const [isMintable, setIsMintable] = useState<boolean | undefined>();
   const [isMinting, setIsMinting] = useState(false);
-  const [hasMinted, setHasMinted] = useState(false);
 
   const [{ data: networkData }] = useNetwork();
   const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
   const { address: contractAddress, blockExplorer } =
-    contractsByNetwork[networkName as SupportedNetwork];
+    mintContractByNetwork[networkName as SupportedNetwork];
 
-  const mintContract = useContract<ATXDAONFTV2>({
+  const mintContract = useContract<ATXDAOUkraineNFT>({
     addressOrName: contractAddress,
-    contractInterface: ATXDAONFT_V2_ABI,
+    contractInterface: UKRAINE_NFT_ABI,
     signerOrProvider: signer || provider,
   });
 
@@ -106,11 +101,6 @@ const UkraineMintForm: FC = () => {
   useEffect(() => {
     // eslint-disable-next-line no-underscore-dangle
     mintContract.isMintable().then((mintable) => setIsMintable(mintable));
-    if (accountData?.address && isAddress(accountData?.address)) {
-      mintContract
-        .hasMinted(getAddress(accountData?.address))
-        .then((_hasMinted) => setHasMinted(_hasMinted));
-    }
   }, [accountData?.address, contractAddress]);
 
   const isMintableLoading = typeof isMintable === 'undefined';
@@ -126,8 +116,6 @@ const UkraineMintForm: FC = () => {
       setButtonText('Loading...');
     } else if (!isMintable) {
       setButtonText('Minting disabled');
-    } else if (hasMinted) {
-      setButtonText('Already minted!');
     } else if (isMinting) {
       setButtonText('Minting...');
     } else if (!isBalanceSufficient) {
@@ -135,9 +123,7 @@ const UkraineMintForm: FC = () => {
     } else {
       setButtonText(`Mint for ${formatEther(mintPrice)} ETH`);
     }
-  }, [isMintable, signerLoading, mintPrice, hasMinted, isBalanceSufficient]);
-
-  // mintContract._mintPrice();
+  }, [isMintable, signerLoading, mintPrice, isBalanceSufficient]);
 
   const onMint = async (): Promise<void> => {
     if (isMintableLoading || isMintPriceLoading) {
@@ -150,7 +136,9 @@ const UkraineMintForm: FC = () => {
     }
     try {
       setIsMinting(true);
-      const tx = await mintContract.mint([], { value: mintPrice });
+      const tx = await mintContract.mint(UKRAINE_ETH_ADDRESS, {
+        value: mintPrice,
+      });
       setTransaction(tx);
     } catch (err) {
       setStatus('error');
@@ -161,7 +149,7 @@ const UkraineMintForm: FC = () => {
   useContractEvent(
     {
       addressOrName: contractAddress,
-      contractInterface: ATXDAONFT_V2_ABI,
+      contractInterface: UKRAINE_NFT_ABI,
     },
     'Transfer',
     async (args: EventArgs) => {
@@ -227,7 +215,6 @@ const UkraineMintForm: FC = () => {
                   isMintPriceLoading ||
                   !isMintable ||
                   buttonText === 'Minted!' ||
-                  hasMinted ||
                   isMinting ||
                   !isBalanceSufficient
                 )

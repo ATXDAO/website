@@ -2,9 +2,11 @@
 /* tslint:disable */
 /* eslint-disable */
 export type { ATXDAONFTV2 } from "./ATXDAONFTV2";
+export type { ATXDAOUkraineNFT } from "./ATXDAOUkraineNFT";
 export type { ERC20 } from "./ERC20";
 export type { Mint } from "./Mint";
 
 export { ATXDAONFTV2__factory } from "./factories/ATXDAONFTV2__factory";
+export { ATXDAOUkraineNFT__factory } from "./factories/ATXDAOUkraineNFT__factory";
 export { ERC20__factory } from "./factories/ERC20__factory";
 export { Mint__factory } from "./factories/Mint__factory";
