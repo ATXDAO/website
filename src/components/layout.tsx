@@ -19,14 +19,14 @@ import { FC, ReactNode, useState } from 'react';
 interface LayoutProps {
   children: ReactNode;
   title?: string;
-  connected: boolean;
+  hideLogo?: boolean;
   canToggleHeader?: boolean;
 }
 
 export const Layout: FC<LayoutProps> = ({
   children,
-  connected,
   canToggleHeader = false,
+  hideLogo,
   title = 'This is the default title',
 }) => {
   const [toggleHeader, setToggleHeader] = useState(true);
@@ -53,7 +53,7 @@ export const Layout: FC<LayoutProps> = ({
           alignItems="center"
           height={toggleHeader ? undefined : '30px'}
         >
-          <Center hidden={!connected || !toggleHeader}>
+          <Center hidden={!toggleHeader || hideLogo}>
             <Logo
               visibility={['hidden', 'visible']}
               boxSize={['0', '48px']}

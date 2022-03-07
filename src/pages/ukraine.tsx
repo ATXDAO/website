@@ -1,34 +1,36 @@
-import { Box, Grid, Text, useColorModeValue, VStack } from '@chakra-ui/react';
+import {
+  Box,
+  Grid,
+  Heading,
+  Link,
+  Text,
+  useColorModeValue,
+  VStack,
+} from '@chakra-ui/react';
 import { Layout } from 'components/layout';
-import { Logo } from 'components/logo';
-import { MintForm } from 'components/mint-form';
 import { SocialLinks } from 'components/social-links';
-import { SubscribeForm } from 'components/subscribe-form';
+import { UkraineMintForm } from 'components/ukraine-mint-form';
 import { NextPage } from 'next';
-import { useAccount } from 'wagmi';
 
 const IndexPage: NextPage = () => {
-  const [{ data: accountData }] = useAccount();
-
   return (
-    <Layout title="atxdao" hideLogo={!accountData}>
+    <Layout title="atxdao">
       <Box textAlign="center" fontSize="xl">
         <Grid minH="100vh" p={3} mt="5vh">
           <VStack spacing={[4, 4, 8]}>
-            {accountData ? (
-              <MintForm />
-            ) : (
-              <>
-                <Text fontSize={['3.2rem', '4rem', '5rem']} lineHeight={1}>
-                  ATX DAO
-                </Text>
-                <Logo
-                  boxSize={['256px', '256px', '384px']}
-                  fill={useColorModeValue('gray.800', 'gray.100')}
-                />
-                <SubscribeForm />
-              </>
-            )}
+            <Heading>ATX ❤️ Ukraine NFT</Heading>
+            <Text>
+              100% of proceeds sent{' '}
+              <Link
+                href="https://twitter.com/Ukraine/status/1497594592438497282?s=20&t=pjoN6IY5Jkghkjvplc75sw"
+                target="_blank"
+                textDecoration="underline"
+              >
+                directly
+              </Link>{' '}
+              to Ukraine
+            </Text>
+            <UkraineMintForm />
             <SocialLinks
               fontSize={['2rem', '2rem', '3rem']}
               color={useColorModeValue('gray.800', 'gray.100')}
