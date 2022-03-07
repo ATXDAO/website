@@ -1,29 +1,31 @@
 /* eslint-disable no-console */
 // eslint-disable react/function-component-definition
-import { PfpImage } from './pfp-image';
+import { ConnectButton } from './connect-button';
+import { RadioCard } from './radio-card';
 import { LinkIcon } from '@chakra-ui/icons';
 import {
   Alert,
   AlertDescription,
   Button,
   Center,
-  Code,
   Container,
   Flex,
   FormControl,
-  FormErrorMessage,
+  Image,
   Stack,
   Text,
+  useRadioGroup,
 } from '@chakra-ui/react';
-import { ATXDAONFTV2 } from 'contracts/types';
+import { ATXDAOUkraineNFT } from 'contracts/types';
 import { BigNumber, ContractTransaction } from 'ethers';
-import { formatEther, getAddress, isAddress } from 'ethers/lib/utils';
+import { formatEther, parseEther } from 'ethers/lib/utils';
 import { useFireworks } from 'hooks/app-hooks';
 import { FC, useEffect, useState } from 'react';
 import {
-  mintContractByNetwork,
   EventArgs,
   SupportedNetwork,
+  UKRAINE_ETH_ADDRESS,
+  ukraineContractByNetwork,
 } from 'util/constants';
 import {
   useAccount,
@@ -36,7 +38,13 @@ import {
 } from 'wagmi';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const ATXDAONFT_V2_ABI = require('../contracts/ATXDAONFT_V2.json');
+const UKRAINE_NFT_ABI = require('../contracts/ATXDAOUkraineNFT.json');
+
+const TIERS = {
+  '0': '0.0512',
+  '1': '0.512',
+  '2': '5.12',
+};
 
 const tryParseError = (errorMsg: string): string => {
   const requireRevertError = errorMsg.match(
@@ -51,7 +59,7 @@ const tryParseError = (errorMsg: string): string => {
   return errorMsg;
 };
 
-const MintForm: FC = () => {
+const UkraineMintForm: FC = () => {
   const [, setFireworks] = useFireworks();
   const [{ data: accountData }] = useAccount();
   const [errorMessage, setErrorMessage] = useState('');
@@ -72,26 +80,18 @@ const MintForm: FC = () => {
 
   const provider = useProvider();
 
-  const [mintPrice, setMintPrice] = useState<BigNumber | undefined>();
+  const [mintPrice, setMintPrice] = useState<BigNumber>(parseEther(TIERS[0]));
   const [isMintable, setIsMintable] = useState<boolean | undefined>();
   const [isMinting, setIsMinting] = useState(false);
-  const [hasMinted, setHasMinted] = useState(false);
 
   const [{ data: networkData }] = useNetwork();
   const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
-  const {
-    address: contractAddress,
-    merkleTree,
-    blockExplorer,
-  } = mintContractByNetwork[networkName as SupportedNetwork];
+  const { address: contractAddress, blockExplorer } =
+    ukraineContractByNetwork[networkName as SupportedNetwork];
 
-  const proof = accountData
-    ? merkleTree.proofs[accountData?.address.toLowerCase()]
-    : undefined;
-
-  const mintContract = useContract<ATXDAONFTV2>({
+  const mintContract = useContract<ATXDAOUkraineNFT>({
     addressOrName: contractAddress,
-    contractInterface: ATXDAONFT_V2_ABI,
+    contractInterface: UKRAINE_NFT_ABI,
     signerOrProvider: signer || provider,
   });
 
@@ -100,13 +100,7 @@ const MintForm: FC = () => {
 
   useEffect(() => {
     // eslint-disable-next-line no-underscore-dangle
-    mintContract._mintPrice().then((price) => setMintPrice(price));
     mintContract.isMintable().then((mintable) => setIsMintable(mintable));
-    if (accountData?.address && isAddress(accountData?.address)) {
-      mintContract
-        .hasMinted(getAddress(accountData?.address))
-        .then((_hasMinted) => setHasMinted(_hasMinted));
-    }
   }, [accountData?.address, contractAddress]);
 
   const isMintableLoading = typeof isMintable === 'undefined';
@@ -122,40 +116,32 @@ const MintForm: FC = () => {
       setButtonText('Loading...');
     } else if (!isMintable) {
       setButtonText('Minting disabled');
-    } else if (!proof) {
-      setButtonText('Not on the whitelist!');
-    } else if (hasMinted) {
-      setButtonText('Already minted!');
     } else if (isMinting) {
       setButtonText('Minting...');
     } else if (!isBalanceSufficient) {
-      setButtonText(`Must have at least ${formatEther(mintPrice)} Ξ`);
+      setButtonText(`Must have at least ${formatEther(mintPrice)} ETH`);
     } else {
-      setButtonText(`Mint for ${formatEther(mintPrice)} Ξ`);
+      setButtonText(`Mint for ${formatEther(mintPrice)} ETH`);
     }
-  }, [
-    isMintable,
-    signerLoading,
-    isMintPriceLoading,
-    hasMinted,
-    isBalanceSufficient,
-  ]);
-
-  // mintContract._mintPrice();
+  }, [isMintable, signerLoading, mintPrice, isBalanceSufficient]);
 
   const onMint = async (): Promise<void> => {
-    if (!proof || isMintableLoading || isMintPriceLoading) {
+    if (isMintableLoading || isMintPriceLoading) {
       // eslint-disable-next-line no-console
       console.error({
-        proof,
         isMintableLoading,
         isMintPriceLoading,
       });
       return;
     }
     try {
+      console.log(
+        `network: ${networkName} contract: ${mintContract.address} recip: ${UKRAINE_ETH_ADDRESS}`
+      );
       setIsMinting(true);
-      const tx = await mintContract.mint(proof, { value: mintPrice });
+      const tx = await mintContract.mint(UKRAINE_ETH_ADDRESS, {
+        value: mintPrice,
+      });
       setTransaction(tx);
     } catch (err) {
       setStatus('error');
@@ -163,12 +149,10 @@ const MintForm: FC = () => {
     }
   };
 
-  const [pfpId, setPfpId] = useState<number | undefined>();
-
   useContractEvent(
     {
       addressOrName: contractAddress,
-      contractInterface: ATXDAONFT_V2_ABI,
+      contractInterface: UKRAINE_NFT_ABI,
     },
     'Transfer',
     async (args: EventArgs) => {
@@ -176,7 +160,6 @@ const MintForm: FC = () => {
       console.log({ from, to, tokenId, event });
       if (to.toLowerCase() === accountData?.address.toLowerCase()) {
         console.log('your nft was minted!!', tokenId.toNumber());
-        setPfpId(tokenId.toNumber());
         setButtonText('Minted!');
         setIsMinting(false);
         setStatus('success');
@@ -185,47 +168,80 @@ const MintForm: FC = () => {
     }
   );
 
+  const {
+    getRootProps,
+    getRadioProps,
+    value: tier,
+  } = useRadioGroup({
+    name: 'tier',
+    defaultValue: '0',
+    onChange: (val: '0' | '1' | '2') => {
+      setMintPrice(parseEther(TIERS[val]));
+    },
+  });
+
+  const radioGroupProps = getRootProps();
+
   return (
-    <Container p={6} maxWidth="400px" display="block" overflow="none">
+    <Container p={6} maxWidth="512px" display="block" overflow="none">
       <FormControl>
-        <FormErrorMessage hidden={!errorMessage}>
-          {errorMessage}
-        </FormErrorMessage>
         <Stack spacing={8}>
-          <PfpImage active={!!pfpId && status === 'success'} pfpId={pfpId} />
-          <Stack spacing={2} hidden={!!proof}>
-            <Text>Your address is not on the whitelist. </Text>
-            <Code>{accountData && accountData.address}</Code>
-          </Stack>
-          <Button
-            isLoading={
-              isMintableLoading ||
-              isMintPriceLoading ||
-              signerLoading ||
-              isMinting
-            }
-            loadingText={buttonText}
-            onClick={onMint}
-            disabled={
-              !!(
-                !proof ||
-                signerLoading ||
-                signerError ||
+          <Image src={`/img/ukraine/${tier}.png`} />
+          <link rel="prefetch" href="/img/ukraine/1.png" />
+          <link rel="prefetch" href="/img/ukraine/2.png" />
+          <Center>
+            <Stack direction="row" {...radioGroupProps}>
+              {['0', '1', '2'].map((value) => {
+                const radio = getRadioProps({ value });
+                return (
+                  <RadioCard key={value} {...radio}>
+                    {TIERS[value as '0' | '1' | '2']} ETH
+                  </RadioCard>
+                );
+              })}
+            </Stack>
+          </Center>
+          {accountData ? (
+            <Button
+              isLoading={
+                isMintableLoading ||
                 isMintPriceLoading ||
-                !isMintable ||
-                buttonText === 'Minted!' ||
-                hasMinted ||
-                isMinting ||
-                !isBalanceSufficient
-              )
-            }
-            boxShadow="lg"
-            fontWeight="600"
-            _hover={{ boxShadow: 'md' }}
-            _active={{ boxShadow: 'lg' }}
-          >
-            {buttonText}
-          </Button>
+                signerLoading ||
+                isMinting
+              }
+              loadingText={buttonText}
+              onClick={onMint}
+              disabled={
+                !!(
+                  signerLoading ||
+                  signerError ||
+                  isMintPriceLoading ||
+                  !isMintable ||
+                  buttonText === 'Minted!' ||
+                  isMinting ||
+                  !isBalanceSufficient
+                )
+              }
+              size="lg"
+              boxShadow="lg"
+              fontWeight="600"
+              _hover={{ boxShadow: 'md' }}
+              _active={{ boxShadow: 'lg' }}
+            >
+              {buttonText}
+            </Button>
+          ) : (
+            <ConnectButton
+              size="lg"
+              boxShadow="lg"
+              fontWeight="600"
+              _hover={{ boxShadow: 'md' }}
+              _active={{ boxShadow: 'lg' }}
+            >
+              Connect to mint
+            </ConnectButton>
+          )}
+
           <Alert
             status={status === 'success' ? 'success' : 'error'}
             fontSize="md"
@@ -257,15 +273,6 @@ const MintForm: FC = () => {
             ) : (
               <AlertDescription mt={-1}>
                 <Text mb={4}>{errorMessage}</Text>
-                <Text
-                  as="pre"
-                  fontSize="8px"
-                  textAlign="left"
-                  lineHeight="8px"
-                  hidden={!proof}
-                >
-                  {JSON.stringify(proof, undefined, 4)}
-                </Text>
               </AlertDescription>
             )}
           </Alert>
@@ -275,4 +282,4 @@ const MintForm: FC = () => {
   );
 };
 
-export { MintForm };
+export { UkraineMintForm };
