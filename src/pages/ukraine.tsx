@@ -14,11 +14,11 @@ import { NextPage } from 'next';
 
 const IndexPage: NextPage = () => {
   return (
-    <Layout title="atxdao">
+    <Layout title="atx ❤️ ukraine NFT">
       <Box textAlign="center" fontSize="xl">
         <Grid minH="100vh" p={3} mt="5vh">
           <VStack spacing={[4, 4, 8]}>
-            <Heading>ATX ❤️ Ukraine NFT</Heading>
+            <Heading>Austin ❤️ Ukraine NFT</Heading>
             <Text>
               100% of proceeds sent{' '}
               <Link

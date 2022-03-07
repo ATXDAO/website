@@ -19,7 +19,7 @@ import {
   EventArgs,
   SupportedNetwork,
 } from 'util/constants';
-import { useAccount, useContractEvent, useEnsLookup, useNetwork } from 'wagmi';
+import { useContractEvent, useEnsLookup, useNetwork } from 'wagmi';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ATXDAONFT_V2_ABI = require('../contracts/ATXDAONFT_V2.json');
@@ -58,7 +58,6 @@ const EventPage: NextPage = () => {
   useEffect(() => {
     setFireworks(true);
   });
-  const [{ data: accountData }] = useAccount();
   const [{ data: networkData }] = useNetwork();
   const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
   const { address: contractAddress } =
@@ -92,7 +91,7 @@ const EventPage: NextPage = () => {
   );
 
   return (
-    <Layout title="atxdao" connected={!!accountData} canToggleHeader>
+    <Layout title="atxdao" hideLogo canToggleHeader>
       <Container width="100%" height="100%">
         <VStack spacing={10}>
           <Heading fontSize="4rem">mint.atxdao.com</Heading>
