@@ -65,7 +65,7 @@ export const Wallet: FC = () => {
           <Avatar fontWeight="700" size="sm" src={avatar}>
             <AvatarBadge boxSize="1.25em" bg="green.500" />
           </Avatar>
-          <TriangleDownIcon ml={3} mr={-1} w={3} h3={4} color="gray.400" />
+          <TriangleDownIcon ml={3} mr={-1} w={3} color="gray.400" />
         </HStack>
       </MenuButton>
       <MenuGroup />

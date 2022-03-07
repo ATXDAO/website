@@ -11,6 +11,7 @@ import {
   Container,
   Flex,
   FormControl,
+  FormErrorMessage,
   Stack,
   Text,
 } from '@chakra-ui/react';
@@ -186,7 +187,10 @@ const MintForm: FC = () => {
 
   return (
     <Container p={6} maxWidth="400px" display="block" overflow="none">
-      <FormControl error={errorMessage || undefined}>
+      <FormControl>
+        <FormErrorMessage hidden={!errorMessage}>
+          {errorMessage}
+        </FormErrorMessage>
         <Stack spacing={8}>
           <PfpImage active={!!pfpId && status === 'success'} pfpId={pfpId} />
           <Stack spacing={2} hidden={!!proof}>
