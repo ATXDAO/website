@@ -13,6 +13,7 @@ import { Layout } from 'components/layout';
 import { SocialLinks } from 'components/social-links';
 import { UkraineMintForm } from 'components/ukraine-mint-form';
 import { NextPage } from 'next';
+import Head from 'next/head';
 import { SupportedNetwork, ukraineContractByNetwork } from 'util/constants';
 import { useNetwork } from 'wagmi';
 
@@ -22,11 +23,30 @@ const IndexPage: NextPage = () => {
   const { address: contractAddress, blockExplorer } =
     ukraineContractByNetwork[networkName as SupportedNetwork];
   return (
-    <Layout title="atx ❤️ ukraine NFT">
+    <Layout title="❤️ Ukraine NFT">
+      <Head>
+        <meta name="twitter:card" content="summary" />
+        <meta
+          name="twitter:description"
+          content="100% of proceeds sent directly to Ukraine."
+        />
+        <meta name="twitter:title" content="❤️ Ukraine NFT" />
+        <meta name="twitter:site" content="@atxdao" />
+        <meta
+          name="twitter:image"
+          content="https://mint.atxdao.com/img/ukraine/1.png"
+        />
+        <meta name="twitter:creator" content="@atxdao" />
+        <meta property="og:title" content="❤️ Ukraine NFT" />
+        <meta
+          property="og:image"
+          content="https://mint.atxdao.com/img/ukraine/1.png"
+        />
+      </Head>
       <Box textAlign="center" fontSize="xl">
         <Grid minH="100vh" p={3} mt="5vh">
           <VStack spacing={[4, 4, 8]}>
-            <Heading>Austin ❤️ Ukraine NFT</Heading>
+            <Heading>❤️ Ukraine NFT</Heading>
             <Text>
               100% of proceeds sent{' '}
               <Link
