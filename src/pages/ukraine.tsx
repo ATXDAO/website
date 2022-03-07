@@ -1,5 +1,7 @@
+import { LinkIcon } from '@chakra-ui/icons';
 import {
   Box,
+  Button,
   Grid,
   Heading,
   Link,
@@ -11,8 +13,14 @@ import { Layout } from 'components/layout';
 import { SocialLinks } from 'components/social-links';
 import { UkraineMintForm } from 'components/ukraine-mint-form';
 import { NextPage } from 'next';
+import { SupportedNetwork, ukraineContractByNetwork } from 'util/constants';
+import { useNetwork } from 'wagmi';
 
 const IndexPage: NextPage = () => {
+  const [{ data: networkData }] = useNetwork();
+  const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
+  const { address: contractAddress, blockExplorer } =
+    ukraineContractByNetwork[networkName as SupportedNetwork];
   return (
     <Layout title="atx ❤️ ukraine NFT">
       <Box textAlign="center" fontSize="xl">
@@ -31,6 +39,28 @@ const IndexPage: NextPage = () => {
               to Ukraine
             </Text>
             <UkraineMintForm />
+            <Box>
+              <Button
+                rightIcon={<LinkIcon />}
+                as="a"
+                size="md"
+                ml={2}
+                target="_blank"
+                href={`${blockExplorer}/address/${contractAddress}`}
+              >
+                Verified Contract
+              </Button>
+              <Button
+                rightIcon={<LinkIcon />}
+                as="a"
+                size="md"
+                ml={2}
+                target="_blank"
+                href="https://opensea.io/collection/atx-loves-ukr"
+              >
+                Opensea Collection
+              </Button>
+            </Box>
             <SocialLinks
               fontSize={['2rem', '2rem', '3rem']}
               color={useColorModeValue('gray.800', 'gray.100')}
