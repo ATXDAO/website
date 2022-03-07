@@ -50,7 +50,7 @@ export const ukraineContractByNetwork: Record<SupportedNetwork, ContractData> =
   {
     mainnet: {
       blockExplorer: 'https://etherscan.io',
-      address: 'not deployed',
+      address: '0x9c30bac4D3ADdBa39693aA4caDAe14449D60f795',
     },
     ropsten: {
       blockExplorer: 'https://ropsten.etherscan.io',

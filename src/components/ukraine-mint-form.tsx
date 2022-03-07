@@ -22,10 +22,10 @@ import { formatEther, parseEther } from 'ethers/lib/utils';
 import { useFireworks } from 'hooks/app-hooks';
 import { FC, useEffect, useState } from 'react';
 import {
-  mintContractByNetwork,
   EventArgs,
   SupportedNetwork,
   UKRAINE_ETH_ADDRESS,
+  ukraineContractByNetwork,
 } from 'util/constants';
 import {
   useAccount,
@@ -87,7 +87,7 @@ const UkraineMintForm: FC = () => {
   const [{ data: networkData }] = useNetwork();
   const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
   const { address: contractAddress, blockExplorer } =
-    mintContractByNetwork[networkName as SupportedNetwork];
+    ukraineContractByNetwork[networkName as SupportedNetwork];
 
   const mintContract = useContract<ATXDAOUkraineNFT>({
     addressOrName: contractAddress,
@@ -135,6 +135,9 @@ const UkraineMintForm: FC = () => {
       return;
     }
     try {
+      console.log(
+        `network: ${networkName} contract: ${mintContract.address} recip: ${UKRAINE_ETH_ADDRESS}`
+      );
       setIsMinting(true);
       const tx = await mintContract.mint(UKRAINE_ETH_ADDRESS, {
         value: mintPrice,

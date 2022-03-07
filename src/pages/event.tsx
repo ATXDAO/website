@@ -15,7 +15,7 @@ import { useFireworks } from 'hooks/app-hooks';
 import { NextPage } from 'next';
 import { FC, useEffect, useState } from 'react';
 import {
-  contractsByNetwork,
+  mintContractByNetwork,
   EventArgs,
   SupportedNetwork,
 } from 'util/constants';
@@ -61,7 +61,7 @@ const EventPage: NextPage = () => {
   const [{ data: networkData }] = useNetwork();
   const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
   const { address: contractAddress } =
-    contractsByNetwork[networkName as SupportedNetwork];
+    mintContractByNetwork[networkName as SupportedNetwork];
 
   const [owners, setOwners] = useState<NewOwnerArgs[]>([
     {

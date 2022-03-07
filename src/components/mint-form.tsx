@@ -21,7 +21,7 @@ import { formatEther, getAddress, isAddress } from 'ethers/lib/utils';
 import { useFireworks } from 'hooks/app-hooks';
 import { FC, useEffect, useState } from 'react';
 import {
-  contractsByNetwork,
+  mintContractByNetwork,
   EventArgs,
   SupportedNetwork,
 } from 'util/constants';
@@ -83,7 +83,7 @@ const MintForm: FC = () => {
     address: contractAddress,
     merkleTree,
     blockExplorer,
-  } = contractsByNetwork[networkName as SupportedNetwork];
+  } = mintContractByNetwork[networkName as SupportedNetwork];
 
   const proof = accountData
     ? merkleTree.proofs[accountData?.address.toLowerCase()]
