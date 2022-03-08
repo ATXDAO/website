@@ -1,4 +1,5 @@
 import { Logo } from './logo';
+import { NextChakraLink } from './next-chakra-link';
 import { Wallet } from './wallet';
 import { ArrowDownIcon, ArrowUpIcon } from '@chakra-ui/icons';
 import {
@@ -53,15 +54,21 @@ export const Layout: FC<LayoutProps> = ({
           alignItems="center"
           height={toggleHeader ? undefined : '30px'}
         >
-          <Center hidden={!toggleHeader || hideLogo}>
-            <Logo
-              visibility={['hidden', 'visible']}
-              boxSize={['0', '48px']}
-              fill={useColorModeValue('gray.800', 'gray.100')}
-              mr={2}
-            />
-            <Text fontSize={['2xl', '3xl']}>ATX DAO</Text>
-          </Center>
+          <NextChakraLink
+            href="https://atxdao.com"
+            target="_blank"
+            _hover={{ textDecoration: 'none' }}
+          >
+            <Center hidden={!toggleHeader || hideLogo}>
+              <Logo
+                visibility={['hidden', 'visible']}
+                boxSize={['0', '48px']}
+                fill={useColorModeValue('gray.800', 'gray.100')}
+                mr={2}
+              />
+              <Text fontSize={['2xl', '3xl']}>ATX DAO</Text>
+            </Center>
+          </NextChakraLink>
           <Spacer />
           <IconButton
             size="sm"
