@@ -1,7 +1,7 @@
 // import { Logo } from '../img/logo';
 import { ColorModeSwitcher } from './color-mode-switcher';
-import { MobileMenu } from './mobileMenu';
-import { StandardMenu } from './standardMenu';
+import { MobileMenu } from './mobile-menu';
+import { StandardMenu } from './standard-menu';
 import { Wallet } from './wallet';
 import { Flex } from '@chakra-ui/react';
 import { FC } from 'react';
