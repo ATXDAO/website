@@ -1,3 +1,4 @@
+import { NavBar } from '../components/navbar';
 import {
   Alert,
   AlertDescription,
@@ -36,7 +37,7 @@ const IndexPage: NextPage = () => {
           <AlertDescription>Mint an ATX ❤️ UKR NFT</AlertDescription>
         </Alert>
       </NextChakraLink>
-      <Layout title="atxdao" hideLogo={!accountData}>
+      <Layout title="atxdao">
         <Box textAlign="center" fontSize="xl">
           <Grid minH="100vh" p={3} mt="5vh">
             <VStack spacing={[4, 4, 8]}>
