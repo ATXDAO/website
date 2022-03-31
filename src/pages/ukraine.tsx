@@ -18,7 +18,6 @@ import { BigNumber } from 'ethers';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
-import { shortenAddress } from 'utils';
 import {
   SupportedNetwork,
   ukraineContractByNetwork,
@@ -28,13 +27,6 @@ import { useBlockNumber, useContract, useNetwork, useProvider } from 'wagmi';
 
 if (typeof window !== 'undefined') {
   window.localStorage.ens = window.localStorage.ens || {};
-}
-
-interface NftOwner {
-  address: string;
-  ens?: string;
-  tier: number;
-  value: BigNumber;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -57,25 +49,12 @@ const IndexPage: NextPage = () => {
   });
 
   const [totalDonated, setTotalDonated] = useState<BigNumber | undefined>();
-  const [nftOwners, setNftOwners] = useState<NftOwner[]>([]);
 
   useEffect(() => {
     mintContract
       .totalDonated(UKRAINE_ETH_ADDRESS)
       .then((total) => setTotalDonated(total));
   }, [blockNumber]);
-
-  useEffect(() => {
-    mintContract.getOwners().then(([addresses, tiers, values]) => {
-      setNftOwners(
-        addresses.map((address, i) => ({
-          address,
-          tier: tiers[i].toNumber(),
-          value: values[i],
-        }))
-      );
-    });
-  });
 
   const totalFormatted = totalDonated ? formatEther(totalDonated) : undefined;
 
@@ -138,14 +117,6 @@ const IndexPage: NextPage = () => {
                 Opensea Collection
               </Button>
             </Box>
-            <VStack>
-              {nftOwners.map(({ address, value }, i) => (
-                // eslint-disable-next-line react/no-array-index-key
-                <Text key={`${address}-${i}`}>
-                  {shortenAddress(address)} donated {formatEther(value)} ETH
-                </Text>
-              ))}
-            </VStack>
             <SocialLinks
               fontSize={['2rem', '2rem', '3rem']}
               color={useColorModeValue('gray.800', 'gray.100')}
