@@ -24,7 +24,7 @@ import {
   mintContractByNetwork,
   EventArgs,
   SupportedNetwork,
-} from 'util/constants';
+} from 'utils/constants';
 import {
   useAccount,
   useBalance,

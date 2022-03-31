@@ -1,3 +1,4 @@
+import { shortenAddress } from '../utils';
 import { ConnectButton } from './connect-button';
 import { TriangleDownIcon } from '@chakra-ui/icons';
 import {
@@ -16,9 +17,6 @@ import {
 } from '@chakra-ui/react';
 import { FC, useEffect, useState } from 'react';
 import { useAccount, useNetwork, useProvider } from 'wagmi';
-
-const shortenAddress = (addr: string): string =>
-  `${addr.substring(0, 6)}...${addr.slice(addr.length - 4)}`;
 
 export const Wallet: FC = () => {
   const [{ data: accountData }, disconnect] = useAccount({ fetchEns: true });

@@ -18,7 +18,7 @@ import {
   mintContractByNetwork,
   EventArgs,
   SupportedNetwork,
-} from 'util/constants';
+} from 'utils/constants';
 import { useContractEvent, useEnsLookup, useNetwork } from 'wagmi';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires

@@ -16,6 +16,11 @@ const nextConfig = {
     NEXT_PUBLIC_ETHERSCAN_API_KEY: throwEnv('NEXT_PUBLIC_ETHERSCAN_API_KEY'),
     NEXT_PUBLIC_INFURA_ID: throwEnv('NEXT_PUBLIC_INFURA_ID'),
   },
+  webpack: {
+    resolve: {
+      mainFields: ['browser', 'module', 'main'],
+    },
+  },
 };
 
 module.exports = nextConfig;

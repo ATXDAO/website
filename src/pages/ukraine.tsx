@@ -9,19 +9,76 @@ import {
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react';
+import { formatEther } from '@ethersproject/units';
 import { Layout } from 'components/layout';
 import { SocialLinks } from 'components/social-links';
 import { UkraineMintForm } from 'components/ukraine-mint-form';
+import { ATXDAOUkraineNFT } from 'contracts/types';
+import { BigNumber } from 'ethers';
 import { NextPage } from 'next';
 import Head from 'next/head';
-import { SupportedNetwork, ukraineContractByNetwork } from 'util/constants';
-import { useNetwork } from 'wagmi';
+import { useEffect, useState } from 'react';
+import { shortenAddress } from 'utils';
+import {
+  SupportedNetwork,
+  ukraineContractByNetwork,
+  UKRAINE_ETH_ADDRESS,
+} from 'utils/constants';
+import { useBlockNumber, useContract, useNetwork, useProvider } from 'wagmi';
+
+if (typeof window !== 'undefined') {
+  window.localStorage.ens = window.localStorage.ens || {};
+}
+
+interface NftOwner {
+  address: string;
+  ens?: string;
+  tier: number;
+  value: BigNumber;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const UKRAINE_NFT_ABI = require('../contracts/ATXDAOUkraineNFT.json');
 
 const IndexPage: NextPage = () => {
   const [{ data: networkData }] = useNetwork();
+  const provider = useProvider();
   const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
   const { address: contractAddress, blockExplorer } =
     ukraineContractByNetwork[networkName as SupportedNetwork];
+  const mintContract = useContract<ATXDAOUkraineNFT>({
+    addressOrName: contractAddress,
+    contractInterface: UKRAINE_NFT_ABI,
+    signerOrProvider: provider,
+  });
+
+  const [{ data: blockNumber }] = useBlockNumber({
+    watch: true,
+  });
+
+  const [totalDonated, setTotalDonated] = useState<BigNumber | undefined>();
+  const [nftOwners, setNftOwners] = useState<NftOwner[]>([]);
+
+  useEffect(() => {
+    mintContract
+      .totalDonated(UKRAINE_ETH_ADDRESS)
+      .then((total) => setTotalDonated(total));
+  }, [blockNumber]);
+
+  useEffect(() => {
+    mintContract.getOwners().then(([addresses, tiers, values]) => {
+      setNftOwners(
+        addresses.map((address, i) => ({
+          address,
+          tier: tiers[i].toNumber(),
+          value: values[i],
+        }))
+      );
+    });
+  });
+
+  const totalFormatted = totalDonated ? formatEther(totalDonated) : undefined;
+
   return (
     <Layout title="❤️ Ukraine NFT">
       <Head>
@@ -48,9 +105,9 @@ const IndexPage: NextPage = () => {
           <VStack spacing={[4, 4, 8]}>
             <Heading>❤️ Ukraine NFT</Heading>
             <Text>
-              100% of proceeds sent{' '}
+              {totalDonated ? `${totalFormatted} ETH` : '100% of proceeds'} sent{' '}
               <Link
-                href="https://twitter.com/Ukraine/status/1497594592438497282?s=20&t=pjoN6IY5Jkghkjvplc75sw"
+                href="https://etherscan.io/address/0x9c30bac4D3ADdBa39693aA4caDAe14449D60f795#internaltx"
                 target="_blank"
                 textDecoration="underline"
               >
@@ -81,6 +138,14 @@ const IndexPage: NextPage = () => {
                 Opensea Collection
               </Button>
             </Box>
+            <VStack>
+              {nftOwners.map(({ address, value }, i) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <Text key={`${address}-${i}`}>
+                  {shortenAddress(address)} donated {formatEther(value)} ETH
+                </Text>
+              ))}
+            </VStack>
             <SocialLinks
               fontSize={['2rem', '2rem', '3rem']}
               color={useColorModeValue('gray.800', 'gray.100')}
