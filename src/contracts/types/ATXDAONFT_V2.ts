@@ -3,10 +3,19 @@
 /* tslint:disable */
 
 /* eslint-disable */
-import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
-import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
-import { Listener, Provider } from "@ethersproject/providers";
-import {
+import type {
+  TypedEventFilter,
+  TypedEvent,
+  TypedListener,
+  OnEvent,
+} from "./common";
+import type {
+  FunctionFragment,
+  Result,
+  EventFragment,
+} from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type {
   BaseContract,
   BigNumber,
   BigNumberish,
@@ -20,8 +29,7 @@ import {
   utils,
 } from "ethers";
 
-export interface ATXDAONFTV2Interface extends utils.Interface {
-  contractName: "ATXDAONFTV2";
+export interface ATXDAONFT_V2Interface extends utils.Interface {
   functions: {
     "_mintPrice()": FunctionFragment;
     "approve(address,uint256)": FunctionFragment;
@@ -40,6 +48,7 @@ export interface ATXDAONFTV2Interface extends utils.Interface {
     "renounceOwnership()": FunctionFragment;
     "resetHasMinted(address[])": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
+    "safeTransferFrom(address,address,uint256,bytes)": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
     "setMerkleRoot(bytes32)": FunctionFragment;
     "startMint(uint256,string,bytes32)": FunctionFragment;
@@ -50,6 +59,37 @@ export interface ATXDAONFTV2Interface extends utils.Interface {
     "transferFrom(address,address,uint256)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
   };
+
+  getFunction(
+    nameOrSignatureOrTopic:
+      | "_mintPrice"
+      | "approve"
+      | "balanceOf"
+      | "baseExtension"
+      | "endMint"
+      | "getApproved"
+      | "hasMinted"
+      | "isApprovedForAll"
+      | "isMintable"
+      | "mint"
+      | "mintSpecial"
+      | "name"
+      | "owner"
+      | "ownerOf"
+      | "renounceOwnership"
+      | "resetHasMinted"
+      | "safeTransferFrom(address,address,uint256)"
+      | "safeTransferFrom(address,address,uint256,bytes)"
+      | "setApprovalForAll"
+      | "setMerkleRoot"
+      | "startMint"
+      | "supportsInterface"
+      | "sweepEth"
+      | "symbol"
+      | "tokenURI"
+      | "transferFrom"
+      | "transferOwnership"
+  ): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "_mintPrice",
@@ -98,8 +138,12 @@ export interface ATXDAONFTV2Interface extends utils.Interface {
     values: [string[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "safeTransferFrom",
+    functionFragment: "safeTransferFrom(address,address,uint256)",
     values: [string, string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "safeTransferFrom(address,address,uint256,bytes)",
+    values: [string, string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "setApprovalForAll",
@@ -167,7 +211,11 @@ export interface ATXDAONFTV2Interface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "safeTransferFrom",
+    functionFragment: "safeTransferFrom(address,address,uint256)",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "safeTransferFrom(address,address,uint256,bytes)",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -208,42 +256,60 @@ export interface ATXDAONFTV2Interface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "Transfer"): EventFragment;
 }
 
+export interface ApprovalEventObject {
+  owner: string;
+  approved: string;
+  tokenId: BigNumber;
+}
 export type ApprovalEvent = TypedEvent<
   [string, string, BigNumber],
-  { owner: string; approved: string; tokenId: BigNumber }
+  ApprovalEventObject
 >;
 
 export type ApprovalEventFilter = TypedEventFilter<ApprovalEvent>;
 
+export interface ApprovalForAllEventObject {
+  owner: string;
+  operator: string;
+  approved: boolean;
+}
 export type ApprovalForAllEvent = TypedEvent<
   [string, string, boolean],
-  { owner: string; operator: string; approved: boolean }
+  ApprovalForAllEventObject
 >;
 
 export type ApprovalForAllEventFilter = TypedEventFilter<ApprovalForAllEvent>;
 
+export interface OwnershipTransferredEventObject {
+  previousOwner: string;
+  newOwner: string;
+}
 export type OwnershipTransferredEvent = TypedEvent<
   [string, string],
-  { previousOwner: string; newOwner: string }
+  OwnershipTransferredEventObject
 >;
 
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
+export interface TransferEventObject {
+  from: string;
+  to: string;
+  tokenId: BigNumber;
+}
 export type TransferEvent = TypedEvent<
   [string, string, BigNumber],
-  { from: string; to: string; tokenId: BigNumber }
+  TransferEventObject
 >;
 
 export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
-export interface ATXDAONFTV2 extends BaseContract {
-  contractName: "ATXDAONFTV2";
+export interface ATXDAONFT_V2 extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
 
-  interface: ATXDAONFTV2Interface;
+  interface: ATXDAONFT_V2Interface;
 
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,

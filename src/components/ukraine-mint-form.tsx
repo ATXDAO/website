@@ -26,7 +26,7 @@ import {
   SupportedNetwork,
   UKRAINE_ETH_ADDRESS,
   ukraineContractByNetwork,
-} from 'util/constants';
+} from 'utils/constants';
 import {
   useAccount,
   useBalance,
@@ -183,7 +183,7 @@ const UkraineMintForm: FC = () => {
   const radioGroupProps = getRootProps();
 
   return (
-    <Container p={6} maxWidth="512px" display="block" overflow="none">
+    <Container maxWidth="512px" display="block" overflow="none">
       <FormControl>
         <Stack spacing={8}>
           <Image src={`/img/ukraine/${tier}.png`} />
