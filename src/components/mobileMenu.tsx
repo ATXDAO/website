@@ -10,14 +10,7 @@ import {
   MenuDivider,
 } from '@chakra-ui/react';
 import { FC } from 'react';
-import {
-  FaHome,
-  FaInfoCircle,
-  FaBloggerB,
-  FaStore,
-  FaDiscord,
-  FaGithub,
-} from 'react-icons/fa';
+import { FaHome, FaInfoCircle, FaDiscord, FaGithub } from 'react-icons/fa';
 
 export const MobileMenu: FC = () => {
   return (

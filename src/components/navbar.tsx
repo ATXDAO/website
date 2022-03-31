@@ -3,7 +3,7 @@ import { ColorModeSwitcher } from './color-mode-switcher';
 import { MobileMenu } from './mobileMenu';
 import { StandardMenu } from './standardMenu';
 import { Wallet } from './wallet';
-import { Flex, Text } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import { FC } from 'react';
 
 interface NavBarProps {
