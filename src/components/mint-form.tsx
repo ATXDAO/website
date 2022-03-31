@@ -15,7 +15,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react';
-import { ATXDAONFTV2 } from 'contracts/types';
+import { ATXDAONFT_V2 } from 'contracts/types';
 import { BigNumber, ContractTransaction } from 'ethers';
 import { formatEther, getAddress, isAddress } from 'ethers/lib/utils';
 import { useFireworks } from 'hooks/app-hooks';
@@ -89,7 +89,7 @@ const MintForm: FC = () => {
     ? merkleTree.proofs[accountData?.address.toLowerCase()]
     : undefined;
 
-  const mintContract = useContract<ATXDAONFTV2>({
+  const mintContract = useContract<ATXDAONFT_V2>({
     addressOrName: contractAddress,
     contractInterface: ATXDAONFT_V2_ABI,
     signerOrProvider: signer || provider,

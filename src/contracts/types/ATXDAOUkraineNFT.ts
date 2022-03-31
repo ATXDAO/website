@@ -3,10 +3,19 @@
 /* tslint:disable */
 
 /* eslint-disable */
-import { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from "./common";
-import { FunctionFragment, Result, EventFragment } from "@ethersproject/abi";
-import { Listener, Provider } from "@ethersproject/providers";
-import {
+import type {
+  TypedEventFilter,
+  TypedEvent,
+  TypedListener,
+  OnEvent,
+} from "./common";
+import type {
+  FunctionFragment,
+  Result,
+  EventFragment,
+} from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
+import type {
   BaseContract,
   BigNumber,
   BigNumberish,
@@ -21,7 +30,6 @@ import {
 } from "ethers";
 
 export interface ATXDAOUkraineNFTInterface extends utils.Interface {
-  contractName: "ATXDAOUkraineNFT";
   functions: {
     "_tokenId()": FunctionFragment;
     "addRecip(address)": FunctionFragment;
@@ -41,6 +49,7 @@ export interface ATXDAOUkraineNFTInterface extends utils.Interface {
     "recips(address)": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "safeTransferFrom(address,address,uint256)": FunctionFragment;
+    "safeTransferFrom(address,address,uint256,bytes)": FunctionFragment;
     "setApprovalForAll(address,bool)": FunctionFragment;
     "setTiers(uint256[])": FunctionFragment;
     "startMint(string)": FunctionFragment;
@@ -53,6 +62,40 @@ export interface ATXDAOUkraineNFTInterface extends utils.Interface {
     "transferOwnership(address)": FunctionFragment;
     "valueMap(uint256)": FunctionFragment;
   };
+
+  getFunction(
+    nameOrSignatureOrTopic:
+      | "_tokenId"
+      | "addRecip"
+      | "approve"
+      | "balanceOf"
+      | "endMint"
+      | "getApproved"
+      | "getOwners"
+      | "isApprovedForAll"
+      | "isMintable"
+      | "isRecip"
+      | "mint"
+      | "name"
+      | "owner"
+      | "ownerOf"
+      | "priceTiers"
+      | "recips"
+      | "renounceOwnership"
+      | "safeTransferFrom(address,address,uint256)"
+      | "safeTransferFrom(address,address,uint256,bytes)"
+      | "setApprovalForAll"
+      | "setTiers"
+      | "startMint"
+      | "supportsInterface"
+      | "symbol"
+      | "tierMap"
+      | "tokenURI"
+      | "totalDonated"
+      | "transferFrom"
+      | "transferOwnership"
+      | "valueMap"
+  ): FunctionFragment;
 
   encodeFunctionData(functionFragment: "_tokenId", values?: undefined): string;
   encodeFunctionData(functionFragment: "addRecip", values: [string]): string;
@@ -93,8 +136,12 @@ export interface ATXDAOUkraineNFTInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "safeTransferFrom",
+    functionFragment: "safeTransferFrom(address,address,uint256)",
     values: [string, string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "safeTransferFrom(address,address,uint256,bytes)",
+    values: [string, string, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "setApprovalForAll",
@@ -162,7 +209,11 @@ export interface ATXDAOUkraineNFTInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "safeTransferFrom",
+    functionFragment: "safeTransferFrom(address,address,uint256)",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "safeTransferFrom(address,address,uint256,bytes)",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -207,45 +258,69 @@ export interface ATXDAOUkraineNFTInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "UkraineNFTMinted"): EventFragment;
 }
 
+export interface ApprovalEventObject {
+  owner: string;
+  approved: string;
+  tokenId: BigNumber;
+}
 export type ApprovalEvent = TypedEvent<
   [string, string, BigNumber],
-  { owner: string; approved: string; tokenId: BigNumber }
+  ApprovalEventObject
 >;
 
 export type ApprovalEventFilter = TypedEventFilter<ApprovalEvent>;
 
+export interface ApprovalForAllEventObject {
+  owner: string;
+  operator: string;
+  approved: boolean;
+}
 export type ApprovalForAllEvent = TypedEvent<
   [string, string, boolean],
-  { owner: string; operator: string; approved: boolean }
+  ApprovalForAllEventObject
 >;
 
 export type ApprovalForAllEventFilter = TypedEventFilter<ApprovalForAllEvent>;
 
+export interface OwnershipTransferredEventObject {
+  previousOwner: string;
+  newOwner: string;
+}
 export type OwnershipTransferredEvent = TypedEvent<
   [string, string],
-  { previousOwner: string; newOwner: string }
+  OwnershipTransferredEventObject
 >;
 
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
+export interface TransferEventObject {
+  from: string;
+  to: string;
+  tokenId: BigNumber;
+}
 export type TransferEvent = TypedEvent<
   [string, string, BigNumber],
-  { from: string; to: string; tokenId: BigNumber }
+  TransferEventObject
 >;
 
 export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
+export interface UkraineNFTMintedEventObject {
+  minter: string;
+  recip: string;
+  value: BigNumber;
+  tier: BigNumber;
+}
 export type UkraineNFTMintedEvent = TypedEvent<
   [string, string, BigNumber, BigNumber],
-  { minter: string; recip: string; value: BigNumber; tier: BigNumber }
+  UkraineNFTMintedEventObject
 >;
 
 export type UkraineNFTMintedEventFilter =
   TypedEventFilter<UkraineNFTMintedEvent>;
 
 export interface ATXDAOUkraineNFT extends BaseContract {
-  contractName: "ATXDAOUkraineNFT";
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
