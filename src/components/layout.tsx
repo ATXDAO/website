@@ -1,6 +1,4 @@
-import { Logo } from './logo';
-import { NextChakraLink } from './next-chakra-link';
-import { Wallet } from './wallet';
+import { NavBar } from './navbar';
 import { ArrowDownIcon, ArrowUpIcon } from '@chakra-ui/icons';
 import {
   Box,
@@ -9,32 +7,34 @@ import {
   Flex,
   IconButton,
   Spacer,
-  Text,
-  useColorModeValue,
 } from '@chakra-ui/react';
-import { ColorModeSwitcher } from 'components/color-mode-switcher';
 import { useFireworks } from 'hooks/app-hooks';
 import Head from 'next/head';
-import { FC, ReactNode, useState } from 'react';
+import { FC, ReactNode, useState, useEffect } from 'react';
 
 interface LayoutProps {
   children: ReactNode;
   title?: string;
-  hideLogo?: boolean;
   canToggleHeader?: boolean;
 }
 
 export const Layout: FC<LayoutProps> = ({
   children,
   canToggleHeader = false,
-  hideLogo,
   title = 'This is the default title',
 }) => {
   const [toggleHeader, setToggleHeader] = useState(true);
   const [fireworks] = useFireworks();
+  const layoutPaddingX = ['0.75rem', '1rem', '2rem', '5rem'];
+  const [width, setWidth] = useState(900);
+
+  useEffect(() => {
+    setWidth(window.innerWidth);
+  }, []);
 
   return (
     <>
+      <NavBar width={width} paddingX={layoutPaddingX} />
       {fireworks && (
         <Box className="pyro">
           <Box className="before" />
@@ -54,21 +54,6 @@ export const Layout: FC<LayoutProps> = ({
           alignItems="center"
           height={toggleHeader ? undefined : '30px'}
         >
-          <NextChakraLink
-            href="https://atxdao.com"
-            target="_blank"
-            _hover={{ textDecoration: 'none' }}
-          >
-            <Center hidden={!toggleHeader || hideLogo}>
-              <Logo
-                visibility={['hidden', 'visible']}
-                boxSize={['0', '48px']}
-                fill={useColorModeValue('gray.800', 'gray.100')}
-                mr={2}
-              />
-              <Text fontSize={['2xl', '3xl']}>ATX DAO</Text>
-            </Center>
-          </NextChakraLink>
           <Spacer />
           <IconButton
             size="sm"
@@ -79,10 +64,7 @@ export const Layout: FC<LayoutProps> = ({
             onClick={() => setToggleHeader(!toggleHeader)}
           />
           <Spacer />
-          <Center hidden={!toggleHeader}>
-            <ColorModeSwitcher justifySelf="flex-end" />
-            <Wallet />
-          </Center>
+          <Center hidden={!toggleHeader} />
         </Flex>
         {children}
       </Container>
