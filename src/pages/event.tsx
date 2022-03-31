@@ -91,7 +91,7 @@ const EventPage: NextPage = () => {
   );
 
   return (
-    <Layout title="atxdao" hideLogo canToggleHeader>
+    <Layout title="atxdao" canToggleHeader>
       <Container width="100%" height="100%">
         <VStack spacing={10}>
           <Heading fontSize="4rem">mint.atxdao.com</Heading>
