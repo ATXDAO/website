@@ -6,6 +6,7 @@ import {
   useContext,
   useMemo,
   useState,
+  ReactElement,
 } from 'react';
 
 type SetState<T> = Dispatch<SetStateAction<T>>;
@@ -26,7 +27,7 @@ export const useFireworks = (): [boolean, SetState<boolean>] => {
   return [fireworks, setFireworks];
 };
 
-export const AppProvider: FC = ({ children }) => {
+export const AppProvider: FC<{ children: ReactElement }> = ({ children }) => {
   const [fireworks, setFireworks] = useState(false);
   const value = useMemo(
     () => ({

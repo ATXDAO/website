@@ -19,7 +19,7 @@ import {
   EventArgs,
   SupportedNetwork,
 } from 'utils/constants';
-import { useContractEvent, useEnsLookup, useNetwork } from 'wagmi';
+import { useContractEvent, useNetwork, useEnsName } from 'wagmi';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ATXDAONFT_V2_ABI = require('../contracts/ATXDAONFT_V2.json');
@@ -35,7 +35,7 @@ const shortenAddress = (addr: string): string =>
 const NewOwner: FC<NewOwnerArgs> = ({ pfpId, address }) => {
   // some hacks bc ens lookup wasnt happening on re-renders
   const [ens, setEns] = useState<string | undefined>();
-  const [{ data: ensData }] = useEnsLookup({
+  const { data: ensData } = useEnsName({
     address,
   });
   useEffect(() => {
@@ -58,8 +58,8 @@ const EventPage: NextPage = () => {
   useEffect(() => {
     setFireworks(true);
   });
-  const [{ data: networkData }] = useNetwork();
-  const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
+  const { activeChain } = useNetwork();
+  const networkName = (activeChain?.name || 'mainnet').toLowerCase();
   const { address: contractAddress } =
     mintContractByNetwork[networkName as SupportedNetwork];
 

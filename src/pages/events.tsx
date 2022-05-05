@@ -79,11 +79,11 @@ const EventsPage: NextPage = ({
 
   const toast = useToast();
 
-  const [{ data: accountData }] = useAccount();
-  const [{ data: networkData }] = useNetwork();
-  const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
+  const { data: accountData } = useAccount();
+  const { activeChain } = useNetwork();
+  const networkName = (activeChain?.name || 'mainnet').toLowerCase();
 
-  const [{ data: signer }] = useSigner();
+  const { data: signer } = useSigner();
 
   const provider = useProvider();
 

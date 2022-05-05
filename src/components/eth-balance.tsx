@@ -3,7 +3,7 @@ import { FC } from 'react';
 import { useBalance } from 'wagmi';
 
 const ETHBalance: FC = () => {
-  const [{ data }] = useBalance();
+  const { data } = useBalance();
 
   return <Text>Balance: Ξ{data?.formatted}</Text>;
 };

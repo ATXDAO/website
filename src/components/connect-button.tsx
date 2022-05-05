@@ -16,7 +16,7 @@ import { FC } from 'react';
 import { useConnect } from 'wagmi';
 
 export const ConnectButton: FC<ButtonProps> = (buttonProps) => {
-  const [{ data, error }, connect] = useConnect();
+  const { connect, error, connectors } = useConnect();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { children } = buttonProps;
   return (
@@ -31,16 +31,17 @@ export const ConnectButton: FC<ButtonProps> = (buttonProps) => {
           <ModalCloseButton />
           <ModalBody>
             <Stack>
-              {data.connectors.map((x) => (
-                <Button
-                  disabled={!x.ready}
-                  key={x.id}
-                  onClick={() => connect(x)}
-                >
-                  {x.name}
-                  {!x.ready && ' (unsupported)'}
-                </Button>
-              ))}
+              {connectors &&
+                connectors.map((x) => (
+                  <Button
+                    disabled={!x.ready}
+                    key={x.id}
+                    onClick={() => connect(x)}
+                  >
+                    {x.name}
+                    {!x.ready && ' (unsupported)'}
+                  </Button>
+                ))}
               {error && <Box>{error?.message ?? 'Failed to connect'}</Box>}
             </Stack>
           </ModalBody>

@@ -19,7 +19,7 @@ import { NextPage } from 'next';
 import { useAccount } from 'wagmi';
 
 const IndexPage: NextPage = () => {
-  const [{ data: accountData }] = useAccount();
+  const { data: accountData } = useAccount();
 
   return (
     <>

@@ -53,7 +53,7 @@ const tryParseError = (errorMsg: string): string => {
 
 const MintForm: FC = () => {
   const [, setFireworks] = useFireworks();
-  const [{ data: accountData }] = useAccount();
+  const { data: accountData } = useAccount();
   const [errorMessage, setErrorMessage] = useState('');
   const [transaction, setTransaction] = useState<
     ContractTransaction | undefined
@@ -61,11 +61,14 @@ const MintForm: FC = () => {
   const [status, setStatus] = useState<'unsubmitted' | 'error' | 'success'>(
     'unsubmitted'
   );
-  const [{ data: signer, error: signerError, loading: signerLoading }] =
-    useSigner();
-  const [{ data: balanceData, loading: isBalanceLoading }] = useBalance({
+  const {
+    data: signer,
+    error: signerError,
+    isLoading: signerLoading,
+  } = useSigner();
+  const { data: balanceData, isLoading: isBalanceLoading } = useBalance({
     addressOrName: accountData?.address,
-    skip: !accountData,
+    enabled: !!accountData,
   });
 
   const [buttonText, setButtonText] = useState('Loading...');
@@ -77,8 +80,8 @@ const MintForm: FC = () => {
   const [isMinting, setIsMinting] = useState(false);
   const [hasMinted, setHasMinted] = useState(false);
 
-  const [{ data: networkData }] = useNetwork();
-  const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
+  const { activeChain } = useNetwork();
+  const networkName = (activeChain?.name || 'mainnet').toLowerCase();
   const {
     address: contractAddress,
     merkleTree,
@@ -86,7 +89,7 @@ const MintForm: FC = () => {
   } = mintContractByNetwork[networkName as SupportedNetwork];
 
   const proof = accountData
-    ? merkleTree.proofs[accountData?.address.toLowerCase()]
+    ? merkleTree.proofs[accountData?.address?.toLowerCase() || '']
     : undefined;
 
   const mintContract = useContract<ATXDAONFT_V2>({
@@ -174,7 +177,7 @@ const MintForm: FC = () => {
     async (args: EventArgs) => {
       const [from, to, tokenId, event] = args;
       console.log({ from, to, tokenId, event });
-      if (to.toLowerCase() === accountData?.address.toLowerCase()) {
+      if (to.toLowerCase() === accountData?.address?.toLowerCase()) {
         console.log('your nft was minted!!', tokenId.toNumber());
         setPfpId(tokenId.toNumber());
         setButtonText('Minted!');

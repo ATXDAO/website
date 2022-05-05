@@ -61,7 +61,7 @@ const tryParseError = (errorMsg: string): string => {
 
 const UkraineMintForm: FC = () => {
   const [, setFireworks] = useFireworks();
-  const [{ data: accountData }] = useAccount();
+  const { data: accountData } = useAccount();
   const [errorMessage, setErrorMessage] = useState('');
   const [transaction, setTransaction] = useState<
     ContractTransaction | undefined
@@ -69,11 +69,14 @@ const UkraineMintForm: FC = () => {
   const [status, setStatus] = useState<'unsubmitted' | 'error' | 'success'>(
     'unsubmitted'
   );
-  const [{ data: signer, error: signerError, loading: signerLoading }] =
-    useSigner();
-  const [{ data: balanceData, loading: isBalanceLoading }] = useBalance({
+  const {
+    data: signer,
+    error: signerError,
+    isLoading: signerLoading,
+  } = useSigner();
+  const { data: balanceData, isLoading: isBalanceLoading } = useBalance({
     addressOrName: accountData?.address,
-    skip: !accountData,
+    enabled: !!accountData,
   });
 
   const [buttonText, setButtonText] = useState('Loading...');
@@ -84,8 +87,8 @@ const UkraineMintForm: FC = () => {
   const [isMintable, setIsMintable] = useState<boolean | undefined>();
   const [isMinting, setIsMinting] = useState(false);
 
-  const [{ data: networkData }] = useNetwork();
-  const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
+  const { activeChain } = useNetwork();
+  const networkName = (activeChain?.name || 'mainnet').toLowerCase();
   const { address: contractAddress, blockExplorer } =
     ukraineContractByNetwork[networkName as SupportedNetwork];
 
@@ -158,7 +161,7 @@ const UkraineMintForm: FC = () => {
     async (args: EventArgs) => {
       const [from, to, tokenId, event] = args;
       console.log({ from, to, tokenId, event });
-      if (to.toLowerCase() === accountData?.address.toLowerCase()) {
+      if (to.toLowerCase() === accountData?.address?.toLowerCase()) {
         console.log('your nft was minted!!', tokenId.toNumber());
         setButtonText('Minted!');
         setIsMinting(false);
