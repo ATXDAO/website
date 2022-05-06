@@ -4,8 +4,7 @@
 import eventbrite from 'eventbrite';
 import { withIronSessionApiRoute } from 'iron-session/next';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { authUser } from 'utils/auth';
-import { sessionOptions, Session } from 'utils/session';
+import { sessionOptions } from 'utils/session';
 
 const eventbriteAPI = process.env.NEXT_PRIVATE_EVENTBRITE_KEY;
 const orgID = process.env.NEXT_PRIVATE_EVENTBRITE_ORGID;
@@ -17,15 +16,9 @@ const handler = async (
   const { method } = req;
   switch (method) {
     case 'GET': {
-      const { siwe } = req.session as Session;
-      const authRes = await authUser(siwe);
-      if (!authRes.valid) {
-        res.status(401).json({ error: authRes.errorMessage });
-      } else {
-        const sdk = eventbrite({ token: `${eventbriteAPI}` });
-        const data = await sdk.request(`/organizations/${orgID}/events/`);
-        res.status(200).json({ data });
-      }
+      const sdk = eventbrite({ token: `${eventbriteAPI}` });
+      const data = await sdk.request(`/organizations/${orgID}/events/`);
+      res.status(200).json({ data });
       break;
     }
     default:

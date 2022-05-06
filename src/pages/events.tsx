@@ -81,7 +81,7 @@ const EventsPage: NextPage = ({
 
   const { data: accountData } = useAccount();
   const { activeChain } = useNetwork();
-  const networkName = (activeChain?.name || 'mainnet').toLowerCase();
+  const networkName = (activeChain?.name || 'ethereum').toLowerCase();
 
   const { data: signer } = useSigner();
 
