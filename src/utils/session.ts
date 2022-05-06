@@ -1,4 +1,5 @@
 import { IronSession, IronSessionOptions } from 'iron-session';
+import { SiweMessage } from 'siwe';
 
 export interface Siwe {
   address: string;
@@ -6,7 +7,7 @@ export interface Siwe {
 
 export interface Session extends IronSession {
   nonce: string;
-  siwe?: Siwe;
+  siwe?: SiweMessage;
 }
 
 export const sessionOptions: IronSessionOptions = {

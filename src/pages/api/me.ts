@@ -1,3 +1,4 @@
+// from https://wagmi.sh/examples/sign-in-with-ethereum
 import { withIronSessionApiRoute } from 'iron-session/next';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session, sessionOptions } from 'utils/session';
