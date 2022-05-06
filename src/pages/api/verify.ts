@@ -4,7 +4,7 @@
 import { withIronSessionApiRoute } from 'iron-session/next';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { SiweMessage } from 'siwe';
-import { sessionOptions, Session } from 'utils/session';
+import { sessionOptions } from 'utils/session';
 
 const handler = async (
   req: NextApiRequest,
@@ -14,16 +14,15 @@ const handler = async (
   switch (method) {
     case 'POST':
       try {
-        const session = req.session as Session;
         const { message, signature } = req.body;
         const siweMessage = new SiweMessage(message);
         const fields = await siweMessage.validate(signature);
 
-        if (fields.nonce !== session.nonce)
+        if (fields.nonce !== req.session.nonce)
           return res.status(422).json({ message: 'Invalid nonce.' });
 
-        session.siwe = fields;
-        await session.save();
+        req.session.siwe = fields;
+        await req.session.save();
         res.json({ ok: true });
       } catch (_error) {
         res.json({ ok: false });

@@ -1,14 +1,4 @@
-import { IronSession, IronSessionOptions } from 'iron-session';
-import { SiweMessage } from 'siwe';
-
-export interface Siwe {
-  address: string;
-}
-
-export interface Session extends IronSession {
-  nonce: string;
-  siwe?: SiweMessage;
-}
+import { IronSessionOptions } from 'iron-session';
 
 export const sessionOptions: IronSessionOptions = {
   cookieName: 'siwe',

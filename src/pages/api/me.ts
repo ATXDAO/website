@@ -1,17 +1,16 @@
 // from https://wagmi.sh/examples/sign-in-with-ethereum
 import { withIronSessionApiRoute } from 'iron-session/next';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Session, sessionOptions } from 'utils/session';
+import { sessionOptions } from 'utils/session';
 
 const handler = async (
   req: NextApiRequest,
   res: NextApiResponse
 ): Promise<void> => {
   const { method } = req;
-  const session = req.session as Session;
   switch (method) {
     case 'GET':
-      res.send({ address: session.siwe?.address });
+      res.send({ address: req.session.siwe?.address });
       break;
     default:
       res.setHeader('Allow', ['GET']);

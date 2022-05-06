@@ -6,7 +6,7 @@ import axios from 'axios';
 import { withIronSessionApiRoute } from 'iron-session/next';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { authUser } from 'utils/auth';
-import { sessionOptions, Session } from 'utils/session';
+import { sessionOptions } from 'utils/session';
 
 const eventbriteAPI = process.env.NEXT_PRIVATE_EVENTBRITE_KEY;
 const orgID = process.env.NEXT_PRIVATE_EVENTBRITE_ORGID;
@@ -23,7 +23,7 @@ const handler = async (
         res.status(400).json({ error: 'expected eventCode in query params' });
         break;
       }
-      const { siwe } = req.session as Session;
+      const { siwe } = req.session;
       const authRes = await authUser(siwe);
       if (!authRes.valid) {
         res.status(401).json({ error: authRes.errorMessage });
