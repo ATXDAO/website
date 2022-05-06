@@ -12,7 +12,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "build": "next build && next export",
+    "build": "next build",
     "compile-contract-types": "typechain --target ethers-v5 --out-dir 'src/contracts/types' 'src/contracts/*.json'",
     "dev": "next dev",
     "postinstall": "yarn compile-contract-types",
