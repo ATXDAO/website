@@ -120,7 +120,7 @@ const EventsPage: NextPage = ({
       <Box paddingX={contentPaddingX} paddingTop={contentPaddingY}>
         {data.events
           .map((obj: IEvent, i: number) => (
-            <>
+            <div key={obj.id}>
               {i !== data.events.length - 1 && (
                 <Divider
                   mb={['2rem', '3rem', '5rem']}
@@ -159,7 +159,7 @@ const EventsPage: NextPage = ({
                   isMember={isMember}
                 />
               </Box>
-            </>
+            </div>
           ))
           .reverse()}
       </Box>
