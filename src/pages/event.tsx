@@ -59,7 +59,7 @@ const EventPage: NextPage = () => {
     setFireworks(true);
   });
   const { activeChain } = useNetwork();
-  const networkName = (activeChain?.name || 'mainnet').toLowerCase();
+  const networkName = (activeChain?.name || 'ethereum').toLowerCase();
   const { address: contractAddress } =
     mintContractByNetwork[networkName as SupportedNetwork];
 

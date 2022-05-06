@@ -88,7 +88,7 @@ const UkraineMintForm: FC = () => {
   const [isMinting, setIsMinting] = useState(false);
 
   const { activeChain } = useNetwork();
-  const networkName = (activeChain?.name || 'mainnet').toLowerCase();
+  const networkName = (activeChain?.name || 'ethereum').toLowerCase();
   const { address: contractAddress, blockExplorer } =
     ukraineContractByNetwork[networkName as SupportedNetwork];
 
