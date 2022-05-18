@@ -31,7 +31,13 @@ export const Wallet: FC = () => {
   const { data: ensAvatar } = useEnsAvatar();
   const { disconnect } = useDisconnect();
 
-  const { switchNetwork, chains, activeChain } = useNetwork();
+  const {
+    switchNetwork,
+    chains,
+    activeChain,
+    pendingChainId,
+    isLoading: networkIsLoading,
+  } = useNetwork();
   const isMounted = useIsMounted();
 
   return isMounted && accountData?.address ? (
@@ -58,12 +64,9 @@ export const Wallet: FC = () => {
           {chains &&
             chains.map((chain) => (
               <MenuItem
-                key={chain.id}
-                onClick={
-                  // TODO: reload browser after network switch if necessary
-                  activeChain?.id !== chain.id
-                    ? switchNetwork && (() => switchNetwork(chain.id))
-                    : undefined
+                key={`network-${chain.id}`}
+                onClick={() =>
+                  activeChain?.id !== chain.id && switchNetwork?.(chain.id)
                 }
               >
                 <Text pl="3">
@@ -75,6 +78,14 @@ export const Wallet: FC = () => {
                     hidden={activeChain?.id !== chain.id}
                   >
                     Connected
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    colorScheme="yellow"
+                    ml={2}
+                    hidden={!networkIsLoading || pendingChainId !== chain.id}
+                  >
+                    Loading...
                   </Badge>
                 </Text>
               </MenuItem>

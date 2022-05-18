@@ -97,29 +97,34 @@ const IndexPage: NextPage = () => {
               </Link>{' '}
               to Ukraine
             </Text>
-            {isMounted && <UkraineMintForm />}
-            <Box>
-              <Button
-                rightIcon={<LinkIcon />}
-                as="a"
-                size="md"
-                ml={2}
-                target="_blank"
-                href={`${blockExplorer}/address/${contractAddress}`}
-              >
-                Verified Contract
-              </Button>
-              <Button
-                rightIcon={<LinkIcon />}
-                as="a"
-                size="md"
-                ml={2}
-                target="_blank"
-                href="https://opensea.io/collection/atx-loves-ukr"
-              >
-                Opensea Collection
-              </Button>
-            </Box>
+            {isMounted && (
+              <>
+                <UkraineMintForm />
+                <Box>
+                  <Button
+                    rightIcon={<LinkIcon />}
+                    as="a"
+                    size="md"
+                    ml={2}
+                    target="_blank"
+                    href={`${blockExplorer}/address/${contractAddress}`}
+                  >
+                    Verified Contract
+                  </Button>
+                  <Button
+                    rightIcon={<LinkIcon />}
+                    as="a"
+                    size="md"
+                    ml={2}
+                    target="_blank"
+                    href="https://opensea.io/collection/atx-loves-ukr"
+                  >
+                    Opensea Collection
+                  </Button>
+                </Box>
+              </>
+            )}
+
             <SocialLinks
               fontSize={['2rem', '2rem', '3rem']}
               color={useColorModeValue('gray.800', 'gray.100')}
