@@ -1,6 +1,6 @@
 import {
   ChakraProvider,
-  cookieStorageManager,
+  cookieStorageManagerSSR,
   extendTheme,
   localStorageManager,
 } from '@chakra-ui/react';
@@ -15,15 +15,12 @@ interface ChakraProps {
   children: ReactNode;
 }
 
-export function UIProvider({
-  children,
-  cookies = '',
-}: ChakraProps): JSX.Element {
+export function UIProvider({ children, cookies }: ChakraProps): JSX.Element {
   return (
     <ChakraProvider
       theme={theme}
       colorModeManager={
-        cookies ? cookieStorageManager(cookies) : localStorageManager
+        cookies ? cookieStorageManagerSSR(cookies) : localStorageManager
       }
     >
       {children}
