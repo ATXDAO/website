@@ -21,7 +21,7 @@ export async function addressHasToken(address: string): Promise<boolean> {
 }
 
 type AuthResponse =
-  | { valid: true; siwe: SiweMessage }
+  | { valid: true; nftOwner: boolean; siwe: SiweMessage }
   | { valid: false; errorMessage: string };
 
 export async function authUser(siwe?: SiweMessage): Promise<AuthResponse> {
@@ -32,8 +32,5 @@ export async function authUser(siwe?: SiweMessage): Promise<AuthResponse> {
   if (!expirationTime || Date.parse(expirationTime) < Date.now()) {
     return { valid: false, errorMessage: 'Session expired' };
   }
-  if (!(await addressHasToken(address))) {
-    return { valid: false, errorMessage: 'User not authorized' };
-  }
-  return { valid: true, siwe };
+  return { valid: true, nftOwner: await addressHasToken(address), siwe };
 }

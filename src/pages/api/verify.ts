@@ -24,7 +24,9 @@ const handler = async (
         req.session.siwe = fields;
         await req.session.save();
         res.json({ ok: true });
-      } catch (_error) {
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log('user verification error', { error });
         res.json({ ok: false });
       }
       break;
