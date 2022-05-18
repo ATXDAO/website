@@ -15,6 +15,7 @@ import {
   MenuList,
   Text,
 } from '@chakra-ui/react';
+import { useIsMounted } from 'hooks/app-hooks';
 import { FC } from 'react';
 import {
   useAccount,
@@ -31,8 +32,9 @@ export const Wallet: FC = () => {
   const { disconnect } = useDisconnect();
 
   const { switchNetwork, chains, activeChain } = useNetwork();
+  const isMounted = useIsMounted();
 
-  return accountData?.address ? (
+  return isMounted && accountData?.address ? (
     <Menu>
       <MenuButton
         as={Button}

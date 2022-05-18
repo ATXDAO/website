@@ -15,6 +15,7 @@ import { SocialLinks } from 'components/social-links';
 import { UkraineMintForm } from 'components/ukraine-mint-form';
 import { ATXDAOUkraineNFT } from 'contracts/types';
 import { BigNumber } from 'ethers';
+import { useIsMounted } from 'hooks/app-hooks';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
@@ -58,6 +59,8 @@ const IndexPage: NextPage = () => {
 
   const totalFormatted = totalDonated ? formatEther(totalDonated) : undefined;
 
+  const isMounted = useIsMounted();
+
   return (
     <Layout title="❤️ Ukraine NFT">
       <Head>
@@ -94,7 +97,7 @@ const IndexPage: NextPage = () => {
               </Link>{' '}
               to Ukraine
             </Text>
-            <UkraineMintForm />
+            {isMounted && <UkraineMintForm />}
             <Box>
               <Button
                 rightIcon={<LinkIcon />}
