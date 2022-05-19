@@ -1,6 +1,7 @@
 // import { Logo } from '../img/logo';
 import { ColorModeSwitcher } from './color-mode-switcher';
 import { MobileMenu } from './mobile-menu';
+import { Profile } from './signin';
 import { StandardMenu } from './standard-menu';
 import { Wallet } from './wallet';
 import { Flex } from '@chakra-ui/react';
@@ -23,6 +24,7 @@ export const NavBar: FC<NavBarProps> = ({ width, paddingX }) => {
       <Flex alignItems="center" gap={['0.5rem', '1rem']}>
         <ColorModeSwitcher justifySelf="flex-end" />
         <Wallet />
+        <Profile />
       </Flex>
     </Flex>
   );

@@ -17,6 +17,7 @@ const handler = async (
           .status(200)
           .send({ nftOwner: authRes.nftOwner, address: authRes.siwe.address });
       } else {
+        console.log(authRes);
         res.status(401).send({ error: authRes.errorMessage });
       }
       break;

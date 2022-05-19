@@ -19,6 +19,7 @@ export const ConnectButton: FC<ButtonProps> = (buttonProps) => {
   const { connect, error, connectors } = useConnect();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { children } = buttonProps;
+
   return (
     <>
       <Button onClick={onOpen} {...buttonProps}>

@@ -77,7 +77,7 @@ export const Wallet: FC = () => {
                     ml={2}
                     hidden={activeChain?.id !== chain.id}
                   >
-                    Connected
+                    SignIn
                   </Badge>
                   <Badge
                     variant="outline"
@@ -96,6 +96,6 @@ export const Wallet: FC = () => {
       </MenuList>
     </Menu>
   ) : (
-    <ConnectButton>Connect</ConnectButton>
+    <ConnectButton>SignIn</ConnectButton>
   );
 };
