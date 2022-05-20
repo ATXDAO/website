@@ -1,18 +1,25 @@
 /* eslint-disable no-console */
-import { Button, VisuallyHidden } from '@chakra-ui/react';
+import { CheckIcon, NotAllowedIcon } from '@chakra-ui/icons';
+import { IconButton, Tooltip, VisuallyHidden } from '@chakra-ui/react';
 import { useIsMounted } from 'hooks/app-hooks';
 import { FC, useCallback, useState, useEffect } from 'react';
 import { SiweMessage } from 'siwe';
-import { useAccount, useNetwork, useSignMessage, useDisconnect } from 'wagmi';
+import { useAccount, useNetwork, useSignMessage } from 'wagmi';
+
+const expiresAt: () => Date = () => {
+  const date = new Date();
+  date.setDate(date.getDate() + 30);
+  return date;
+};
 
 export const Signin: FC = () => {
   const { data: accountData } = useAccount();
   const { activeChain } = useNetwork();
-  const { disconnect } = useDisconnect();
-  const [state, setState] = useState<{
+  const [{ nftOwner, loading }, setState] = useState<{
     address?: string;
     error?: Error;
     loading?: boolean;
+    nftOwner?: boolean;
   }>({});
   const { signMessageAsync } = useSignMessage();
   const isMounted = useIsMounted();
@@ -36,7 +43,7 @@ export const Signin: FC = () => {
         version: '1',
         chainId,
         nonce: await nonceRes.text(),
-        expirationTime: date.toISOString(),
+        expirationTime: expiresAt().toISOString(),
       });
       const signature = await signMessageAsync({
         message: message.prepareMessage(),
@@ -51,11 +58,16 @@ export const Signin: FC = () => {
       });
       if (!verifyRes.ok) throw new Error('Error verifying message');
 
-      setState((x) => ({ ...x, address, loading: false }));
+      setState((x) => ({ ...x, address, loading: true }));
       try {
         const res = await fetch('/api/me');
         const json = await res.json();
-        setState((x) => ({ ...x, address: json.address, loading: false }));
+        setState((x) => ({
+          ...x,
+          nftOwner,
+          address: json.address,
+          loading: false,
+        }));
       } catch (_error) {
         console.log(_error);
       }
@@ -85,22 +97,32 @@ export const Signin: FC = () => {
     signIn();
   }, [accountData?.address]);
 
+  if (!isMounted || !accountData || loading) {
+    return (
+      <Tooltip label="Authenticating...">
+        <IconButton aria-label="Authenticating..." variant="ghost" isLoading />
+      </Tooltip>
+    );
+  }
+  // eslint-disable-next-line no-nested-ternary
   return isMounted && accountData ? (
-    <div>
-      {state.address ? (
-        <div>
-          <Button
-            onClick={async () => {
-              await fetch('/api/logout');
-              disconnect();
-              setState({});
-            }}
-          >
-            Sign Out
-          </Button>
-        </div>
-      ) : null}
-    </div>
+    nftOwner ? (
+      <Tooltip label="DAO membership verified">
+        <IconButton
+          aria-label="DAO membership verified"
+          variant="ghost"
+          icon={<CheckIcon />}
+        />
+      </Tooltip>
+    ) : (
+      <Tooltip label="Not a member of ATX DAO">
+        <IconButton
+          aria-label="Not a member of ATX DAO"
+          variant="ghost"
+          icon={<NotAllowedIcon />}
+        />
+      </Tooltip>
+    )
   ) : (
     <VisuallyHidden>not connected</VisuallyHidden>
   );

@@ -24,10 +24,10 @@ export const NavBar: FC<NavBarProps> = ({ width, paddingX }) => {
       height={['8vh', '10vh', '12vh']}
     >
       {width > 600 ? <StandardMenu width={width} /> : <MobileMenu />}
-      <Flex alignItems="center" gap={['0.5rem', '1rem']}>
+      <Flex alignItems="center">
         <ColorModeSwitcher justifySelf="flex-end" />
-        <Wallet />
         {accountData?.address ? <Signin /> : null}
+        <Wallet />
       </Flex>
     </Flex>
   );
