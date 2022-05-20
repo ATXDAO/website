@@ -1,11 +1,12 @@
 // import { Logo } from '../img/logo';
 import { ColorModeSwitcher } from './color-mode-switcher';
 import { MobileMenu } from './mobile-menu';
-import { Profile } from './signin';
+import { Signin } from './signin';
 import { StandardMenu } from './standard-menu';
 import { Wallet } from './wallet';
 import { Flex } from '@chakra-ui/react';
 import { FC } from 'react';
+import { useAccount } from 'wagmi';
 
 interface NavBarProps {
   width: number;
@@ -13,6 +14,8 @@ interface NavBarProps {
 }
 
 export const NavBar: FC<NavBarProps> = ({ width, paddingX }) => {
+  const { data: accountData } = useAccount();
+
   return (
     <Flex
       justifyContent="space-between"
@@ -24,7 +27,7 @@ export const NavBar: FC<NavBarProps> = ({ width, paddingX }) => {
       <Flex alignItems="center" gap={['0.5rem', '1rem']}>
         <ColorModeSwitcher justifySelf="flex-end" />
         <Wallet />
-        <Profile />
+        {accountData?.address ? <Signin /> : null}
       </Flex>
     </Flex>
   );

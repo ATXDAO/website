@@ -4,7 +4,7 @@ import { FC, useCallback, useState, useEffect } from 'react';
 import { SiweMessage } from 'siwe';
 import { useAccount, useNetwork, useSignMessage, useDisconnect } from 'wagmi';
 
-export const Profile: FC = () => {
+export const Signin: FC = () => {
   const { data: accountData } = useAccount();
   const { activeChain } = useNetwork();
   const { disconnect } = useDisconnect();
@@ -23,9 +23,8 @@ export const Profile: FC = () => {
       if (!address || !chainId) return;
 
       setState((x) => ({ ...x, error: undefined, loading: true }));
-      // Fetch random nonce, create SIWE message, and sign with wallet
+
       const nonceRes = await fetch('/api/nonce');
-      console.log(nonceRes);
       const date = new Date();
       date.setTime(date.getTime() + 7 * 24 * 60 * 60 * 1000);
       const message = new SiweMessage({
@@ -42,7 +41,6 @@ export const Profile: FC = () => {
         message: message.prepareMessage(),
       });
 
-      // Verify signature
       const verifyRes = await fetch('/api/verify', {
         method: 'POST',
         headers: {
@@ -76,24 +74,18 @@ export const Profile: FC = () => {
         console.log(_error);
       }
     };
-    // 1. page loads
     handler();
-
-    // 2. window is focused (in case user logs out of another window)
     window.addEventListener('focus', handler);
     return () => window.removeEventListener('focus', handler);
   }, []);
 
   useEffect(() => {
-    console.log('changed');
     signIn();
   }, [accountData?.address]);
 
   if (isMounted && accountData) {
     return (
       <div>
-        {/* Account content goes here */}
-
         {state.address ? (
           <div>
             <Button
@@ -110,6 +102,4 @@ export const Profile: FC = () => {
       </div>
     );
   }
-
-  return <div>{/* Connect wallet content goes here */}</div>;
 };

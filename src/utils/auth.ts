@@ -29,21 +29,8 @@ export async function authUser(siwe?: SiweMessage): Promise<AuthResponse> {
     return { valid: false, errorMessage: 'Not logged in' };
   }
   const { expirationTime, address } = siwe;
-  console.log(siwe);
-
-  console.log(expirationTime, '--');
   if (!expirationTime || Date.parse(expirationTime) < Date.now()) {
     return { valid: false, errorMessage: 'Session expired' };
   }
   return { valid: true, nftOwner: await addressHasToken(address), siwe };
-}
-
-export async function getUser(): Promise<AuthResponse> {
-  try {
-    const res = await fetch('/api/me');
-    return { valid: true, nftOwner: true, siwe: new SiweMessage('') };
-  } catch (_error) {
-    console.log(_error);
-    return { valid: false, errorMessage: 'Not logged in' };
-  }
 }
