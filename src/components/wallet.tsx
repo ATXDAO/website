@@ -31,6 +31,11 @@ export const Wallet: FC = () => {
   const { data: ensAvatar } = useEnsAvatar();
   const { disconnect } = useDisconnect();
 
+  const signOut: () => void = async () => {
+    disconnect();
+    await fetch('/api/logout');
+  };
+
   const {
     switchNetwork,
     chains,
@@ -77,7 +82,7 @@ export const Wallet: FC = () => {
                     ml={2}
                     hidden={activeChain?.id !== chain.id}
                   >
-                    SignIn
+                    Connected
                   </Badge>
                   <Badge
                     variant="outline"
@@ -92,10 +97,10 @@ export const Wallet: FC = () => {
             ))}
         </MenuGroup>
         <MenuDivider />
-        <MenuItem onClick={() => disconnect()}>Disconnect</MenuItem>
+        <MenuItem onClick={() => signOut()}>Disconnect</MenuItem>
       </MenuList>
     </Menu>
   ) : (
-    <ConnectButton>SignIn</ConnectButton>
+    <ConnectButton>Connect</ConnectButton>
   );
 };
