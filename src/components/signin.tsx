@@ -1,4 +1,5 @@
-import { Button } from '@chakra-ui/react';
+/* eslint-disable no-console */
+import { Button, VisuallyHidden } from '@chakra-ui/react';
 import { useIsMounted } from 'hooks/app-hooks';
 import { FC, useCallback, useState, useEffect } from 'react';
 import { SiweMessage } from 'siwe';
@@ -58,14 +59,15 @@ export const Signin: FC = () => {
       } catch (_error) {
         console.log(_error);
       }
-    } catch (error) {
+    } catch (err) {
+      const error = err as Error;
       setState((x) => ({ ...x, error, loading: false }));
     }
   }, []);
 
   // Fetch user when:
   useEffect(() => {
-    const handler = async () => {
+    const handler: () => Promise<void> = async () => {
       try {
         const res = await fetch('/api/me');
         const json = await res.json();
@@ -83,23 +85,23 @@ export const Signin: FC = () => {
     signIn();
   }, [accountData?.address]);
 
-  if (isMounted && accountData) {
-    return (
-      <div>
-        {state.address ? (
-          <div>
-            <Button
-              onClick={async () => {
-                await fetch('/api/logout');
-                disconnect();
-                setState({});
-              }}
-            >
-              Sign Out
-            </Button>
-          </div>
-        ) : null}
-      </div>
-    );
-  }
+  return isMounted && accountData ? (
+    <div>
+      {state.address ? (
+        <div>
+          <Button
+            onClick={async () => {
+              await fetch('/api/logout');
+              disconnect();
+              setState({});
+            }}
+          >
+            Sign Out
+          </Button>
+        </div>
+      ) : null}
+    </div>
+  ) : (
+    <VisuallyHidden>not connected</VisuallyHidden>
+  );
 };
