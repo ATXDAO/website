@@ -5,8 +5,8 @@ import { Signin } from './signin';
 import { StandardMenu } from './standard-menu';
 import { Wallet } from './wallet';
 import { Flex } from '@chakra-ui/react';
+import { useIsMounted } from 'hooks/app-hooks';
 import { FC } from 'react';
-import { useAccount } from 'wagmi';
 
 interface NavBarProps {
   width: number;
@@ -14,7 +14,7 @@ interface NavBarProps {
 }
 
 export const NavBar: FC<NavBarProps> = ({ width, paddingX }) => {
-  const { data: accountData } = useAccount();
+  const isMounted = useIsMounted();
 
   return (
     <Flex
@@ -26,7 +26,7 @@ export const NavBar: FC<NavBarProps> = ({ width, paddingX }) => {
       {width > 600 ? <StandardMenu width={width} /> : <MobileMenu />}
       <Flex alignItems="center">
         <ColorModeSwitcher justifySelf="flex-end" />
-        {accountData?.address ? <Signin /> : null}
+        {isMounted ? <Signin /> : null}
         <Wallet />
       </Flex>
     </Flex>

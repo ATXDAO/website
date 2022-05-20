@@ -62,9 +62,11 @@ export const Signin: FC = () => {
       try {
         const res = await fetch('/api/me');
         const json = await res.json();
+        // XXX: not getting here
+        console.log(json);
         setState((x) => ({
           ...x,
-          nftOwner,
+          nftOwner: json.nftOwner,
           address: json.address,
           loading: false,
         }));
