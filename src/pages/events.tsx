@@ -57,6 +57,7 @@ interface IEvent {
   end: ITime;
   id: string;
   status: string;
+  address: string;
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
@@ -157,6 +158,7 @@ const EventsPage: NextPage = ({
                   eventId={obj.id ? obj.id : null}
                   shareable={obj.shareable ? obj.shareable : null}
                   isMember={isMember}
+                  address={accountData?.address}
                 />
               </Box>
             </div>
