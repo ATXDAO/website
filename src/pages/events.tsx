@@ -78,8 +78,6 @@ const EventsPage: NextPage = ({
   const contentPaddingY = '3rem';
   const [isMember, setIsMember] = useState(false);
 
-  const toast = useToast();
-
   const { data: accountData } = useAccount();
   const { activeChain } = useNetwork();
   const networkName = (activeChain?.name || 'ethereum').toLowerCase();
@@ -102,15 +100,6 @@ const EventsPage: NextPage = ({
       mintContract
         .hasMinted(getAddress(accountData?.address))
         .then((_hasMinted) => {
-          _hasMinted
-            ? toast({
-                title: 'DAO Member Confirmed',
-                description: 'Your current wallet is holding an ATX DAO NFT',
-                status: 'success',
-                duration: 4000,
-                isClosable: true,
-              })
-            : null;
           setIsMember(_hasMinted);
         });
     }

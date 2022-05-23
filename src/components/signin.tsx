@@ -1,10 +1,21 @@
 /* eslint-disable no-console */
+import ATXDAONFT_V2_ABI from '../contracts/ATXDAONFT_V2.json';
 import { CheckIcon, NotAllowedIcon } from '@chakra-ui/icons';
 import { IconButton, Tooltip, VisuallyHidden } from '@chakra-ui/react';
+import { ATXDAONFT_V2 } from 'contracts/types';
+import { getAddress, isAddress } from 'ethers/lib/utils';
 import { useIsMounted } from 'hooks/app-hooks';
-import { FC, useCallback, useState, useEffect } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { SiweMessage } from 'siwe';
-import { useAccount, useNetwork, useSignMessage } from 'wagmi';
+import { mintContractByNetwork, SupportedNetwork } from 'utils/constants';
+import {
+  useAccount,
+  useNetwork,
+  useSignMessage,
+  useContract,
+  useProvider,
+  useSigner,
+} from 'wagmi';
 
 const expiresAt: () => Date = () => {
   const date = new Date();
@@ -15,6 +26,7 @@ const expiresAt: () => Date = () => {
 export const Signin: FC = () => {
   const { data: accountData } = useAccount();
   const { activeChain } = useNetwork();
+  const [loggedIn, setLoggedIn] = useState(false);
   const [{ nftOwner, loading }, setState] = useState<{
     address?: string;
     error?: Error;
@@ -24,17 +36,20 @@ export const Signin: FC = () => {
   const { signMessageAsync } = useSignMessage();
   const isMounted = useIsMounted();
 
-  const signIn = useCallback(async () => {
+  const signIn = async (): Promise<void> => {
     try {
       const address = accountData?.address;
       const chainId = activeChain?.id;
-      if (!address || !chainId) return;
+      if (!address || !chainId || loggedIn) return;
 
-      setState((x) => ({ ...x, error: undefined, loading: true }));
+      setState((x) => ({
+        ...x,
+        error: undefined,
+        loading: true,
+        address,
+      }));
 
       const nonceRes = await fetch('/api/nonce');
-      const date = new Date();
-      date.setTime(date.getTime() + 7 * 24 * 60 * 60 * 1000);
       const message = new SiweMessage({
         domain: window.location.host,
         address,
@@ -62,8 +77,6 @@ export const Signin: FC = () => {
       try {
         const res = await fetch('/api/me');
         const json = await res.json();
-        // XXX: not getting here
-        console.log(json);
         setState((x) => ({
           ...x,
           nftOwner: json.nftOwner,
@@ -77,8 +90,20 @@ export const Signin: FC = () => {
       const error = err as Error;
       setState((x) => ({ ...x, error, loading: false }));
     }
-  }, []);
+  };
 
+  const { data: signer } = useSigner();
+
+  const provider = useProvider();
+  const networkName = (activeChain?.name || 'ethereum').toLowerCase();
+  const { address: contractAddress } =
+    mintContractByNetwork[networkName as SupportedNetwork];
+
+  const mintContract = useContract<ATXDAONFT_V2>({
+    addressOrName: contractAddress,
+    contractInterface: ATXDAONFT_V2_ABI,
+    signerOrProvider: signer || provider,
+  });
   // Fetch user when:
   useEffect(() => {
     const handler: () => Promise<void> = async () => {
@@ -96,10 +121,34 @@ export const Signin: FC = () => {
   }, []);
 
   useEffect(() => {
-    signIn();
-  }, [accountData?.address]);
+    if (!accountData) {
+      setLoggedIn(false);
+      return;
+    }
+    if (!loggedIn) {
+      signIn();
+      setLoggedIn(true);
+    }
+    if (accountData?.address && isAddress(accountData?.address)) {
+      mintContract
+        .hasMinted(getAddress(accountData?.address))
+        .then((_hasMinted) => {
+          setState((x) => ({ ...x, nftOwner: _hasMinted }));
+        });
+    }
+  }, [accountData]);
 
-  if (!isMounted || !accountData || loading) {
+  useEffect(() => {
+    if (accountData?.address && isAddress(accountData?.address)) {
+      mintContract
+        .hasMinted(getAddress(accountData?.address))
+        .then((_hasMinted) => {
+          setState((x) => ({ ...x, nftOwner: _hasMinted }));
+        });
+    }
+  }, []);
+
+  if (loading) {
     return (
       <Tooltip label="Authenticating...">
         <IconButton aria-label="Authenticating..." variant="ghost" isLoading />
