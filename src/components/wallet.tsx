@@ -15,7 +15,7 @@ import {
   MenuList,
   Text,
 } from '@chakra-ui/react';
-import { useIsMounted } from 'hooks/app-hooks';
+import { useIsMounted, useUser } from 'hooks/app-hooks';
 import { FC } from 'react';
 import {
   useAccount,
@@ -30,10 +30,12 @@ export const Wallet: FC = () => {
   const { data: ensName } = useEnsName();
   const { data: ensAvatar } = useEnsAvatar();
   const { disconnect } = useDisconnect();
+  const [, setUser] = useUser();
 
   const signOut: () => void = async () => {
     disconnect();
     await fetch('/api/logout');
+    setUser(() => null);
   };
 
   const {

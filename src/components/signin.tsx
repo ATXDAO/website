@@ -1,22 +1,11 @@
 /* eslint-disable no-console */
-import ATXDAONFT_V2_ABI from '../contracts/ATXDAONFT_V2.json';
 import { CheckIcon, NotAllowedIcon } from '@chakra-ui/icons';
 import { IconButton, Tooltip, VisuallyHidden } from '@chakra-ui/react';
 import axios from 'axios';
-import { ATXDAONFT_V2 } from 'contracts/types';
-import { getAddress, isAddress } from 'ethers/lib/utils';
-import { useIsMounted } from 'hooks/app-hooks';
+import { useIsMounted, useUser } from 'hooks/app-hooks';
 import { FC, useState, useEffect } from 'react';
 import { SiweMessage } from 'siwe';
-import { mintContractByNetwork, SupportedNetwork } from 'utils/constants';
-import {
-  useAccount,
-  useNetwork,
-  useSignMessage,
-  useContract,
-  useProvider,
-  useSigner,
-} from 'wagmi';
+import { useAccount, useNetwork, useSignMessage } from 'wagmi';
 
 const expiresAt: () => Date = () => {
   const date = new Date();
@@ -28,19 +17,36 @@ export const Signin: FC = () => {
   const { data: accountData } = useAccount();
   const { activeChain } = useNetwork();
   const [loggedIn, setLoggedIn] = useState(false);
-  const [{ nftOwner, loading }, setState] = useState<{
-    address?: string;
+  const [{ loading }, setState] = useState<{
     error?: Error;
     loading?: boolean;
-    nftOwner?: boolean;
   }>({});
   const { signMessageAsync } = useSignMessage();
   const isMounted = useIsMounted();
+  const [user, setUser] = useUser();
+
+  const currentUser = async (): Promise<void> => {
+    try {
+      const res = await axios('/api/me');
+      setUser((x) => ({
+        ...x,
+        address: res.data.address,
+        nftOwner: res.data.nftOwner,
+      }));
+    } catch (err) {
+      const error = err as Error;
+      setState((x) => ({ ...x, error, loading: false }));
+    }
+  };
 
   const signIn = async (): Promise<void> => {
     await axios('/api/me')
       .then((res) => {
-        console.log('logged in as:', res.data);
+        setUser((x) => ({
+          ...x,
+          address: res.data.address,
+          nftOwner: res.data.nftOwner,
+        }));
       })
       .catch(async () => {
         try {
@@ -52,7 +58,6 @@ export const Signin: FC = () => {
             ...x,
             error: undefined,
             loading: true,
-            address,
           }));
 
           const nonceRes = await fetch('/api/nonce');
@@ -79,15 +84,18 @@ export const Signin: FC = () => {
           });
           if (!verifyRes.ok) throw new Error('Error verifying message');
 
-          setState((x) => ({ ...x, address, loading: true }));
+          setState((x) => ({ ...x, loading: true }));
           try {
             const res = await fetch('/api/me');
             const json = await res.json();
             setState((x) => ({
               ...x,
-              nftOwner: json.nftOwner,
-              address: json.address,
               loading: false,
+            }));
+            setUser((x) => ({
+              ...x,
+              address: json.address,
+              nftOwner: json.nftOwner,
             }));
           } catch (_error) {
             console.log(_error);
@@ -99,34 +107,6 @@ export const Signin: FC = () => {
       });
   };
 
-  const { data: signer } = useSigner();
-
-  const provider = useProvider();
-  const networkName = (activeChain?.name || 'ethereum').toLowerCase();
-  const { address: contractAddress } =
-    mintContractByNetwork[networkName as SupportedNetwork];
-
-  const mintContract = useContract<ATXDAONFT_V2>({
-    addressOrName: contractAddress,
-    contractInterface: ATXDAONFT_V2_ABI,
-    signerOrProvider: signer || provider,
-  });
-  // Fetch user when:
-  useEffect(() => {
-    const handler: () => Promise<void> = async () => {
-      try {
-        const res = await fetch('/api/me');
-        const json = await res.json();
-        setState((x) => ({ ...x, address: json.address, loading: false }));
-      } catch (_error) {
-        console.log(_error);
-      }
-    };
-    handler();
-    window.addEventListener('focus', handler);
-    return () => window.removeEventListener('focus', handler);
-  }, []);
-
   useEffect(() => {
     if (!accountData) {
       setLoggedIn(false);
@@ -136,23 +116,10 @@ export const Signin: FC = () => {
       signIn();
       setLoggedIn(true);
     }
-    if (accountData?.address && isAddress(accountData?.address)) {
-      mintContract
-        .hasMinted(getAddress(accountData?.address))
-        .then((_hasMinted) => {
-          setState((x) => ({ ...x, nftOwner: _hasMinted }));
-        });
-    }
-  }, [accountData]);
+  }, [accountData?.address]);
 
   useEffect(() => {
-    if (accountData?.address && isAddress(accountData?.address)) {
-      mintContract
-        .hasMinted(getAddress(accountData?.address))
-        .then((_hasMinted) => {
-          setState((x) => ({ ...x, nftOwner: _hasMinted }));
-        });
-    }
+    currentUser();
   }, []);
 
   if (loading) {
@@ -163,8 +130,8 @@ export const Signin: FC = () => {
     );
   }
   // eslint-disable-next-line no-nested-ternary
-  return isMounted && accountData ? (
-    nftOwner ? (
+  return isMounted && user?.address ? (
+    user?.nftOwner ? (
       <Tooltip label="DAO membership verified">
         <IconButton
           aria-label="DAO membership verified"

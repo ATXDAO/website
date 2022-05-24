@@ -77,15 +77,11 @@ const EventsPage: NextPage = ({
   const contentPaddingX = ['1rem', '2rem', '3rem', '10rem'];
   const contentPaddingY = '3rem';
   const [isMember, setIsMember] = useState(false);
-
   const { data: accountData } = useAccount();
   const { activeChain } = useNetwork();
   const networkName = (activeChain?.name || 'ethereum').toLowerCase();
-
   const { data: signer } = useSigner();
-
   const provider = useProvider();
-
   const { address: contractAddress } =
     mintContractByNetwork[networkName as SupportedNetwork];
 
