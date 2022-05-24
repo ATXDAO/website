@@ -2,6 +2,7 @@
 import ATXDAONFT_V2_ABI from '../contracts/ATXDAONFT_V2.json';
 import { CheckIcon, NotAllowedIcon } from '@chakra-ui/icons';
 import { IconButton, Tooltip, VisuallyHidden } from '@chakra-ui/react';
+import axios from 'axios';
 import { ATXDAONFT_V2 } from 'contracts/types';
 import { getAddress, isAddress } from 'ethers/lib/utils';
 import { useIsMounted } from 'hooks/app-hooks';
@@ -37,59 +38,65 @@ export const Signin: FC = () => {
   const isMounted = useIsMounted();
 
   const signIn = async (): Promise<void> => {
-    try {
-      const address = accountData?.address;
-      const chainId = activeChain?.id;
-      if (!address || !chainId || loggedIn) return;
+    await axios('/api/me')
+      .then((res) => {
+        console.log('logged in as:', res.data);
+      })
+      .catch(async () => {
+        try {
+          const address = accountData?.address;
+          const chainId = activeChain?.id;
+          if (!address || !chainId || loggedIn) return;
 
-      setState((x) => ({
-        ...x,
-        error: undefined,
-        loading: true,
-        address,
-      }));
+          setState((x) => ({
+            ...x,
+            error: undefined,
+            loading: true,
+            address,
+          }));
 
-      const nonceRes = await fetch('/api/nonce');
-      const message = new SiweMessage({
-        domain: window.location.host,
-        address,
-        statement: 'Sign in with Ethereum to the app.',
-        uri: window.location.origin,
-        version: '1',
-        chainId,
-        nonce: await nonceRes.text(),
-        expirationTime: expiresAt().toISOString(),
+          const nonceRes = await fetch('/api/nonce');
+          const message = new SiweMessage({
+            domain: window.location.host,
+            address,
+            statement: 'Sign in with Ethereum to the app.',
+            uri: window.location.origin,
+            version: '1',
+            chainId,
+            nonce: await nonceRes.text(),
+            expirationTime: expiresAt().toISOString(),
+          });
+          const signature = await signMessageAsync({
+            message: message.prepareMessage(),
+          });
+
+          const verifyRes = await fetch('/api/verify', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message, signature }),
+          });
+          if (!verifyRes.ok) throw new Error('Error verifying message');
+
+          setState((x) => ({ ...x, address, loading: true }));
+          try {
+            const res = await fetch('/api/me');
+            const json = await res.json();
+            setState((x) => ({
+              ...x,
+              nftOwner: json.nftOwner,
+              address: json.address,
+              loading: false,
+            }));
+          } catch (_error) {
+            console.log(_error);
+          }
+        } catch (err) {
+          const error = err as Error;
+          setState((x) => ({ ...x, error, loading: false }));
+        }
       });
-      const signature = await signMessageAsync({
-        message: message.prepareMessage(),
-      });
-
-      const verifyRes = await fetch('/api/verify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message, signature }),
-      });
-      if (!verifyRes.ok) throw new Error('Error verifying message');
-
-      setState((x) => ({ ...x, address, loading: true }));
-      try {
-        const res = await fetch('/api/me');
-        const json = await res.json();
-        setState((x) => ({
-          ...x,
-          nftOwner: json.nftOwner,
-          address: json.address,
-          loading: false,
-        }));
-      } catch (_error) {
-        console.log(_error);
-      }
-    } catch (err) {
-      const error = err as Error;
-      setState((x) => ({ ...x, error, loading: false }));
-    }
   };
 
   const { data: signer } = useSigner();
