@@ -1,7 +1,7 @@
 import NO_IMAGE from '../../public/img/no_image.png';
 import { Event } from '../components/event';
 import ATXDAONFT_V2_ABI from '../contracts/ATXDAONFT_V2.json';
-import { Box, Divider, useToast } from '@chakra-ui/react';
+import { Box, Divider } from '@chakra-ui/react';
 import { Layout } from 'components/layout';
 import { ATXDAONFT_V2 } from 'contracts/types';
 import { getAddress, isAddress } from 'ethers/lib/utils';
