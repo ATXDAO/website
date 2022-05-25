@@ -9,12 +9,8 @@ import {
   Link,
   useToast,
 } from '@chakra-ui/react';
-import axios from 'axios';
 import { FC } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
-
-const eventbriteAPI = process.env.NEXT_PRIVATE_EVENTBRITE_KEY;
-const orgID = process.env.NEXT_PRIVATE_EVENTBRITE_ORGID;
 
 interface EventProps {
   img: string;
@@ -28,6 +24,7 @@ interface EventProps {
   eventId: string | null;
   status: string;
   isMember: boolean;
+  address: string | undefined;
 }
 
 export const Event: FC<EventProps> = ({
@@ -42,6 +39,7 @@ export const Event: FC<EventProps> = ({
   eventId,
   status,
   isMember,
+  address,
 }) => {
   const toast = useToast();
 
@@ -53,23 +51,12 @@ export const Event: FC<EventProps> = ({
   ): Promise<void> => {
     if (_isMember) {
       try {
-        const code = Math.floor(Math.random() * 1000000);
-        const body = {
-          discount: {
-            type: 'access',
-            code: `${code}`,
-            event_id: `${eventCode}`,
-            ticket_class_ids: [],
-            quantity_available: 1,
-          },
-        };
+        const code = `atx-${address}`;
 
-        await axios({
-          method: 'post',
-          url: `https://www.eventbriteapi.com/v3/organizations/${orgID}/discounts/`,
-          data: body,
+        await fetch(`/api/events/discount-code?eventCode=${eventCode}`, {
+          method: 'GET',
           headers: {
-            Authorization: `Bearer ${eventbriteAPI}`,
+            'Content-Type': 'application/json',
           },
         });
 

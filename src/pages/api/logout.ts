@@ -11,6 +11,7 @@ const handler = async (
   switch (method) {
     case 'GET':
       req.session.destroy();
+      res.setHeader('cache-control', 'no-store, max-age=0');
       res.send({ ok: true });
       break;
     default:

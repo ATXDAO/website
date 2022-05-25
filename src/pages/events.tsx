@@ -1,7 +1,7 @@
 import NO_IMAGE from '../../public/img/no_image.png';
 import { Event } from '../components/event';
 import ATXDAONFT_V2_ABI from '../contracts/ATXDAONFT_V2.json';
-import { Box, Divider, useToast } from '@chakra-ui/react';
+import { Box, Divider } from '@chakra-ui/react';
 import { Layout } from 'components/layout';
 import { ATXDAONFT_V2 } from 'contracts/types';
 import { getAddress, isAddress } from 'ethers/lib/utils';
@@ -57,6 +57,7 @@ interface IEvent {
   end: ITime;
   id: string;
   status: string;
+  address: string;
 }
 
 export const getServerSideProps: GetServerSideProps = async () => {
@@ -76,17 +77,11 @@ const EventsPage: NextPage = ({
   const contentPaddingX = ['1rem', '2rem', '3rem', '10rem'];
   const contentPaddingY = '3rem';
   const [isMember, setIsMember] = useState(false);
-
-  const toast = useToast();
-
   const { data: accountData } = useAccount();
   const { activeChain } = useNetwork();
   const networkName = (activeChain?.name || 'ethereum').toLowerCase();
-
   const { data: signer } = useSigner();
-
   const provider = useProvider();
-
   const { address: contractAddress } =
     mintContractByNetwork[networkName as SupportedNetwork];
 
@@ -101,15 +96,6 @@ const EventsPage: NextPage = ({
       mintContract
         .hasMinted(getAddress(accountData?.address))
         .then((_hasMinted) => {
-          _hasMinted
-            ? toast({
-                title: 'DAO Member Confirmed',
-                description: 'Your current wallet is holding an ATX DAO NFT',
-                status: 'success',
-                duration: 4000,
-                isClosable: true,
-              })
-            : null;
           setIsMember(_hasMinted);
         });
     }
@@ -157,6 +143,7 @@ const EventsPage: NextPage = ({
                   eventId={obj.id ? obj.id : null}
                   shareable={obj.shareable ? obj.shareable : null}
                   isMember={isMember}
+                  address={accountData?.address}
                 />
               </Box>
             </div>
