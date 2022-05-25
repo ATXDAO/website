@@ -24,7 +24,6 @@ interface EventProps {
   eventId: string | null;
   status: string;
   isMember: boolean;
-  address: string | undefined;
 }
 
 export const Event: FC<EventProps> = ({
@@ -39,7 +38,6 @@ export const Event: FC<EventProps> = ({
   eventId,
   status,
   isMember,
-  address,
 }) => {
   const toast = useToast();
 
@@ -51,15 +49,16 @@ export const Event: FC<EventProps> = ({
   ): Promise<void> => {
     if (_isMember) {
       try {
-        const code = `atx-${address}`;
-
-        await fetch(`/api/events/discount-code?eventCode=${eventCode}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
+        const res = await fetch(
+          `/api/events/discount-code?eventCode=${eventCode}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        const { code } = await res.json();
         window.open(`${redirectURL}?discount=${code}`);
       } catch (e) {
         toast({
