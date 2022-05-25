@@ -3,6 +3,7 @@
 
 /* eslint-disable consistent-return */
 import axios from 'axios';
+import { createHash } from 'crypto';
 import { withIronSessionApiRoute } from 'iron-session/next';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { authUser } from 'utils/auth';
@@ -28,7 +29,17 @@ const handler = async (
       if (!authRes.valid) {
         res.status(401).json({ error: authRes.errorMessage });
       } else {
-        const code = `atx-${authRes.siwe.address}`;
+        // so that user cant reverse-engineer discount codes of other addresses
+        const code = `atxdao-${createHash('sha256')
+          .update(
+            [
+              eventCode,
+              authRes.siwe.address,
+              process.env.NEXT_PRIVATE_EVENTBRITE_KEY,
+            ].join('-')
+          )
+          .digest('base64url')
+          .substring(0, 8)}`;
         const body = {
           discount: {
             type: 'access',
