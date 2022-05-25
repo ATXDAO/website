@@ -143,7 +143,6 @@ const EventsPage: NextPage = ({
                   eventId={obj.id ? obj.id : null}
                   shareable={obj.shareable ? obj.shareable : null}
                   isMember={isMember}
-                  address={accountData?.address}
                 />
               </Box>
             </div>
