@@ -15,6 +15,7 @@ import { SocialLinks } from 'components/social-links';
 import { UkraineMintForm } from 'components/ukraine-mint-form';
 import { ATXDAOUkraineNFT } from 'contracts/types';
 import { BigNumber } from 'ethers';
+import { useIsMounted } from 'hooks/app-hooks';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
@@ -33,9 +34,9 @@ if (typeof window !== 'undefined') {
 const UKRAINE_NFT_ABI = require('../contracts/ATXDAOUkraineNFT.json');
 
 const IndexPage: NextPage = () => {
-  const [{ data: networkData }] = useNetwork();
   const provider = useProvider();
-  const networkName = (networkData.chain?.name || 'mainnet').toLowerCase();
+  const { activeChain } = useNetwork();
+  const networkName = (activeChain?.name || 'ethereum').toLowerCase();
   const { address: contractAddress, blockExplorer } =
     ukraineContractByNetwork[networkName as SupportedNetwork];
   const mintContract = useContract<ATXDAOUkraineNFT>({
@@ -44,7 +45,7 @@ const IndexPage: NextPage = () => {
     signerOrProvider: provider,
   });
 
-  const [{ data: blockNumber }] = useBlockNumber({
+  const { data: blockNumber } = useBlockNumber({
     watch: true,
   });
 
@@ -57,6 +58,8 @@ const IndexPage: NextPage = () => {
   }, [blockNumber]);
 
   const totalFormatted = totalDonated ? formatEther(totalDonated) : undefined;
+
+  const isMounted = useIsMounted();
 
   return (
     <Layout title="❤️ Ukraine NFT">
@@ -94,29 +97,34 @@ const IndexPage: NextPage = () => {
               </Link>{' '}
               to Ukraine
             </Text>
-            <UkraineMintForm />
-            <Box>
-              <Button
-                rightIcon={<LinkIcon />}
-                as="a"
-                size="md"
-                ml={2}
-                target="_blank"
-                href={`${blockExplorer}/address/${contractAddress}`}
-              >
-                Verified Contract
-              </Button>
-              <Button
-                rightIcon={<LinkIcon />}
-                as="a"
-                size="md"
-                ml={2}
-                target="_blank"
-                href="https://opensea.io/collection/atx-loves-ukr"
-              >
-                Opensea Collection
-              </Button>
-            </Box>
+            {isMounted && (
+              <>
+                <UkraineMintForm />
+                <Box>
+                  <Button
+                    rightIcon={<LinkIcon />}
+                    as="a"
+                    size="md"
+                    ml={2}
+                    target="_blank"
+                    href={`${blockExplorer}/address/${contractAddress}`}
+                  >
+                    Verified Contract
+                  </Button>
+                  <Button
+                    rightIcon={<LinkIcon />}
+                    as="a"
+                    size="md"
+                    ml={2}
+                    target="_blank"
+                    href="https://opensea.io/collection/atx-loves-ukr"
+                  >
+                    Opensea Collection
+                  </Button>
+                </Box>
+              </>
+            )}
+
             <SocialLinks
               fontSize={['2rem', '2rem', '3rem']}
               color={useColorModeValue('gray.800', 'gray.100')}

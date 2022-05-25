@@ -26,7 +26,7 @@ export const MobileMenu: FC = () => {
           <Link href="/">Home</Link>
         </MenuItem>
         <MenuItem icon={<FaInfoCircle />}>
-          <Link href="/coming-soon">Events</Link>
+          <Link href="/events">Events</Link>
         </MenuItem>
         <MenuItem icon={<FaInfoCircle />}>
           <Link href="/ukraine">Ukraine</Link>

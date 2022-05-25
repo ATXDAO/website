@@ -15,27 +15,39 @@ import {
   MenuList,
   Text,
 } from '@chakra-ui/react';
-import { FC, useEffect, useState } from 'react';
-import { useAccount, useNetwork, useProvider } from 'wagmi';
+import { useIsMounted, useUser } from 'hooks/app-hooks';
+import { FC } from 'react';
+import {
+  useAccount,
+  useDisconnect,
+  useEnsAvatar,
+  useEnsName,
+  useNetwork,
+} from 'wagmi';
 
 export const Wallet: FC = () => {
-  const [{ data: accountData }, disconnect] = useAccount({ fetchEns: true });
+  const { data: accountData } = useAccount();
+  const { data: ensName } = useEnsName();
+  const { data: ensAvatar } = useEnsAvatar();
+  const { disconnect } = useDisconnect();
+  const [, setUser] = useUser();
 
-  const provider = useProvider();
-  const [providerAvatar, setProviderAvatar] = useState<string | null>();
+  const signOut: () => void = async () => {
+    disconnect();
+    await fetch('/api/logout');
+    setUser(() => null);
+  };
 
-  useEffect(() => {
-    if (!accountData) return;
-    provider
-      .getAvatar(accountData?.address)
-      .then((_avatar) => setProviderAvatar(_avatar));
-  }, [accountData?.address]);
+  const {
+    switchNetwork,
+    chains,
+    activeChain,
+    pendingChainId,
+    isLoading: networkIsLoading,
+  } = useNetwork();
+  const isMounted = useIsMounted();
 
-  const [{ data: networkData }, switchNetwork] = useNetwork();
-
-  const avatar = accountData?.ens?.avatar || providerAvatar || undefined;
-
-  return accountData ? (
+  return isMounted && accountData?.address ? (
     <Menu>
       <MenuButton
         as={Button}
@@ -45,11 +57,9 @@ export const Wallet: FC = () => {
       >
         <HStack mx={-1} spacing={1}>
           <Text fontSize={['md', 'lg']} mr={1}>
-            {accountData.ens?.name
-              ? accountData.ens.name
-              : shortenAddress(accountData.address)}
+            {ensName || shortenAddress(accountData.address)}
           </Text>
-          <Avatar fontWeight="700" size="sm" src={avatar}>
+          <Avatar fontWeight="700" size="sm" src={ensAvatar || undefined}>
             <AvatarBadge boxSize="1.25em" bg="green.500" />
           </Avatar>
           <TriangleDownIcon ml={3} mr={-1} w={3} color="gray.400" />
@@ -58,18 +68,12 @@ export const Wallet: FC = () => {
       <MenuGroup />
       <MenuList>
         <MenuGroup title="Network">
-          {networkData &&
-            networkData.chains.map((chain) => (
+          {chains &&
+            chains.map((chain) => (
               <MenuItem
-                key={chain.id}
-                onClick={
-                  networkData.chain?.id !== chain.id
-                    ? switchNetwork &&
-                      (() =>
-                        switchNetwork(chain.id).then(() =>
-                          window.location.reload()
-                        ))
-                    : undefined
+                key={`network-${chain.id}`}
+                onClick={() =>
+                  activeChain?.id !== chain.id && switchNetwork?.(chain.id)
                 }
               >
                 <Text pl="3">
@@ -78,16 +82,24 @@ export const Wallet: FC = () => {
                     variant="outline"
                     colorScheme="green"
                     ml={2}
-                    hidden={networkData.chain?.id !== chain.id}
+                    hidden={activeChain?.id !== chain.id}
                   >
                     Connected
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    colorScheme="yellow"
+                    ml={2}
+                    hidden={!networkIsLoading || pendingChainId !== chain.id}
+                  >
+                    Loading...
                   </Badge>
                 </Text>
               </MenuItem>
             ))}
         </MenuGroup>
         <MenuDivider />
-        <MenuItem onClick={disconnect}>Disconnect</MenuItem>
+        <MenuItem onClick={() => signOut()}>Disconnect</MenuItem>
       </MenuList>
     </Menu>
   ) : (

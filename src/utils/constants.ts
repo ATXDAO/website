@@ -7,7 +7,7 @@ interface MerkleTreeData {
   proofs: Record<string, string[]>;
 }
 
-export type SupportedNetwork = 'mainnet' | 'ropsten' | 'rinkeby';
+export type SupportedNetwork = 'ethereum' | 'ropsten' | 'rinkeby';
 
 interface ContractData {
   blockExplorer: string;
@@ -27,7 +27,7 @@ export type EventArgs = [
 
 export const mintContractByNetwork: Record<SupportedNetwork, MintContractData> =
   {
-    mainnet: {
+    ethereum: {
       blockExplorer: 'https://etherscan.io',
       address: '0x63f8F23ce0f3648097447622209E95A391c44b00',
       merkleTree: require('./zilker-merkle-tree.json') as MerkleTreeData,
@@ -48,7 +48,7 @@ export const UKRAINE_ETH_ADDRESS = '0x165CD37b4C644C2921454429E7F9358d18A45e14';
 
 export const ukraineContractByNetwork: Record<SupportedNetwork, ContractData> =
   {
-    mainnet: {
+    ethereum: {
       blockExplorer: 'https://etherscan.io',
       address: '0x9c30bac4D3ADdBa39693aA4caDAe14449D60f795',
     },
