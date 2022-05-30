@@ -1,14 +1,5 @@
 import { limitChars } from '../utils/helpers';
-import {
-  Grid,
-  Box,
-  Heading,
-  Text,
-  Button,
-  Flex,
-  Link,
-  useToast,
-} from '@chakra-ui/react';
+import { Grid, Box, Heading, Text, Button, Flex, Link } from '@chakra-ui/react';
 import { createHash } from 'crypto';
 import { FC } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
