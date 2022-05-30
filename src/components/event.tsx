@@ -1,14 +1,6 @@
 import { limitChars } from '../utils/helpers';
-import {
-  Grid,
-  Box,
-  Heading,
-  Text,
-  Button,
-  Flex,
-  Link,
-  useToast,
-} from '@chakra-ui/react';
+import { Grid, Box, Heading, Text, Button, Flex, Link } from '@chakra-ui/react';
+import { createHash } from 'crypto';
 import { FC } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 
@@ -24,6 +16,7 @@ interface EventProps {
   eventId: string | null;
   status: string;
   isMember: boolean;
+  address: string | undefined;
 }
 
 export const Event: FC<EventProps> = ({
@@ -38,8 +31,22 @@ export const Event: FC<EventProps> = ({
   eventId,
   status,
   isMember,
+  address,
 }) => {
-  const toast = useToast();
+  const ecode = async (
+    eventCode: string | null,
+    user_address: string | undefined
+  ): Promise<string> => {
+    const code = `atxdao-${createHash('sha256')
+      .update(
+        [eventCode, user_address, process.env.NEXT_PRIVATE_EVENTBRITE_KEY].join(
+          '-'
+        )
+      )
+      .digest('base64')
+      .substring(0, 8)}`;
+    return code;
+  };
 
   const CreateDiscountAndNavigate = async (
     eventCode: string | null,
@@ -48,26 +55,22 @@ export const Event: FC<EventProps> = ({
     isOpen: boolean | null
   ): Promise<void> => {
     if (_isMember) {
-      try {
-        const res = await fetch(
-          `/api/events/discount-code?eventCode=${eventCode}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
+      const res = await fetch(
+        `/api/events/discount-code?eventCode=${eventCode}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      if (res.status === 200) {
         const { code } = await res.json();
         window.open(`${redirectURL}?discount=${code}`);
-      } catch (e) {
-        toast({
-          title: 'Error',
-          description: 'Error handling your request',
-          status: 'error',
-          duration: 2000,
-          isClosable: true,
-        });
+      } else if (res.status === 500) {
+        // try to see if user didnt use code yet, else error out
+        const code = await ecode(eventCode, address);
+        window.open(`${redirectURL}?discount=${code}`);
       }
     } else if (!_isMember && isOpen) {
       window.open(`${redirectURL}`);
