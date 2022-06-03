@@ -62,10 +62,10 @@ export const Signin: FC = () => {
           if (activeChain?.unsupported) {
             disconnect();
             toast({
-              title: 'Please swith networks',
-              description: 'Only Ethereum Mainnet is supported',
+              title: 'Please Switch Networks',
+              description: 'Only Ethereum Mainnet is Supported',
               status: 'error',
-              duration: 5000,
+              duration: 6000,
               isClosable: true,
             });
             return;
