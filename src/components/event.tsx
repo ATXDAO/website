@@ -1,6 +1,7 @@
 import { limitChars } from '../utils/helpers';
 import { Grid, Box, Heading, Text, Button, Flex, Link } from '@chakra-ui/react';
 import { createHash } from 'crypto';
+import { useUser } from 'hooks/app-hooks';
 import { FC } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 
@@ -33,6 +34,7 @@ export const Event: FC<EventProps> = ({
   isMember,
   address,
 }) => {
+  const [user] = useUser();
   const ecode = async (
     eventCode: string | null,
     user_address: string | undefined
@@ -54,7 +56,7 @@ export const Event: FC<EventProps> = ({
     _isMember: boolean,
     isOpen: boolean | null
   ): Promise<void> => {
-    if (_isMember) {
+    if (user.nftOwner) {
       const res = await fetch(
         `/api/events/discount-code?eventCode=${eventCode}`,
         {

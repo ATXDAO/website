@@ -1,11 +1,16 @@
 /* eslint-disable no-console */
 import { CheckIcon, NotAllowedIcon } from '@chakra-ui/icons';
-import { IconButton, Tooltip, VisuallyHidden } from '@chakra-ui/react';
+import {
+  IconButton,
+  Tooltip,
+  VisuallyHidden,
+  useToast,
+} from '@chakra-ui/react';
 import axios from 'axios';
 import { useIsMounted, useUser } from 'hooks/app-hooks';
 import { FC, useState, useEffect } from 'react';
 import { SiweMessage } from 'siwe';
-import { useAccount, useNetwork, useSignMessage } from 'wagmi';
+import { useAccount, useNetwork, useSignMessage, useDisconnect } from 'wagmi';
 
 const expiresAt: () => Date = () => {
   const date = new Date();
@@ -14,6 +19,7 @@ const expiresAt: () => Date = () => {
 };
 
 export const Signin: FC = () => {
+  const toast = useToast();
   const { data: accountData } = useAccount();
   const { activeChain } = useNetwork();
   const [loggedIn, setLoggedIn] = useState(false);
@@ -22,6 +28,7 @@ export const Signin: FC = () => {
     loading?: boolean;
   }>({});
   const { signMessageAsync } = useSignMessage();
+  const { disconnect } = useDisconnect();
   const isMounted = useIsMounted();
   const [user, setUser] = useUser();
 
@@ -52,6 +59,18 @@ export const Signin: FC = () => {
         try {
           const address = accountData?.address;
           const chainId = activeChain?.id;
+          if (activeChain?.unsupported) {
+            disconnect();
+            toast({
+              title: 'Please swith networks',
+              description: 'Only Ethereum Mainnet is supported',
+              status: 'error',
+              duration: 5000,
+              isClosable: true,
+            });
+            return;
+          }
+
           if (!address || !chainId || loggedIn) return;
 
           setState((x) => ({
