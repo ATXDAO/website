@@ -43,7 +43,7 @@ export const Event: FC<EventProps> = ({
           '-'
         )
       )
-      .digest('base64')
+      .digest('hex')
       .substring(0, 8)}`;
     return code;
   };

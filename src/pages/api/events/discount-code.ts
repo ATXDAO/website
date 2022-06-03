@@ -38,7 +38,7 @@ const handler = async (
               process.env.NEXT_PRIVATE_EVENTBRITE_KEY,
             ].join('-')
           )
-          .digest('base64')
+          .digest('hex')
           .substring(0, 8)}`;
         const body = {
           discount: {
