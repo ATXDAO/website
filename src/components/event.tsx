@@ -56,7 +56,7 @@ export const Event: FC<EventProps> = ({
     _isMember: boolean,
     isOpen: boolean | null
   ): Promise<void> => {
-    if (user.nftOwner) {
+    if (user?.nftOwner) {
       const res = await fetch(
         `/api/events/discount-code?eventCode=${eventCode}`,
         {
