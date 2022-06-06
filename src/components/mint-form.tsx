@@ -81,7 +81,7 @@ const MintForm: FC = () => {
   const [hasMinted, setHasMinted] = useState(false);
 
   const { activeChain } = useNetwork();
-  const networkName = (activeChain?.name || 'ethereum').toLowerCase();
+  const networkName = 'ethereum'.toLowerCase();
   const {
     address: contractAddress,
     merkleTree,
@@ -102,6 +102,9 @@ const MintForm: FC = () => {
     mintPrice && balanceData && balanceData.value.gte(mintPrice);
 
   useEffect(() => {
+    if (activeChain?.unsupported) {
+      return;
+    }
     // eslint-disable-next-line no-underscore-dangle
     mintContract._mintPrice().then((price) => setMintPrice(price));
     mintContract.isMintable().then((mintable) => setIsMintable(mintable));

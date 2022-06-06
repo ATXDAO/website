@@ -79,7 +79,7 @@ const EventsPage: NextPage = ({
   const [isMember, setIsMember] = useState(false);
   const { data: accountData } = useAccount();
   const { activeChain } = useNetwork();
-  const networkName = (activeChain?.name || 'ethereum').toLowerCase();
+  const networkName = 'ethereum'.toLowerCase();
   const { data: signer } = useSigner();
   const provider = useProvider();
   const { address: contractAddress } =
@@ -92,6 +92,9 @@ const EventsPage: NextPage = ({
   });
 
   useEffect(() => {
+    if (activeChain?.unsupported) {
+      return;
+    }
     if (accountData?.address && isAddress(accountData?.address)) {
       mintContract
         .hasMinted(getAddress(accountData?.address))
