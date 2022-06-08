@@ -4,7 +4,7 @@ import { AppProvider } from 'hooks/app-hooks';
 import type { NextComponentType, NextPageContext } from 'next';
 import type { NextRouter } from 'next/router';
 import { FunctionComponent } from 'react';
-import { defaultChains, WagmiProvider, createWagmiClient } from 'wagmi';
+import { defaultChains, WagmiProvider, createClient } from 'wagmi';
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
@@ -26,7 +26,7 @@ const defaultChain = defaultChains.find((chain) => chain.id === 1);
 const isChainSupported = (chainId?: number): boolean =>
   chains.some((x) => x.id === chainId);
 
-const wagmiClient = createWagmiClient({
+const wagmiClient = createClient({
   autoConnect: true,
   connectors({ chainId }) {
     const rpcUrl =
