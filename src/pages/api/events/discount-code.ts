@@ -46,7 +46,7 @@ const handler = async (
             code,
             event_id: `${eventCode}`,
             ticket_class_ids: [],
-            quantity_available: 1,
+            quantity_available: 2,
           },
         };
 
