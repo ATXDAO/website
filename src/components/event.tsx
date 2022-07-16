@@ -1,6 +1,15 @@
 import { DaoEvent } from '../data/eventbrite';
 import { limitChars } from '../utils/helpers';
-import { Grid, Box, Heading, Text, Button, Flex, Link } from '@chakra-ui/react';
+import {
+  Grid,
+  Box,
+  Heading,
+  Text,
+  Button,
+  Flex,
+  Link,
+  useColorModeValue,
+} from '@chakra-ui/react';
 import { createHash } from 'crypto';
 import { useUser } from 'hooks/app-hooks';
 import { FC } from 'react';
@@ -80,6 +89,7 @@ export const Event: FC<EventProps> = ({
       gap={['1rem', '1rem', '3rem']}
       borderRadius="12px"
       transition="0.2s"
+      backgroundColor={useColorModeValue('#6c7693', 'gray.800')}
       _hover={{
         cursor: 'pointer',
         color: 'orange',
