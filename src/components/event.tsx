@@ -1,3 +1,4 @@
+import { DaoEvent } from '../data/eventbrite';
 import { limitChars } from '../utils/helpers';
 import { Grid, Box, Heading, Text, Button, Flex, Link } from '@chakra-ui/react';
 import { createHash } from 'crypto';
@@ -6,31 +7,24 @@ import { FC } from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 
 interface EventProps {
-  img: string;
-  shareable: boolean | null;
-  link: string;
-  title: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  description: string;
-  eventId: string | null;
-  status: string;
+  event: DaoEvent;
   isMember: boolean;
   address: string | undefined;
 }
 
 export const Event: FC<EventProps> = ({
-  img,
-  shareable,
-  link,
-  title,
-  date,
-  startTime,
-  endTime,
-  description,
-  eventId,
-  status,
+  event: {
+    img,
+    shareable,
+    link,
+    title,
+    date,
+    startTime,
+    endTime,
+    description,
+    eventId,
+    status,
+  },
   isMember,
   address,
 }) => {

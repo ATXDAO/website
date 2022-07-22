@@ -9,8 +9,13 @@
 #### editor setup
 
 1. download + open atxdao website with [vscode](https://code.visualstudio.com/)
-1. go to the extensions view with `(ctrl|cmd)+shift+x`
-1. search for @recommended and install the workspace recommended eslint and prettier extensions
+2. go to the extensions view with `(ctrl|cmd)+shift+x`
+3. search for @recommended and install the workspace recommended eslint and prettier extensions
+
+#### .env
+
+1. Copy `.env.example` to `.env`
+2. Change any variables necessary for your environment (see [services](#services) below)
 
 #### developing on the site
 
@@ -25,3 +30,15 @@
 1. we use [chakra-ui](https://chakra-ui.com/docs/getting-started) as our design framework. check out the [docs](https://chakra-ui.com/docs/getting-started)!
 1. we use [nextjs](https://nextjs.org/docs) to statically build the site
 1. and deploy to [github pages](https://pages.github.com/)
+
+#### services
+
+##### EventBrite
+
+1. You'll need to set up an API Key on the EventBrite site under 
+   [API Keys](https://www.eventbrite.com/account-settings/apps)
+2. Use the Private Token for `NEXT_PRIVATE_EVENTBRITE_KEY` in `.env`
+3. Create at least one event (it may need to be paid)
+4. Get your organization ID by listing organizations using the 
+   [API Docs](https://www.eventbrite.com/platform/api#/reference/organization/list-your-organizations/list-your-organizations?console=1)
+5. Put your organization ID into `NEXT_PRIVATE_EVENTBRITE_ORGID` in `.env`

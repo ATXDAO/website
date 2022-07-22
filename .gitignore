@@ -25,6 +25,9 @@ yarn-error.log*
 
 tsconfig.tsbuildinfo
 
+# local editor files
+.idea/
+
 # local env files
 .env
 .env.local
