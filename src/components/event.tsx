@@ -1,6 +1,13 @@
 import { DaoEvent } from '../data/eventbrite';
 import { limitChars } from '../utils/helpers';
-import { Grid, Box, Heading, Text, Button, Flex, Link } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Heading,
+  Link,
+  Text,
+  useColorModeValue,
+} from '@chakra-ui/react';
 import { createHash } from 'crypto';
 import { useUser } from 'hooks/app-hooks';
 import { FC } from 'react';
@@ -73,13 +80,26 @@ export const Event: FC<EventProps> = ({
     }
   };
 
+  const details = (
+    <Box>
+      <Heading mb="2">{title}</Heading>
+      <Text fontSize="1.5rem" color="white !important">
+        {date}
+      </Text>
+      <Text fontWeight="bold" color="white !important">
+        {`${startTime} - ${endTime}`}
+      </Text>
+      <Text mt="2" fontSize="1.2rem" color="white !important">
+        {limitChars(description, 120)}
+      </Text>
+    </Box>
+  );
+
   return (
-    <Grid
-      minHeight="300px"
-      gridTemplateColumns={['1fr', '1fr', '2fr 3fr']}
-      gap={['1rem', '1rem', '3rem']}
+    <Box
       borderRadius="12px"
       transition="0.2s"
+      backgroundColor={useColorModeValue('#6c7693', 'gray.800')}
       _hover={{
         cursor: 'pointer',
         color: 'orange',
@@ -87,46 +107,19 @@ export const Event: FC<EventProps> = ({
       }}
     >
       <Box
-        minHeight="250px"
+        minHeight="300px"
         borderRadius="12px"
         backgroundImage={img}
         backgroundSize="cover"
         backgroundPosition="center"
       />
-      <Flex
-        paddingY={['0', '0', '2rem']}
-        paddingX={['0.5rem', '1rem', '0']}
-        justifyContent="space-between"
-        flexDirection="column"
-      >
+      <Box paddingY="1rem" paddingX="1rem" justifyContent="space-between">
         {isMember || shareable ? (
           <Link href={link} target="_blank">
-            <Box>
-              <Heading mb="2">{title}</Heading>
-              <Text fontSize="1.5rem" color="white !important">
-                {date}
-              </Text>
-              <Text fontWeight="bold" color="white !important">
-                {`${startTime} - ${endTime}`}
-              </Text>
-              <Text mt="2" fontSize="1.2rem" color="white !important">
-                {limitChars(description, 120)}
-              </Text>
-            </Box>
+            {details}
           </Link>
         ) : (
-          <Box>
-            <Heading mb="2">{title}</Heading>
-            <Text fontSize="1.5rem" color="white !important">
-              {date}
-            </Text>
-            <Text fontWeight="bold" color="white !important">
-              {`${startTime} - ${endTime}`}
-            </Text>
-            <Text mt="2" fontSize="1.2rem" color="white !important">
-              {limitChars(description, 120)}
-            </Text>
-          </Box>
+          details
         )}
         <Button
           variant="unstyled"
@@ -144,8 +137,8 @@ export const Event: FC<EventProps> = ({
         >
           {isMember || shareable ? 'Get Tickets' : 'Members Only'}
         </Button>
-      </Flex>
-    </Grid>
+      </Box>
+    </Box>
   );
 };
 
