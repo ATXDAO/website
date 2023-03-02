@@ -4,8 +4,7 @@ import { AppProvider } from 'hooks/app-hooks';
 import type { NextComponentType, NextPageContext } from 'next';
 import type { NextRouter } from 'next/router';
 import { FunctionComponent } from 'react';
-import { WagmiConfig, createClient } from 'wagmi';
-import { mainnet, sepolia, goerli } from 'wagmi/chains';
+import { defaultChains, WagmiProvider, createClient } from 'wagmi';
 import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
 import { InjectedConnector } from 'wagmi/connectors/injected';
 import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
@@ -14,14 +13,25 @@ import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
 const alchemy = process.env.NEXT_PUBLIC_ALCHEMY_ID as string;
 const etherscan = process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY as string;
 const infuraId = process.env.NEXT_PUBLIC_INFURA_ID as string;
-const chains = [mainnet, sepolia, goerli];
+
+// Pick chains
+const supportedChainIds = new Set([1, 3, 4]); // mainnet, ropsten
+
+const chains = defaultChains.filter((_chain) =>
+  supportedChainIds.has(_chain.id)
+);
+
+const defaultChain = defaultChains.find((chain) => chain.id === 1);
 
 const isChainSupported = (chainId?: number): boolean =>
   chains.some((x) => x.id === chainId);
 
 const wagmiClient = createClient({
   autoConnect: true,
-  connectors() {
+  connectors({ chainId }) {
+    const rpcUrl =
+      chains.find((x) => x.id === chainId)?.rpcUrls?.[0] ??
+      defaultChain?.rpcUrls[0];
     return [
       new InjectedConnector({ chains }),
       new WalletConnectConnector({
@@ -35,6 +45,7 @@ const wagmiClient = createClient({
         chains,
         options: {
           appName: 'wagmi',
+          jsonRpcUrl: `${rpcUrl}/${infuraId}`,
         },
       }),
     ];
@@ -73,13 +84,13 @@ const App: FunctionComponent<AppRenderProps> = ({
   pageProps,
   cookies,
 }) => (
-  <WagmiConfig client={wagmiClient}>
+  <WagmiProvider client={wagmiClient}>
     <UIProvider cookies={cookies}>
       <AppProvider>
         <Component {...pageProps} />
       </AppProvider>
     </UIProvider>
-  </WagmiConfig>
+  </WagmiProvider>
 );
 
 export default App;

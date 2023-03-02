@@ -11,19 +11,22 @@ import {
 } from '@chakra-ui/react';
 import { Layout } from 'components/layout';
 import { PfpImage } from 'components/pfp-image';
-import { BigNumber } from 'ethers';
 import { useFireworks } from 'hooks/app-hooks';
 import { NextPage } from 'next';
 import { FC, useEffect, useState } from 'react';
-import { mintContractByNetwork, SupportedNetwork } from 'utils/constants';
-import { useContractEvent, useNetwork, useEnsName, Address } from 'wagmi';
+import {
+  mintContractByNetwork,
+  EventArgs,
+  SupportedNetwork,
+} from 'utils/constants';
+import { useContractEvent, useNetwork, useEnsName } from 'wagmi';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const ATXDAONFT_V2_ABI = require('../contracts/ATXDAONFT_V2.json');
 
 interface NewOwnerArgs {
   pfpId: number;
-  address: Address;
+  address: string;
 }
 
 const shortenAddress = (addr: string): string =>
@@ -55,8 +58,8 @@ const EventPage: NextPage = () => {
   useEffect(() => {
     setFireworks(true);
   });
-  const { chain } = useNetwork();
-  const networkName = (chain?.name || 'ethereum').toLowerCase();
+  const { activeChain } = useNetwork();
+  const networkName = (activeChain?.name || 'ethereum').toLowerCase();
   const { address: contractAddress } =
     mintContractByNetwork[networkName as SupportedNetwork];
 
@@ -71,19 +74,21 @@ const EventPage: NextPage = () => {
     },
   ]);
 
-  useContractEvent({
-    address: contractAddress,
-    abi: ATXDAONFT_V2_ABI,
-    eventName: 'Transfer',
-    listener(...args) {
-      const [from, to, tokenId] = args as [Address, Address, BigNumber];
-      console.log({ from, to, tokenId });
+  useContractEvent(
+    {
+      addressOrName: contractAddress,
+      contractInterface: ATXDAONFT_V2_ABI,
+    },
+    'Transfer',
+    async (args: EventArgs) => {
+      const [from, to, tokenId, event] = args;
+      console.log({ from, to, tokenId, event });
       setOwners((oldOwners) => [
         { address: to, pfpId: tokenId.toNumber() },
         ...oldOwners.slice(0, 2),
       ]);
-    },
-  });
+    }
+  );
 
   return (
     <Layout title="atxdao" canToggleHeader>

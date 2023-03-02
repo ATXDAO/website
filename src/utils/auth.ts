@@ -11,11 +11,11 @@ export async function addressHasToken(address: string): Promise<boolean> {
     process.env.NEXT_PUBLIC_ALCHEMY_ID
   );
 
-  const nft = getContract({
-    address: mintContractByNetwork.ethereum.address,
-    abi: ATXDAONFT_V2_ABI,
+  const nft = getContract<ATXDAONFT_V2>({
+    addressOrName: mintContractByNetwork.ethereum.address,
+    contractInterface: ATXDAONFT_V2_ABI,
     signerOrProvider: provider,
-  }) as ATXDAONFT_V2;
+  });
 
   return (await nft.balanceOf(address)).gt(0);
 }

@@ -16,13 +16,16 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { ATXDAONFT_V2 } from 'contracts/types';
-import { BigNumber, BigNumberish, ContractTransaction } from 'ethers';
+import { BigNumber, ContractTransaction } from 'ethers';
 import { formatEther, getAddress, isAddress } from 'ethers/lib/utils';
 import { useFireworks } from 'hooks/app-hooks';
 import { FC, useEffect, useState } from 'react';
-import { mintContractByNetwork, SupportedNetwork } from 'utils/constants';
 import {
-  Address,
+  mintContractByNetwork,
+  EventArgs,
+  SupportedNetwork,
+} from 'utils/constants';
+import {
   useAccount,
   useBalance,
   useContract,
@@ -50,7 +53,7 @@ const tryParseError = (errorMsg: string): string => {
 
 const MintForm: FC = () => {
   const [, setFireworks] = useFireworks();
-  const { address: accountAddress, isConnected } = useAccount();
+  const { data: accountData } = useAccount();
   const [errorMessage, setErrorMessage] = useState('');
   const [transaction, setTransaction] = useState<
     ContractTransaction | undefined
@@ -64,20 +67,20 @@ const MintForm: FC = () => {
     isLoading: signerLoading,
   } = useSigner();
   const { data: balanceData, isLoading: isBalanceLoading } = useBalance({
-    address: accountAddress,
-    enabled: isConnected,
+    addressOrName: accountData?.address,
+    enabled: !!accountData,
   });
 
   const [buttonText, setButtonText] = useState('Loading...');
 
   const provider = useProvider();
 
-  const [mintPrice, setMintPrice] = useState<BigNumberish | undefined>();
+  const [mintPrice, setMintPrice] = useState<BigNumber | undefined>();
   const [isMintable, setIsMintable] = useState<boolean | undefined>();
   const [isMinting, setIsMinting] = useState(false);
   const [hasMinted, setHasMinted] = useState(false);
 
-  const { chain } = useNetwork();
+  const { activeChain } = useNetwork();
   const networkName = 'ethereum'.toLowerCase();
   const {
     address: contractAddress,
@@ -85,32 +88,32 @@ const MintForm: FC = () => {
     blockExplorer,
   } = mintContractByNetwork[networkName as SupportedNetwork];
 
-  const proof = accountAddress
-    ? merkleTree.proofs[accountAddress.toLowerCase() || '']
+  const proof = accountData
+    ? merkleTree.proofs[accountData?.address?.toLowerCase() || '']
     : undefined;
 
-  const mintContract = useContract({
-    address: contractAddress,
-    abi: ATXDAONFT_V2_ABI,
+  const mintContract = useContract<ATXDAONFT_V2>({
+    addressOrName: contractAddress,
+    contractInterface: ATXDAONFT_V2_ABI,
     signerOrProvider: signer || provider,
-  }) as ATXDAONFT_V2;
+  });
 
   const isBalanceSufficient =
     mintPrice && balanceData && balanceData.value.gte(mintPrice);
 
   useEffect(() => {
-    if (chain?.unsupported) {
+    if (activeChain?.unsupported) {
       return;
     }
     // eslint-disable-next-line no-underscore-dangle
     mintContract._mintPrice().then((price) => setMintPrice(price));
     mintContract.isMintable().then((mintable) => setIsMintable(mintable));
-    if (accountAddress && isAddress(accountAddress)) {
+    if (accountData?.address && isAddress(accountData?.address)) {
       mintContract
-        .hasMinted(getAddress(accountAddress))
+        .hasMinted(getAddress(accountData?.address))
         .then((_hasMinted) => setHasMinted(_hasMinted));
     }
-  }, [accountAddress, contractAddress]);
+  }, [accountData?.address, contractAddress]);
 
   const isMintableLoading = typeof isMintable === 'undefined';
   const isMintPriceLoading = typeof mintPrice === 'undefined';
@@ -168,14 +171,16 @@ const MintForm: FC = () => {
 
   const [pfpId, setPfpId] = useState<number | undefined>();
 
-  useContractEvent({
-    address: contractAddress,
-    abi: ATXDAONFT_V2_ABI,
-    eventName: 'Transfer',
-    listener(...args) {
-      const [from, to, tokenId] = args as [Address, Address, BigNumber];
-      console.log({ from, to, tokenId });
-      if (to.toLowerCase() === accountAddress?.toLowerCase()) {
+  useContractEvent(
+    {
+      addressOrName: contractAddress,
+      contractInterface: ATXDAONFT_V2_ABI,
+    },
+    'Transfer',
+    async (args: EventArgs) => {
+      const [from, to, tokenId, event] = args;
+      console.log({ from, to, tokenId, event });
+      if (to.toLowerCase() === accountData?.address?.toLowerCase()) {
         console.log('your nft was minted!!', tokenId.toNumber());
         setPfpId(tokenId.toNumber());
         setButtonText('Minted!');
@@ -183,8 +188,8 @@ const MintForm: FC = () => {
         setStatus('success');
         setFireworks(true);
       }
-    },
-  });
+    }
+  );
 
   return (
     <Container p={6} maxWidth="400px" display="block" overflow="none">
@@ -196,7 +201,7 @@ const MintForm: FC = () => {
           <PfpImage active={!!pfpId && status === 'success'} pfpId={pfpId} />
           <Stack spacing={2} hidden={!!proof}>
             <Text>Your address is not on the whitelist. </Text>
-            <Code>{accountAddress}</Code>
+            <Code>{accountData && accountData.address}</Code>
           </Stack>
           <Button
             isLoading={

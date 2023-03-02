@@ -35,15 +35,15 @@ const UKRAINE_NFT_ABI = require('../contracts/ATXDAOUkraineNFT.json');
 
 const IndexPage: NextPage = () => {
   const provider = useProvider();
-  const { chain } = useNetwork();
-  const networkName = (chain?.name || 'ethereum').toLowerCase();
+  const { activeChain } = useNetwork();
+  const networkName = (activeChain?.name || 'ethereum').toLowerCase();
   const { address: contractAddress, blockExplorer } =
     ukraineContractByNetwork[networkName as SupportedNetwork];
-  const mintContract = useContract({
-    address: contractAddress,
-    abi: UKRAINE_NFT_ABI,
+  const mintContract = useContract<ATXDAOUkraineNFT>({
+    addressOrName: contractAddress,
+    contractInterface: UKRAINE_NFT_ABI,
     signerOrProvider: provider,
-  }) as ATXDAOUkraineNFT;
+  });
 
   const { data: blockNumber } = useBlockNumber({
     watch: true,
