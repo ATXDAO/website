@@ -32,17 +32,16 @@ export const ConnectButton: FC<ButtonProps> = (buttonProps) => {
           <ModalCloseButton />
           <ModalBody>
             <Stack>
-              {connectors &&
-                connectors.map((x) => (
-                  <Button
-                    disabled={!x.ready}
-                    key={x.id}
-                    onClick={() => connect(x)}
-                  >
-                    {x.name}
-                    {!x.ready && ' (unsupported)'}
-                  </Button>
-                ))}
+              {connectors?.map((connector) => (
+                <Button
+                  disabled={!connector.ready}
+                  key={connector.id}
+                  onClick={() => connect({ connector })}
+                >
+                  {connector.name}
+                  {!connector.ready && ' (unsupported)'}
+                </Button>
+              ))}
               {error && <Box>{error?.message ?? 'Failed to connect'}</Box>}
             </Stack>
           </ModalBody>

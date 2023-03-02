@@ -20,7 +20,7 @@ import { NextPage } from 'next';
 import { useAccount } from 'wagmi';
 
 const IndexPage: NextPage = () => {
-  const { data: accountData } = useAccount();
+  const { isConnected } = useAccount();
   const isMounted = useIsMounted();
 
   return (
@@ -43,7 +43,7 @@ const IndexPage: NextPage = () => {
           <Grid minH="100vh" p={3} mt="5vh">
             <VStack spacing={[4, 4, 8]}>
               <Box>
-                {isMounted && accountData ? (
+                {isMounted && isConnected ? (
                   <MintForm />
                 ) : (
                   <>
