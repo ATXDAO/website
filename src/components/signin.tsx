@@ -20,8 +20,8 @@ const expiresAt: () => Date = () => {
 
 export const Signin: FC = () => {
   const toast = useToast();
-  const { data: accountData } = useAccount();
-  const { activeChain } = useNetwork();
+  const { address: accountAddress, isConnected } = useAccount();
+  const { chain } = useNetwork();
   const [loggedIn, setLoggedIn] = useState(false);
   const [{ loading }, setState] = useState<{
     error?: Error;
@@ -57,9 +57,8 @@ export const Signin: FC = () => {
       })
       .catch(async () => {
         try {
-          const address = accountData?.address;
-          const chainId = activeChain?.id;
-          if (activeChain?.unsupported) {
+          const chainId = chain?.id;
+          if (chain?.unsupported) {
             disconnect();
             toast({
               title: 'Please Switch Networks',
@@ -71,7 +70,7 @@ export const Signin: FC = () => {
             return;
           }
 
-          if (!address || !chainId || loggedIn) return;
+          if (!isConnected || loggedIn) return;
 
           setState((x) => ({
             ...x,
@@ -82,7 +81,7 @@ export const Signin: FC = () => {
           const nonceRes = await fetch('/api/nonce');
           const message = new SiweMessage({
             domain: window.location.host,
-            address,
+            address: accountAddress,
             statement: 'Sign in with Ethereum to the app.',
             uri: window.location.origin,
             version: '1',
@@ -127,7 +126,7 @@ export const Signin: FC = () => {
   };
 
   useEffect(() => {
-    if (!accountData) {
+    if (!isConnected) {
       setLoggedIn(false);
       return;
     }
@@ -135,7 +134,7 @@ export const Signin: FC = () => {
       signIn();
       setLoggedIn(true);
     }
-  }, [accountData?.address]);
+  }, [accountAddress]);
 
   useEffect(() => {
     currentUser();

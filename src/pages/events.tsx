@@ -45,32 +45,30 @@ const EventsPage: NextPage = ({
   const contentPaddingX = ['1rem', '2rem', '3rem', '10rem'];
   const contentPaddingY = '3rem';
   const [isMember, setIsMember] = useState(false);
-  const { data: accountData } = useAccount();
-  const { activeChain } = useNetwork();
+  const { address: accountAddress } = useAccount();
+  const { chain } = useNetwork();
   const networkName = 'ethereum'.toLowerCase();
   const { data: signer } = useSigner();
   const provider = useProvider();
   const { address: contractAddress } =
     mintContractByNetwork[networkName as SupportedNetwork];
 
-  const mintContract = useContract<ATXDAONFT_V2>({
-    addressOrName: contractAddress,
-    contractInterface: ATXDAONFT_V2_ABI,
+  const mintContract = useContract({
+    address: contractAddress,
+    abi: ATXDAONFT_V2_ABI,
     signerOrProvider: signer || provider,
-  });
+  }) as ATXDAONFT_V2;
 
   useEffect(() => {
-    if (activeChain?.unsupported) {
+    if (chain?.unsupported) {
       return;
     }
-    if (accountData?.address && isAddress(accountData?.address)) {
-      mintContract
-        .hasMinted(getAddress(accountData?.address))
-        .then((_hasMinted) => {
-          setIsMember(_hasMinted);
-        });
+    if (accountAddress && isAddress(accountAddress)) {
+      mintContract.hasMinted(getAddress(accountAddress)).then((_hasMinted) => {
+        setIsMember(_hasMinted);
+      });
     }
-  }, [accountData?.address]);
+  }, [accountAddress]);
 
   const events = (data.events.map(extractEventDetails) as DaoEvent[]).sort(
     (e1, e2) => e1.timestamp.getTime() - e2.timestamp.getTime()
@@ -87,7 +85,7 @@ const EventsPage: NextPage = ({
             .filter((event) => event.timestamp.getTime() >= Date.now())
             .reverse()}
           isMember={isMember}
-          address={accountData?.address}
+          address={accountAddress}
         />
         <Heading as="h1" mb="1rem">
           Recent Events
@@ -99,7 +97,7 @@ const EventsPage: NextPage = ({
               event.timestamp.getTime() >= Date.now() - pastEventsDateDiff
           )}
           isMember={isMember}
-          address={accountData?.address}
+          address={accountAddress}
         />
       </Box>
     </Layout>

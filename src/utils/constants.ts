@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { BigNumber } from 'ethers';
+import { Address } from 'wagmi';
 
 /* eslint-disable global-require */
 interface MerkleTreeData {
@@ -11,7 +12,7 @@ export type SupportedNetwork = 'ethereum' | 'ropsten' | 'rinkeby';
 
 interface ContractData {
   blockExplorer: string;
-  address: string;
+  address: Address;
 }
 
 interface MintContractData extends ContractData {

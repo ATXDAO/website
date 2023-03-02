@@ -15,7 +15,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import jsonp from 'jsonp';
-import { stringify } from 'query-string';
+import queryString from 'query-string';
 import {
   Dispatch,
   FC,
@@ -59,7 +59,7 @@ const SubscribeForm: FC = () => {
 
   const onSubmit: FormEventHandler = async (event) => {
     event.preventDefault();
-    const qs = stringify({
+    const qs = queryString.stringify({
       MERGE0: email,
     });
     setIsPosting(true);

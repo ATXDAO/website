@@ -22,12 +22,12 @@ import { formatEther, parseEther } from 'ethers/lib/utils';
 import { useFireworks } from 'hooks/app-hooks';
 import { FC, useEffect, useState } from 'react';
 import {
-  EventArgs,
   SupportedNetwork,
   UKRAINE_ETH_ADDRESS,
   ukraineContractByNetwork,
 } from 'utils/constants';
 import {
+  Address,
   useAccount,
   useBalance,
   useContract,
@@ -61,7 +61,7 @@ const tryParseError = (errorMsg: string): string => {
 
 const UkraineMintForm: FC = () => {
   const [, setFireworks] = useFireworks();
-  const { data: accountData } = useAccount();
+  const { address: accountAddress, isConnected } = useAccount();
   const [errorMessage, setErrorMessage] = useState('');
   const [transaction, setTransaction] = useState<
     ContractTransaction | undefined
@@ -75,8 +75,8 @@ const UkraineMintForm: FC = () => {
     isLoading: signerLoading,
   } = useSigner();
   const { data: balanceData, isLoading: isBalanceLoading } = useBalance({
-    addressOrName: accountData?.address,
-    enabled: !!accountData,
+    address: accountAddress,
+    enabled: isConnected,
   });
 
   const [buttonText, setButtonText] = useState('Loading...');
@@ -87,16 +87,16 @@ const UkraineMintForm: FC = () => {
   const [isMintable, setIsMintable] = useState<boolean | undefined>();
   const [isMinting, setIsMinting] = useState(false);
 
-  const { activeChain } = useNetwork();
-  const networkName = (activeChain?.name || 'ethereum').toLowerCase();
+  const { chain } = useNetwork();
+  const networkName = (chain?.name || 'ethereum').toLowerCase();
   const { address: contractAddress, blockExplorer } =
     ukraineContractByNetwork[networkName as SupportedNetwork];
 
-  const mintContract = useContract<ATXDAOUkraineNFT>({
-    addressOrName: contractAddress,
-    contractInterface: UKRAINE_NFT_ABI,
+  const mintContract = useContract({
+    address: contractAddress,
+    abi: UKRAINE_NFT_ABI,
     signerOrProvider: signer || provider,
-  });
+  }) as ATXDAOUkraineNFT;
 
   const isBalanceSufficient =
     mintPrice && balanceData && balanceData.value.gte(mintPrice);
@@ -104,7 +104,7 @@ const UkraineMintForm: FC = () => {
   useEffect(() => {
     // eslint-disable-next-line no-underscore-dangle
     mintContract.isMintable().then((mintable) => setIsMintable(mintable));
-  }, [accountData?.address, contractAddress]);
+  }, [accountAddress, contractAddress]);
 
   const isMintableLoading = typeof isMintable === 'undefined';
   const isMintPriceLoading = typeof mintPrice === 'undefined';
@@ -152,24 +152,22 @@ const UkraineMintForm: FC = () => {
     }
   };
 
-  useContractEvent(
-    {
-      addressOrName: contractAddress,
-      contractInterface: UKRAINE_NFT_ABI,
-    },
-    'Transfer',
-    async (args: EventArgs) => {
-      const [from, to, tokenId, event] = args;
-      console.log({ from, to, tokenId, event });
-      if (to.toLowerCase() === accountData?.address?.toLowerCase()) {
+  useContractEvent({
+    address: contractAddress,
+    abi: UKRAINE_NFT_ABI,
+    eventName: 'Transfer',
+    listener(...args) {
+      const [from, to, tokenId] = args as [Address, Address, BigNumber];
+      console.log({ from, to, tokenId });
+      if (to.toLowerCase() === accountAddress?.toLowerCase()) {
         console.log('your nft was minted!!', tokenId.toNumber());
         setButtonText('Minted!');
         setIsMinting(false);
         setStatus('success');
         setFireworks(true);
       }
-    }
-  );
+    },
+  });
 
   const {
     getRootProps,
@@ -204,7 +202,7 @@ const UkraineMintForm: FC = () => {
               })}
             </Stack>
           </Center>
-          {accountData ? (
+          {isConnected ? (
             <Button
               isLoading={
                 isMintableLoading ||
