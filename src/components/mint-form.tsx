@@ -18,18 +18,16 @@ import {
 import { ATXDAOMinter } from 'contracts/types';
 import { BigNumber, ContractTransaction } from 'ethers';
 import { formatEther, getAddress, isAddress } from 'ethers/lib/utils';
-import { useFireworks } from 'hooks/app-hooks';
+// import { useFireworks } from 'hooks/app-hooks';
 import { FC, useEffect, useState } from 'react';
 import {
-  mintContractByNetwork,
-  EventArgs,
+  mintContractByNetwork, // EventArgs,
   SupportedNetwork,
 } from 'utils/constants';
 import {
   useAccount,
   useBalance,
-  useContract,
-  useContractEvent,
+  useContract, // useContractEvent,
   useNetwork,
   useProvider,
   useSigner,
@@ -52,7 +50,7 @@ const tryParseError = (errorMsg: string): string => {
 };
 
 const MintForm: FC = () => {
-  const [, setFireworks] = useFireworks();
+  // const [, setFireworks] = useFireworks();
   const { data: accountData } = useAccount();
   const [errorMessage, setErrorMessage] = useState('');
   const [transaction, setTransaction] = useState<
