@@ -1,0 +1,27 @@
+[
+  {
+    "address": "0xabC1000000000000000000000000000000000000",
+    "tokenURI": "ipfs://QmYVgQoE74xp5TigTe1EC9vDQw7tx39t3U9ySTaNHa7CdV/26.json",
+    "isNewMember": true
+  },
+  {
+    "address": "0xAbc2000000000000000000000000000000000000",
+    "tokenURI": "ipfs://QmYVgQoE74xp5TigTe1EC9vDQw7tx39t3U9ySTaNHa7CdV/27.json",
+    "isNewMember": true
+  },
+  {
+    "address": "0xaBc3000000000000000000000000000000000000",
+    "tokenURI": "ipfs://QmYVgQoE74xp5TigTe1EC9vDQw7tx39t3U9ySTaNHa7CdV/28.json",
+    "isNewMember": false
+  },
+  {
+    "address": "0x51040CE6FC9b9C5Da69B044109f637dc997e92DE",
+    "tokenURI": "ipfs://QmYVgQoE74xp5TigTe1EC9vDQw7tx39t3U9ySTaNHa7CdV/29.json",
+    "isNewMember": true
+  },
+  {
+    "address": "0x6d7ddD863eB2Dad990bC05BDd3357E32850509E9",
+    "tokenURI": "ipfs://QmYVgQoE74xp5TigTe1EC9vDQw7tx39t3U9ySTaNHa7CdV/30.json",
+    "isNewMember": false
+  }
+]
