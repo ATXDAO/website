@@ -15,28 +15,26 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react';
-import { ATXDAONFT_V2 } from 'contracts/types';
+import { ATXDAOMinter } from 'contracts/types';
 import { BigNumber, ContractTransaction } from 'ethers';
 import { formatEther, getAddress, isAddress } from 'ethers/lib/utils';
-import { useFireworks } from 'hooks/app-hooks';
+// import { useFireworks } from 'hooks/app-hooks';
 import { FC, useEffect, useState } from 'react';
 import {
-  mintContractByNetwork,
-  EventArgs,
+  mintContractByNetwork, // EventArgs,
   SupportedNetwork,
 } from 'utils/constants';
 import {
   useAccount,
   useBalance,
-  useContract,
-  useContractEvent,
+  useContract, // useContractEvent,
   useNetwork,
   useProvider,
   useSigner,
 } from 'wagmi';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const ATXDAONFT_V2_ABI = require('../contracts/ATXDAONFT_V2.json');
+const ATXDAO_MINTER_ABI = require('../contracts/ATXDAOMinter.json');
 
 const tryParseError = (errorMsg: string): string => {
   const requireRevertError = errorMsg.match(
@@ -52,7 +50,7 @@ const tryParseError = (errorMsg: string): string => {
 };
 
 const MintForm: FC = () => {
-  const [, setFireworks] = useFireworks();
+  // const [, setFireworks] = useFireworks();
   const { data: accountData } = useAccount();
   const [errorMessage, setErrorMessage] = useState('');
   const [transaction, setTransaction] = useState<
@@ -86,15 +84,18 @@ const MintForm: FC = () => {
     address: contractAddress,
     merkleTree,
     blockExplorer,
+    minterMap,
   } = mintContractByNetwork[networkName as SupportedNetwork];
 
   const proof = accountData
     ? merkleTree.proofs[accountData?.address?.toLowerCase() || '']
     : undefined;
 
-  const mintContract = useContract<ATXDAONFT_V2>({
+  const tokenURI = minterMap[accountData?.address || '']?.tokenURI;
+
+  const mintContract = useContract<ATXDAOMinter>({
     addressOrName: contractAddress,
-    contractInterface: ATXDAONFT_V2_ABI,
+    contractInterface: ATXDAO_MINTER_ABI,
     signerOrProvider: signer || provider,
   });
 
@@ -106,7 +107,7 @@ const MintForm: FC = () => {
       return;
     }
     // eslint-disable-next-line no-underscore-dangle
-    mintContract._mintPrice().then((price) => setMintPrice(price));
+    mintContract.price().then((price) => setMintPrice(price));
     mintContract.isMintable().then((mintable) => setIsMintable(mintable));
     if (accountData?.address && isAddress(accountData?.address)) {
       mintContract
@@ -161,7 +162,9 @@ const MintForm: FC = () => {
     }
     try {
       setIsMinting(true);
-      const tx = await mintContract.mint(proof, { value: mintPrice });
+      const tx = await mintContract.mint(proof, tokenURI, {
+        value: mintPrice.toString(),
+      });
       setTransaction(tx);
     } catch (err) {
       setStatus('error');
@@ -169,27 +172,28 @@ const MintForm: FC = () => {
     }
   };
 
-  const [pfpId, setPfpId] = useState<number | undefined>();
+  const [pfpId /* , setPfpId */] = useState<number | undefined>();
 
-  useContractEvent(
-    {
-      addressOrName: contractAddress,
-      contractInterface: ATXDAONFT_V2_ABI,
-    },
-    'Transfer',
-    async (args: EventArgs) => {
-      const [from, to, tokenId, event] = args;
-      console.log({ from, to, tokenId, event });
-      if (to.toLowerCase() === accountData?.address?.toLowerCase()) {
-        console.log('your nft was minted!!', tokenId.toNumber());
-        setPfpId(tokenId.toNumber());
-        setButtonText('Minted!');
-        setIsMinting(false);
-        setStatus('success');
-        setFireworks(true);
-      }
-    }
-  );
+  // celebration thing
+  // useContractEvent(
+  //   {
+  //     addressOrName: contractAddress,
+  //     contractInterface: ATXDAO_MINTER_ABI,
+  //   },
+  //   'Transfer',
+  //   async (args: EventArgs) => {
+  //     const [from, to, tokenId, event] = args;
+  //     console.log({ from, to, tokenId, event });
+  //     if (to.toLowerCase() === accountData?.address?.toLowerCase()) {
+  //       console.log('your nft was minted!!', tokenId.toNumber());
+  //       setPfpId(tokenId.toNumber());
+  //       setButtonText('Minted!');
+  //       setIsMinting(false);
+  //       setStatus('success');
+  //       setFireworks(true);
+  //     }
+  //   }
+  // );
 
   return (
     <Container p={6} maxWidth="400px" display="block" overflow="none">

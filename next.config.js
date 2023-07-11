@@ -23,6 +23,15 @@ const nextConfig = {
       mainFields: ['browser', 'module', 'main'],
     },
   },
+  async redirects() {
+    return [
+      {
+        source: '/ukraine',
+        destination: '/',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

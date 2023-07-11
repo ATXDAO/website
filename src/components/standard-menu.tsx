@@ -31,9 +31,6 @@ export const StandardMenu: FC<StandardMenuProps> = ({ width }) => {
       <Link href="/events">
         <Button variant="ghost">Events</Button>
       </Link>
-      <Link href="/ukraine">
-        <Button variant="ghost">Ukraine</Button>
-      </Link>
     </Flex>
   );
 };
