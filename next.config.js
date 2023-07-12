@@ -17,11 +17,7 @@ const nextConfig = {
     NEXT_PUBLIC_INFURA_ID: throwEnv('NEXT_PUBLIC_INFURA_ID'),
     NEXT_PRIVATE_EVENTBRITE_KEY: throwEnv('NEXT_PRIVATE_EVENTBRITE_KEY'),
     NEXT_PRIVATE_EVENTBRITE_ORGID: throwEnv('NEXT_PRIVATE_EVENTBRITE_ORGID'),
-  },
-  webpack: {
-    resolve: {
-      mainFields: ['browser', 'module', 'main'],
-    },
+    NEXT_WALLETCONNECT_PROJECT_ID: throwEnv('NEXT_WALLETCONNECT_PROJECT_ID'),
   },
   async redirects() {
     return [

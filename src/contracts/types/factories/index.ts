@@ -4,4 +4,3 @@
 export { ATXDAOMinter__factory } from "./ATXDAOMinter__factory";
 export { ATXDAONFT_V2__factory } from "./ATXDAONFT_V2__factory";
 export { ATXDAOUkraineNFT__factory } from "./ATXDAOUkraineNFT__factory";
-export { IATXDAONFT_V2__factory } from "./IATXDAONFT_V2__factory";
