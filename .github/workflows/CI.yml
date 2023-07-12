@@ -19,6 +19,7 @@ jobs:
       NEXT_PRIVATE_EVENTBRITE_KEY: ${{ secrets.NEXT_PRIVATE_EVENTBRITE_KEY }}
       NEXT_PRIVATE_EVENTBRITE_ORGID: ${{ secrets.NEXT_PRIVATE_EVENTBRITE_ORGID }}
       NEXT_SESSION_PRIVATE_KEY: ${{ secrets.NEXT_SESSION_PRIVATE_KEY }}
+      NEXT_WALLETCONNECT_PROJECT_ID: ${{ secrets.NEXT_WALLETCONNECT_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
