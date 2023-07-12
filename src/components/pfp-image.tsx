@@ -3,12 +3,12 @@ import { Image, ImageProps } from '@chakra-ui/react';
 import { createRef, FC, useEffect } from 'react';
 
 interface PfpImageProps extends ImageProps {
-  pfpId?: number;
+  imageHash?: string;
   active: boolean;
 }
 
 export const PfpImage: FC<PfpImageProps> = ({
-  pfpId = 26,
+  imageHash = '00db2b',
   active,
   ...imageProps
 }) => {
@@ -31,10 +31,10 @@ export const PfpImage: FC<PfpImageProps> = ({
       );
     }
     // eslint-disable-next-line no-console
-  }, [pfpId, active]);
+  }, [imageHash, active]);
   return (
     <Image
-      src={`/img/zilker/${pfpId}.png`}
+      src={`/img/bluebonnet/${imageHash}.png`}
       transition="all 800ms ease-out"
       filter={active ? 'grayscale(1%)' : 'grayscale(95%)'}
       borderRadius="50%"
