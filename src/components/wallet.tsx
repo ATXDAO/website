@@ -23,10 +23,11 @@ import {
   useEnsAvatar,
   useEnsName,
   useNetwork,
+  useSwitchNetwork,
 } from 'wagmi';
 
 export const Wallet: FC = () => {
-  const { data: accountData } = useAccount();
+  const { address } = useAccount();
   const { data: ensName } = useEnsName();
   const { data: ensAvatar } = useEnsAvatar();
   const { disconnect } = useDisconnect();
@@ -38,16 +39,15 @@ export const Wallet: FC = () => {
     setUser(() => null);
   };
 
+  const { chains, chain } = useNetwork();
   const {
     switchNetwork,
-    chains,
-    activeChain,
     pendingChainId,
     isLoading: networkIsLoading,
-  } = useNetwork();
+  } = useSwitchNetwork();
   const isMounted = useIsMounted();
 
-  return isMounted && accountData?.address ? (
+  return isMounted && address ? (
     <Menu>
       <MenuButton
         as={Button}
@@ -57,7 +57,7 @@ export const Wallet: FC = () => {
       >
         <HStack mx={-1} spacing={1}>
           <Text fontSize={['md', 'lg']} mr={1}>
-            {ensName || shortenAddress(accountData.address)}
+            {ensName || shortenAddress(address)}
           </Text>
           <Avatar fontWeight="700" size="sm" src={ensAvatar || undefined}>
             <AvatarBadge boxSize="1.25em" bg="green.500" />
@@ -69,20 +69,20 @@ export const Wallet: FC = () => {
       <MenuList>
         <MenuGroup title="Network">
           {chains &&
-            chains.map((chain) => (
+            chains.map((_chain) => (
               <MenuItem
-                key={`network-${chain.id}`}
+                key={`network-${_chain.id}`}
                 onClick={() =>
-                  activeChain?.id !== chain.id && switchNetwork?.(chain.id)
+                  chain?.id !== _chain.id && switchNetwork?.(_chain.id)
                 }
               >
                 <Text pl="3">
-                  {chain.name}
+                  {_chain.name}
                   <Badge
                     variant="outline"
                     colorScheme="green"
                     ml={2}
-                    hidden={activeChain?.id !== chain.id}
+                    hidden={chain?.id !== _chain.id}
                   >
                     Connected
                   </Badge>
@@ -90,7 +90,7 @@ export const Wallet: FC = () => {
                     variant="outline"
                     colorScheme="yellow"
                     ml={2}
-                    hidden={!networkIsLoading || pendingChainId !== chain.id}
+                    hidden={!networkIsLoading || pendingChainId !== _chain.id}
                   >
                     Loading...
                   </Badge>
@@ -103,6 +103,6 @@ export const Wallet: FC = () => {
       </MenuList>
     </Menu>
   ) : (
-    <ConnectButton>Connect</ConnectButton>
+    <ConnectButton />
   );
 };

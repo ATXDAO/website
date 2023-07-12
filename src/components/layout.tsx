@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-css-tags */
 import { NavBar } from './navbar';
 import { ArrowDownIcon, ArrowUpIcon } from '@chakra-ui/icons';
 import {

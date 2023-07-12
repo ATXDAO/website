@@ -15,26 +15,22 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react';
-import { ATXDAOMinter } from 'contracts/types';
-import { BigNumber, ContractTransaction } from 'ethers';
-import { formatEther, getAddress, isAddress } from 'ethers/lib/utils';
-// import { useFireworks } from 'hooks/app-hooks';
+import { formatEther } from 'viem';
+import { useFireworks } from 'hooks/app-hooks';
 import { FC, useEffect, useState } from 'react';
 import {
   mintContractByNetwork, // EventArgs,
   SupportedNetwork,
+  ATXDAOMINTER_ABI,
 } from 'utils/constants';
 import {
   useAccount,
   useBalance,
-  useContract, // useContractEvent,
   useNetwork,
-  useProvider,
-  useSigner,
+  useWalletClient,
+  useContractRead,
+  useContractWrite,
 } from 'wagmi';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const ATXDAO_MINTER_ABI = require('../contracts/ATXDAOMinter.json');
 
 const tryParseError = (errorMsg: string): string => {
   const requireRevertError = errorMsg.match(
@@ -50,74 +46,123 @@ const tryParseError = (errorMsg: string): string => {
 };
 
 const MintForm: FC = () => {
-  // const [, setFireworks] = useFireworks();
-  const { data: accountData } = useAccount();
+  const { chain } = useNetwork();
+  const [, setFireworks] = useFireworks();
+  const { address } = useAccount();
+
+  console.log({ chain, address });
+
   const [errorMessage, setErrorMessage] = useState('');
-  const [transaction, setTransaction] = useState<
-    ContractTransaction | undefined
-  >();
   const [status, setStatus] = useState<'unsubmitted' | 'error' | 'success'>(
     'unsubmitted'
   );
   const {
-    data: signer,
+    // data: signer,
     error: signerError,
     isLoading: signerLoading,
-  } = useSigner();
+  } = useWalletClient();
   const { data: balanceData, isLoading: isBalanceLoading } = useBalance({
-    addressOrName: accountData?.address,
-    enabled: !!accountData,
+    address,
+    enabled: !!address,
   });
 
+  const [isMinting, setIsMinting] = useState(false);
   const [buttonText, setButtonText] = useState('Loading...');
 
-  const provider = useProvider();
-
-  const [mintPrice, setMintPrice] = useState<BigNumber | undefined>();
-  const [isMintable, setIsMintable] = useState<boolean | undefined>();
-  const [isMinting, setIsMinting] = useState(false);
-  const [hasMinted, setHasMinted] = useState(false);
-
-  const { activeChain } = useNetwork();
-  const networkName = 'ethereum'.toLowerCase();
+  const networkName = chain?.name?.toLowerCase() as SupportedNetwork;
   const {
     address: contractAddress,
     merkleTree,
     blockExplorer,
     minterMap,
-  } = mintContractByNetwork[networkName as SupportedNetwork];
+  } = mintContractByNetwork[networkName];
 
-  const proof = accountData
-    ? merkleTree.proofs[accountData?.address?.toLowerCase() || '']
+  const proof = address
+    ? merkleTree.proofs[address?.toLowerCase() || '']
     : undefined;
 
-  const tokenURI = minterMap[accountData?.address || '']?.tokenURI;
+  const tokenURI = minterMap[address || '']?.tokenURI;
 
-  const mintContract = useContract<ATXDAOMinter>({
-    addressOrName: contractAddress,
-    contractInterface: ATXDAO_MINTER_ABI,
-    signerOrProvider: signer || provider,
+  const { data: mintPriceData, isLoading: isMintPriceLoading } =
+    useContractRead({
+      abi: ATXDAOMINTER_ABI,
+      address: contractAddress,
+      functionName: 'price',
+      cacheTime: 600000, // 10 minutes
+    });
+  const mintPrice = mintPriceData as bigint | undefined;
+
+  const { data: isMintableData, isLoading: isMintableLoading } =
+    useContractRead({
+      abi: ATXDAOMINTER_ABI,
+      address: contractAddress,
+      functionName: 'isMintable',
+      cacheTime: 600000, // 10 minutes
+    });
+  const isMintable = isMintableData as boolean | undefined;
+
+  const { data: hasMintedData } = useContractRead({
+    abi: ATXDAOMINTER_ABI,
+    address: contractAddress,
+    functionName: 'hasMinted',
+    args: [address],
+    cacheOnBlock: true, // 10 minutes
+  });
+  const hasMinted = hasMintedData as boolean | undefined;
+
+  function mintSuccess(): void {
+    console.log('your nft was minted!!');
+    setButtonText('Minted!');
+    setIsMinting(false);
+    setStatus('success');
+    setFireworks(true);
+  }
+
+  function mintFailure(error: Error): void {
+    setStatus('error');
+    setIsMinting(false);
+    setErrorMessage(tryParseError(error.message));
+  }
+
+  const { data: mintTransaction, write: mintNft } = useContractWrite({
+    abi: ATXDAOMINTER_ABI,
+    address: contractAddress,
+    functionName: 'mint',
+    args: [proof, tokenURI],
+    value: mintPrice,
+    onSuccess(data, variables, context) {
+      console.log('minted', { data, variables, context });
+      mintSuccess();
+    },
+    onError(error, variables, context) {
+      console.log('error minting!', { error, variables, context });
+      mintFailure(error);
+    },
   });
 
+  // trade-in logic
+  // const [tradeInTokenId, setTradeInTokenId] = useState<bigint | undefined>();
+  // const { data: tradeInTransaction, write: tradeInNft } = useContractWrite({
+  //   abi: ATXDAOMINTER_ABI,
+  //   address: contractAddress,
+  //   functionName: 'tradeIn',
+  //   args: [proof, tokenURI, tradeInTokenId],
+  //   value: mintPrice,
+  //   onSuccess(data, variables, context) {
+  //     console.log('minted', { data, variables, context });
+  //     mintSuccess();
+  //   },
+  //   onError(error, variables, context) {
+  //     console.log('error minting!', { error, variables, context });
+  //     mintFailure(error);
+  //   },
+  // });
+
+  const mintTxHash = mintTransaction?.hash; // || tradeInTransaction?.hash;
+  console.log('mint tx:', mintTxHash);
+
   const isBalanceSufficient =
-    mintPrice && balanceData && balanceData.value.gte(mintPrice);
-
-  useEffect(() => {
-    if (activeChain?.unsupported) {
-      return;
-    }
-    // eslint-disable-next-line no-underscore-dangle
-    mintContract.price().then((price) => setMintPrice(price));
-    mintContract.isMintable().then((mintable) => setIsMintable(mintable));
-    if (accountData?.address && isAddress(accountData?.address)) {
-      mintContract
-        .hasMinted(getAddress(accountData?.address))
-        .then((_hasMinted) => setHasMinted(_hasMinted));
-    }
-  }, [accountData?.address, contractAddress]);
-
-  const isMintableLoading = typeof isMintable === 'undefined';
-  const isMintPriceLoading = typeof mintPrice === 'undefined';
+    mintPrice && balanceData && balanceData.value >= mintPrice;
 
   useEffect(() => {
     if (
@@ -136,9 +181,9 @@ const MintForm: FC = () => {
     } else if (isMinting) {
       setButtonText('Minting...');
     } else if (!isBalanceSufficient) {
-      setButtonText(`Must have at least ${formatEther(mintPrice)} Ξ`);
+      setButtonText(`Must have at least ${formatEther(mintPrice || 1n)} Ξ`);
     } else {
-      setButtonText(`Mint for ${formatEther(mintPrice)} Ξ`);
+      setButtonText(`Mint for ${formatEther(mintPrice || 1n)} Ξ`);
     }
   }, [
     isMintable,
@@ -160,19 +205,11 @@ const MintForm: FC = () => {
       });
       return;
     }
-    try {
-      setIsMinting(true);
-      const tx = await mintContract.mint(proof, tokenURI, {
-        value: mintPrice.toString(),
-      });
-      setTransaction(tx);
-    } catch (err) {
-      setStatus('error');
-      setErrorMessage(tryParseError((err as Error).message));
-    }
+    setIsMinting(true);
+    mintNft();
   };
 
-  const [pfpId /* , setPfpId */] = useState<number | undefined>();
+  // const [imageHash /* , setPfpId */] = useState<number | undefined>();
 
   // celebration thing
   // useContractEvent(
@@ -185,12 +222,6 @@ const MintForm: FC = () => {
   //     const [from, to, tokenId, event] = args;
   //     console.log({ from, to, tokenId, event });
   //     if (to.toLowerCase() === accountData?.address?.toLowerCase()) {
-  //       console.log('your nft was minted!!', tokenId.toNumber());
-  //       setPfpId(tokenId.toNumber());
-  //       setButtonText('Minted!');
-  //       setIsMinting(false);
-  //       setStatus('success');
-  //       setFireworks(true);
   //     }
   //   }
   // );
@@ -202,10 +233,10 @@ const MintForm: FC = () => {
           {errorMessage}
         </FormErrorMessage>
         <Stack spacing={8}>
-          <PfpImage active={!!pfpId && status === 'success'} pfpId={pfpId} />
+          <PfpImage active={status === 'success'} /* imageHash={imageHash} */ />
           <Stack spacing={2} hidden={!!proof}>
             <Text>Your address is not on the whitelist. </Text>
-            <Code>{accountData && accountData.address}</Code>
+            <Code>{address}</Code>
           </Stack>
           <Button
             isLoading={
@@ -248,7 +279,7 @@ const MintForm: FC = () => {
               <AlertDescription mt={-1}>
                 <Flex>
                   <Center>Successfully minted!</Center>
-                  {transaction && (
+                  {mintTxHash && (
                     <Center>
                       <Button
                         rightIcon={<LinkIcon />}
@@ -256,7 +287,7 @@ const MintForm: FC = () => {
                         size="xs"
                         ml={2}
                         target="_blank"
-                        href={`${blockExplorer}/tx/${transaction.hash}`}
+                        href={`${blockExplorer}/tx/${mintTxHash}`}
                       >
                         Etherscan
                       </Button>

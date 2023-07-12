@@ -1,3 +1,9 @@
+import { useColorModeValue } from '@chakra-ui/system';
+import {
+  RainbowKitProvider,
+  darkTheme,
+  lightTheme,
+} from '@rainbow-me/rainbowkit';
 import {
   createContext,
   Dispatch,
@@ -9,6 +15,7 @@ import {
   ReactElement,
   useEffect,
 } from 'react';
+import { chains } from 'utils/clients';
 
 type SetState<T> = Dispatch<SetStateAction<T>>;
 
@@ -66,5 +73,21 @@ export const AppProvider: FC<{ children: ReactElement }> = ({ children }) => {
     }),
     [fireworks, isMounted, user]
   );
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  const theme = useColorModeValue(lightTheme, darkTheme);
+
+  return (
+    <AppContext.Provider value={value}>
+      <RainbowKitProvider
+        coolMode
+        chains={chains}
+        theme={theme()}
+        appInfo={{
+          appName: 'ATX DAO',
+          learnMoreUrl: 'https://www.atxdao.com/',
+        }}
+      >
+        {children}
+      </RainbowKitProvider>
+    </AppContext.Provider>
+  );
 };

@@ -10,7 +10,7 @@ import {
   MenuDivider,
 } from '@chakra-ui/react';
 import { FC } from 'react';
-import { FaHome, FaInfoCircle, FaDiscord, FaGithub } from 'react-icons/fa';
+import { FaHome, FaDiscord, FaGithub } from 'react-icons/fa';
 
 export const MobileMenu: FC = () => {
   return (
@@ -25,9 +25,9 @@ export const MobileMenu: FC = () => {
         <MenuItem icon={<FaHome />}>
           <Link href="/">Home</Link>
         </MenuItem>
-        <MenuItem icon={<FaInfoCircle />}>
+        {/* <MenuItem icon={<FaInfoCircle />}>
           <Link href="/events">Events</Link>
-        </MenuItem>
+        </MenuItem> */}
         <MenuDivider />
         <MenuItem>
           <Flex gap="1rem">

@@ -3,59 +3,29 @@
 /* eslint-disable */
 import type {
   BaseContract,
-  BigNumber,
   BigNumberish,
   BytesLike,
-  CallOverrides,
-  ContractTransaction,
-  Overrides,
-  PayableOverrides,
-  PopulatedTransaction,
-  Signer,
-  utils,
-} from "ethers";
-import type {
   FunctionFragment,
   Result,
+  Interface,
   EventFragment,
-} from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
+  AddressLike,
+  ContractRunner,
+  ContractMethod,
+  Listener,
+} from "ethers";
 import type {
-  TypedEventFilter,
-  TypedEvent,
+  TypedContractEvent,
+  TypedDeferredTopicFilter,
+  TypedEventLog,
+  TypedLogDescription,
   TypedListener,
-  OnEvent,
+  TypedContractMethod,
 } from "./common";
 
-export interface ATXDAOMinterInterface extends utils.Interface {
-  functions: {
-    "canMint(address,bytes32[],string)": FunctionFragment;
-    "canTradeIn(address,bytes32[],string)": FunctionFragment;
-    "endMint()": FunctionFragment;
-    "hasMinted(address)": FunctionFragment;
-    "isMintable()": FunctionFragment;
-    "lastMinted(address)": FunctionFragment;
-    "lastRoundTokenId()": FunctionFragment;
-    "merkleRoot()": FunctionFragment;
-    "mint(bytes32[],string)": FunctionFragment;
-    "mintSpecial(address,string)": FunctionFragment;
-    "mintedIndex()": FunctionFragment;
-    "nft()": FunctionFragment;
-    "onERC721Received(address,address,uint256,bytes)": FunctionFragment;
-    "owner()": FunctionFragment;
-    "price()": FunctionFragment;
-    "renounceOwnership()": FunctionFragment;
-    "resetHasMinted(address[])": FunctionFragment;
-    "setBank(address)": FunctionFragment;
-    "startMint(bytes32,uint256,bool)": FunctionFragment;
-    "tradeIn(bytes32[],string,uint256)": FunctionFragment;
-    "transferNftOwnership(address)": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
-    "verifyProof(bytes32[],address,string,bool)": FunctionFragment;
-  };
-
+export interface ATXDAOMinterInterface extends Interface {
   getFunction(
-    nameOrSignatureOrTopic:
+    nameOrSignature:
       | "canMint"
       | "canTradeIn"
       | "endMint"
@@ -81,21 +51,31 @@ export interface ATXDAOMinterInterface extends utils.Interface {
       | "verifyProof"
   ): FunctionFragment;
 
+  getEvent(
+    nameOrSignatureOrTopic: "Mint" | "OwnershipTransferred" | "TradeIn"
+  ): EventFragment;
+
   encodeFunctionData(
     functionFragment: "canMint",
-    values: [string, BytesLike[], string]
+    values: [AddressLike, BytesLike[], string]
   ): string;
   encodeFunctionData(
     functionFragment: "canTradeIn",
-    values: [string, BytesLike[], string]
+    values: [AddressLike, BytesLike[], string]
   ): string;
   encodeFunctionData(functionFragment: "endMint", values?: undefined): string;
-  encodeFunctionData(functionFragment: "hasMinted", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "hasMinted",
+    values: [AddressLike]
+  ): string;
   encodeFunctionData(
     functionFragment: "isMintable",
     values?: undefined
   ): string;
-  encodeFunctionData(functionFragment: "lastMinted", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "lastMinted",
+    values: [AddressLike]
+  ): string;
   encodeFunctionData(
     functionFragment: "lastRoundTokenId",
     values?: undefined
@@ -110,7 +90,7 @@ export interface ATXDAOMinterInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "mintSpecial",
-    values: [string, string]
+    values: [AddressLike, string]
   ): string;
   encodeFunctionData(
     functionFragment: "mintedIndex",
@@ -119,7 +99,7 @@ export interface ATXDAOMinterInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "nft", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "onERC721Received",
-    values: [string, string, BigNumberish, BytesLike]
+    values: [AddressLike, AddressLike, BigNumberish, BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(functionFragment: "price", values?: undefined): string;
@@ -129,9 +109,12 @@ export interface ATXDAOMinterInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "resetHasMinted",
-    values: [string[]]
+    values: [AddressLike[]]
   ): string;
-  encodeFunctionData(functionFragment: "setBank", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "setBank",
+    values: [AddressLike]
+  ): string;
   encodeFunctionData(
     functionFragment: "startMint",
     values: [BytesLike, BigNumberish, boolean]
@@ -142,15 +125,15 @@ export interface ATXDAOMinterInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "transferNftOwnership",
-    values: [string]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
-    values: [string]
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "verifyProof",
-    values: [BytesLike[], string, string, boolean]
+    values: [BytesLike[], AddressLike, string, boolean]
   ): string;
 
   decodeFunctionResult(functionFragment: "canMint", data: BytesLike): Result;
@@ -203,613 +186,360 @@ export interface ATXDAOMinterInterface extends utils.Interface {
     functionFragment: "verifyProof",
     data: BytesLike
   ): Result;
-
-  events: {
-    "Mint(address,string,uint256)": EventFragment;
-    "OwnershipTransferred(address,address)": EventFragment;
-    "TradeIn(address,string,uint256)": EventFragment;
-  };
-
-  getEvent(nameOrSignatureOrTopic: "Mint"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "TradeIn"): EventFragment;
 }
 
-export interface MintEventObject {
-  to: string;
-  tokenURI: string;
-  price: BigNumber;
+export namespace MintEvent {
+  export type InputTuple = [
+    to: AddressLike,
+    tokenURI: string,
+    price: BigNumberish
+  ];
+  export type OutputTuple = [to: string, tokenURI: string, price: bigint];
+  export interface OutputObject {
+    to: string;
+    tokenURI: string;
+    price: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type MintEvent = TypedEvent<
-  [string, string, BigNumber],
-  MintEventObject
->;
 
-export type MintEventFilter = TypedEventFilter<MintEvent>;
-
-export interface OwnershipTransferredEventObject {
-  previousOwner: string;
-  newOwner: string;
+export namespace OwnershipTransferredEvent {
+  export type InputTuple = [previousOwner: AddressLike, newOwner: AddressLike];
+  export type OutputTuple = [previousOwner: string, newOwner: string];
+  export interface OutputObject {
+    previousOwner: string;
+    newOwner: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type OwnershipTransferredEvent = TypedEvent<
-  [string, string],
-  OwnershipTransferredEventObject
->;
 
-export type OwnershipTransferredEventFilter =
-  TypedEventFilter<OwnershipTransferredEvent>;
-
-export interface TradeInEventObject {
-  to: string;
-  tokenURI: string;
-  oldTokenId: BigNumber;
+export namespace TradeInEvent {
+  export type InputTuple = [
+    to: AddressLike,
+    tokenURI: string,
+    oldTokenId: BigNumberish
+  ];
+  export type OutputTuple = [to: string, tokenURI: string, oldTokenId: bigint];
+  export interface OutputObject {
+    to: string;
+    tokenURI: string;
+    oldTokenId: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
-export type TradeInEvent = TypedEvent<
-  [string, string, BigNumber],
-  TradeInEventObject
->;
-
-export type TradeInEventFilter = TypedEventFilter<TradeInEvent>;
 
 export interface ATXDAOMinter extends BaseContract {
-  connect(signerOrProvider: Signer | Provider | string): this;
-  attach(addressOrName: string): this;
-  deployed(): Promise<this>;
+  connect(runner?: ContractRunner | null): ATXDAOMinter;
+  waitForDeployment(): Promise<this>;
 
   interface: ATXDAOMinterInterface;
 
-  queryFilter<TEvent extends TypedEvent>(
-    event: TypedEventFilter<TEvent>,
+  queryFilter<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
     toBlock?: string | number | undefined
-  ): Promise<Array<TEvent>>;
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
+  queryFilter<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    fromBlockOrBlockhash?: string | number | undefined,
+    toBlock?: string | number | undefined
+  ): Promise<Array<TypedEventLog<TCEvent>>>;
 
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
-  listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
-  removeAllListeners(eventName?: string): this;
-  off: OnEvent<this>;
-  on: OnEvent<this>;
-  once: OnEvent<this>;
-  removeListener: OnEvent<this>;
+  on<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  on<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
 
-  functions: {
-    canMint(
-      recipient: string,
+  once<TCEvent extends TypedContractEvent>(
+    event: TCEvent,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+  once<TCEvent extends TypedContractEvent>(
+    filter: TypedDeferredTopicFilter<TCEvent>,
+    listener: TypedListener<TCEvent>
+  ): Promise<this>;
+
+  listeners<TCEvent extends TypedContractEvent>(
+    event: TCEvent
+  ): Promise<Array<TypedListener<TCEvent>>>;
+  listeners(eventName?: string): Promise<Array<Listener>>;
+  removeAllListeners<TCEvent extends TypedContractEvent>(
+    event?: TCEvent
+  ): Promise<this>;
+
+  canMint: TypedContractMethod<
+    [recipient: AddressLike, proof: BytesLike[], tokenURI: string],
+    [boolean],
+    "view"
+  >;
+
+  canTradeIn: TypedContractMethod<
+    [recipient: AddressLike, proof: BytesLike[], tokenURI: string],
+    [boolean],
+    "view"
+  >;
+
+  endMint: TypedContractMethod<[], [void], "nonpayable">;
+
+  hasMinted: TypedContractMethod<[recipient: AddressLike], [boolean], "view">;
+
+  isMintable: TypedContractMethod<[], [boolean], "view">;
+
+  lastMinted: TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
+
+  lastRoundTokenId: TypedContractMethod<[], [bigint], "view">;
+
+  merkleRoot: TypedContractMethod<[], [string], "view">;
+
+  mint: TypedContractMethod<
+    [proof: BytesLike[], tokenURI: string],
+    [void],
+    "payable"
+  >;
+
+  mintSpecial: TypedContractMethod<
+    [to: AddressLike, tokenURI: string],
+    [void],
+    "nonpayable"
+  >;
+
+  mintedIndex: TypedContractMethod<[], [bigint], "view">;
+
+  nft: TypedContractMethod<[], [string], "view">;
+
+  onERC721Received: TypedContractMethod<
+    [arg0: AddressLike, arg1: AddressLike, arg2: BigNumberish, arg3: BytesLike],
+    [string],
+    "view"
+  >;
+
+  owner: TypedContractMethod<[], [string], "view">;
+
+  price: TypedContractMethod<[], [bigint], "view">;
+
+  renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
+
+  resetHasMinted: TypedContractMethod<
+    [addrs: AddressLike[]],
+    [void],
+    "nonpayable"
+  >;
+
+  setBank: TypedContractMethod<[_bank: AddressLike], [void], "nonpayable">;
+
+  startMint: TypedContractMethod<
+    [_merkleRoot: BytesLike, _price: BigNumberish, _isNewRound: boolean],
+    [void],
+    "nonpayable"
+  >;
+
+  tradeIn: TypedContractMethod<
+    [proof: BytesLike[], tokenURI: string, tokenId: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  transferNftOwnership: TypedContractMethod<
+    [to: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  transferOwnership: TypedContractMethod<
+    [newOwner: AddressLike],
+    [void],
+    "nonpayable"
+  >;
+
+  verifyProof: TypedContractMethod<
+    [
       proof: BytesLike[],
+      recipient: AddressLike,
       tokenURI: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
+      isNewMember: boolean
+    ],
+    [boolean],
+    "view"
+  >;
 
-    canTradeIn(
-      recipient: string,
+  getFunction<T extends ContractMethod = ContractMethod>(
+    key: string | FunctionFragment
+  ): T;
+
+  getFunction(
+    nameOrSignature: "canMint"
+  ): TypedContractMethod<
+    [recipient: AddressLike, proof: BytesLike[], tokenURI: string],
+    [boolean],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "canTradeIn"
+  ): TypedContractMethod<
+    [recipient: AddressLike, proof: BytesLike[], tokenURI: string],
+    [boolean],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "endMint"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "hasMinted"
+  ): TypedContractMethod<[recipient: AddressLike], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "isMintable"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "lastMinted"
+  ): TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "lastRoundTokenId"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "merkleRoot"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "mint"
+  ): TypedContractMethod<
+    [proof: BytesLike[], tokenURI: string],
+    [void],
+    "payable"
+  >;
+  getFunction(
+    nameOrSignature: "mintSpecial"
+  ): TypedContractMethod<
+    [to: AddressLike, tokenURI: string],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "mintedIndex"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "nft"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "onERC721Received"
+  ): TypedContractMethod<
+    [arg0: AddressLike, arg1: AddressLike, arg2: BigNumberish, arg3: BytesLike],
+    [string],
+    "view"
+  >;
+  getFunction(
+    nameOrSignature: "owner"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "price"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "renounceOwnership"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "resetHasMinted"
+  ): TypedContractMethod<[addrs: AddressLike[]], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setBank"
+  ): TypedContractMethod<[_bank: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "startMint"
+  ): TypedContractMethod<
+    [_merkleRoot: BytesLike, _price: BigNumberish, _isNewRound: boolean],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "tradeIn"
+  ): TypedContractMethod<
+    [proof: BytesLike[], tokenURI: string, tokenId: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "transferNftOwnership"
+  ): TypedContractMethod<[to: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "transferOwnership"
+  ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "verifyProof"
+  ): TypedContractMethod<
+    [
       proof: BytesLike[],
+      recipient: AddressLike,
       tokenURI: string,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-
-    endMint(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    hasMinted(recipient: string, overrides?: CallOverrides): Promise<[boolean]>;
-
-    isMintable(overrides?: CallOverrides): Promise<[boolean]>;
-
-    lastMinted(arg0: string, overrides?: CallOverrides): Promise<[number]>;
-
-    lastRoundTokenId(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    merkleRoot(overrides?: CallOverrides): Promise<[string]>;
-
-    mint(
-      proof: BytesLike[],
-      tokenURI: string,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    mintSpecial(
-      to: string,
-      tokenURI: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    mintedIndex(overrides?: CallOverrides): Promise<[number]>;
-
-    nft(overrides?: CallOverrides): Promise<[string]>;
-
-    onERC721Received(
-      arg0: string,
-      arg1: string,
-      arg2: BigNumberish,
-      arg3: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<[string]>;
-
-    owner(overrides?: CallOverrides): Promise<[string]>;
-
-    price(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    resetHasMinted(
-      addrs: string[],
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    setBank(
-      _bank: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    startMint(
-      _merkleRoot: BytesLike,
-      _price: BigNumberish,
-      _isNewRound: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    tradeIn(
-      proof: BytesLike[],
-      tokenURI: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    transferNftOwnership(
-      to: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    verifyProof(
-      proof: BytesLike[],
-      recipient: string,
-      tokenURI: string,
-      isNewMember: boolean,
-      overrides?: CallOverrides
-    ): Promise<[boolean]>;
-  };
-
-  canMint(
-    recipient: string,
-    proof: BytesLike[],
-    tokenURI: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  canTradeIn(
-    recipient: string,
-    proof: BytesLike[],
-    tokenURI: string,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  endMint(
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  hasMinted(recipient: string, overrides?: CallOverrides): Promise<boolean>;
-
-  isMintable(overrides?: CallOverrides): Promise<boolean>;
-
-  lastMinted(arg0: string, overrides?: CallOverrides): Promise<number>;
-
-  lastRoundTokenId(overrides?: CallOverrides): Promise<BigNumber>;
-
-  merkleRoot(overrides?: CallOverrides): Promise<string>;
-
-  mint(
-    proof: BytesLike[],
-    tokenURI: string,
-    overrides?: PayableOverrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  mintSpecial(
-    to: string,
-    tokenURI: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  mintedIndex(overrides?: CallOverrides): Promise<number>;
-
-  nft(overrides?: CallOverrides): Promise<string>;
-
-  onERC721Received(
-    arg0: string,
-    arg1: string,
-    arg2: BigNumberish,
-    arg3: BytesLike,
-    overrides?: CallOverrides
-  ): Promise<string>;
-
-  owner(overrides?: CallOverrides): Promise<string>;
-
-  price(overrides?: CallOverrides): Promise<BigNumber>;
-
-  renounceOwnership(
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  resetHasMinted(
-    addrs: string[],
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  setBank(
-    _bank: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  startMint(
-    _merkleRoot: BytesLike,
-    _price: BigNumberish,
-    _isNewRound: boolean,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  tradeIn(
-    proof: BytesLike[],
-    tokenURI: string,
-    tokenId: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  transferNftOwnership(
-    to: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  transferOwnership(
-    newOwner: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  verifyProof(
-    proof: BytesLike[],
-    recipient: string,
-    tokenURI: string,
-    isNewMember: boolean,
-    overrides?: CallOverrides
-  ): Promise<boolean>;
-
-  callStatic: {
-    canMint(
-      recipient: string,
-      proof: BytesLike[],
-      tokenURI: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    canTradeIn(
-      recipient: string,
-      proof: BytesLike[],
-      tokenURI: string,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-
-    endMint(overrides?: CallOverrides): Promise<void>;
-
-    hasMinted(recipient: string, overrides?: CallOverrides): Promise<boolean>;
-
-    isMintable(overrides?: CallOverrides): Promise<boolean>;
-
-    lastMinted(arg0: string, overrides?: CallOverrides): Promise<number>;
-
-    lastRoundTokenId(overrides?: CallOverrides): Promise<BigNumber>;
-
-    merkleRoot(overrides?: CallOverrides): Promise<string>;
-
-    mint(
-      proof: BytesLike[],
-      tokenURI: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    mintSpecial(
-      to: string,
-      tokenURI: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    mintedIndex(overrides?: CallOverrides): Promise<number>;
-
-    nft(overrides?: CallOverrides): Promise<string>;
-
-    onERC721Received(
-      arg0: string,
-      arg1: string,
-      arg2: BigNumberish,
-      arg3: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<string>;
-
-    owner(overrides?: CallOverrides): Promise<string>;
-
-    price(overrides?: CallOverrides): Promise<BigNumber>;
-
-    renounceOwnership(overrides?: CallOverrides): Promise<void>;
-
-    resetHasMinted(addrs: string[], overrides?: CallOverrides): Promise<void>;
-
-    setBank(_bank: string, overrides?: CallOverrides): Promise<void>;
-
-    startMint(
-      _merkleRoot: BytesLike,
-      _price: BigNumberish,
-      _isNewRound: boolean,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    tradeIn(
-      proof: BytesLike[],
-      tokenURI: string,
-      tokenId: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    transferNftOwnership(to: string, overrides?: CallOverrides): Promise<void>;
-
-    transferOwnership(
-      newOwner: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    verifyProof(
-      proof: BytesLike[],
-      recipient: string,
-      tokenURI: string,
-      isNewMember: boolean,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
-  };
+      isNewMember: boolean
+    ],
+    [boolean],
+    "view"
+  >;
+
+  getEvent(
+    key: "Mint"
+  ): TypedContractEvent<
+    MintEvent.InputTuple,
+    MintEvent.OutputTuple,
+    MintEvent.OutputObject
+  >;
+  getEvent(
+    key: "OwnershipTransferred"
+  ): TypedContractEvent<
+    OwnershipTransferredEvent.InputTuple,
+    OwnershipTransferredEvent.OutputTuple,
+    OwnershipTransferredEvent.OutputObject
+  >;
+  getEvent(
+    key: "TradeIn"
+  ): TypedContractEvent<
+    TradeInEvent.InputTuple,
+    TradeInEvent.OutputTuple,
+    TradeInEvent.OutputObject
+  >;
 
   filters: {
-    "Mint(address,string,uint256)"(
-      to?: null,
-      tokenURI?: null,
-      price?: null
-    ): MintEventFilter;
-    Mint(to?: null, tokenURI?: null, price?: null): MintEventFilter;
+    "Mint(address,string,uint256)": TypedContractEvent<
+      MintEvent.InputTuple,
+      MintEvent.OutputTuple,
+      MintEvent.OutputObject
+    >;
+    Mint: TypedContractEvent<
+      MintEvent.InputTuple,
+      MintEvent.OutputTuple,
+      MintEvent.OutputObject
+    >;
 
-    "OwnershipTransferred(address,address)"(
-      previousOwner?: string | null,
-      newOwner?: string | null
-    ): OwnershipTransferredEventFilter;
-    OwnershipTransferred(
-      previousOwner?: string | null,
-      newOwner?: string | null
-    ): OwnershipTransferredEventFilter;
+    "OwnershipTransferred(address,address)": TypedContractEvent<
+      OwnershipTransferredEvent.InputTuple,
+      OwnershipTransferredEvent.OutputTuple,
+      OwnershipTransferredEvent.OutputObject
+    >;
+    OwnershipTransferred: TypedContractEvent<
+      OwnershipTransferredEvent.InputTuple,
+      OwnershipTransferredEvent.OutputTuple,
+      OwnershipTransferredEvent.OutputObject
+    >;
 
-    "TradeIn(address,string,uint256)"(
-      to?: null,
-      tokenURI?: null,
-      oldTokenId?: null
-    ): TradeInEventFilter;
-    TradeIn(to?: null, tokenURI?: null, oldTokenId?: null): TradeInEventFilter;
-  };
-
-  estimateGas: {
-    canMint(
-      recipient: string,
-      proof: BytesLike[],
-      tokenURI: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    canTradeIn(
-      recipient: string,
-      proof: BytesLike[],
-      tokenURI: string,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    endMint(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    hasMinted(recipient: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    isMintable(overrides?: CallOverrides): Promise<BigNumber>;
-
-    lastMinted(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    lastRoundTokenId(overrides?: CallOverrides): Promise<BigNumber>;
-
-    merkleRoot(overrides?: CallOverrides): Promise<BigNumber>;
-
-    mint(
-      proof: BytesLike[],
-      tokenURI: string,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    mintSpecial(
-      to: string,
-      tokenURI: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    mintedIndex(overrides?: CallOverrides): Promise<BigNumber>;
-
-    nft(overrides?: CallOverrides): Promise<BigNumber>;
-
-    onERC721Received(
-      arg0: string,
-      arg1: string,
-      arg2: BigNumberish,
-      arg3: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    price(overrides?: CallOverrides): Promise<BigNumber>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    resetHasMinted(
-      addrs: string[],
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    setBank(
-      _bank: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    startMint(
-      _merkleRoot: BytesLike,
-      _price: BigNumberish,
-      _isNewRound: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    tradeIn(
-      proof: BytesLike[],
-      tokenURI: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    transferNftOwnership(
-      to: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    verifyProof(
-      proof: BytesLike[],
-      recipient: string,
-      tokenURI: string,
-      isNewMember: boolean,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-  };
-
-  populateTransaction: {
-    canMint(
-      recipient: string,
-      proof: BytesLike[],
-      tokenURI: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    canTradeIn(
-      recipient: string,
-      proof: BytesLike[],
-      tokenURI: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    endMint(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    hasMinted(
-      recipient: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    isMintable(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    lastMinted(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    lastRoundTokenId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    merkleRoot(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    mint(
-      proof: BytesLike[],
-      tokenURI: string,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    mintSpecial(
-      to: string,
-      tokenURI: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    mintedIndex(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    nft(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    onERC721Received(
-      arg0: string,
-      arg1: string,
-      arg2: BigNumberish,
-      arg3: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    price(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    renounceOwnership(
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    resetHasMinted(
-      addrs: string[],
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setBank(
-      _bank: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    startMint(
-      _merkleRoot: BytesLike,
-      _price: BigNumberish,
-      _isNewRound: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    tradeIn(
-      proof: BytesLike[],
-      tokenURI: string,
-      tokenId: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    transferNftOwnership(
-      to: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    verifyProof(
-      proof: BytesLike[],
-      recipient: string,
-      tokenURI: string,
-      isNewMember: boolean,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
+    "TradeIn(address,string,uint256)": TypedContractEvent<
+      TradeInEvent.InputTuple,
+      TradeInEvent.OutputTuple,
+      TradeInEvent.OutputObject
+    >;
+    TradeIn: TypedContractEvent<
+      TradeInEvent.InputTuple,
+      TradeInEvent.OutputTuple,
+      TradeInEvent.OutputObject
+    >;
   };
 }

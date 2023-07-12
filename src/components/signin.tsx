@@ -20,8 +20,8 @@ const expiresAt: () => Date = () => {
 
 export const Signin: FC = () => {
   const toast = useToast();
-  const { data: accountData } = useAccount();
-  const { activeChain } = useNetwork();
+  const { address } = useAccount();
+  const { chain } = useNetwork();
   const [loggedIn, setLoggedIn] = useState(false);
   const [{ loading }, setState] = useState<{
     error?: Error;
@@ -57,9 +57,8 @@ export const Signin: FC = () => {
       })
       .catch(async () => {
         try {
-          const address = accountData?.address;
-          const chainId = activeChain?.id;
-          if (activeChain?.unsupported) {
+          const chainId = chain?.id;
+          if (chain?.unsupported) {
             disconnect();
             toast({
               title: 'Please Switch Networks',
@@ -127,7 +126,7 @@ export const Signin: FC = () => {
   };
 
   useEffect(() => {
-    if (!accountData) {
+    if (!address) {
       setLoggedIn(false);
       return;
     }
@@ -135,7 +134,7 @@ export const Signin: FC = () => {
       signIn();
       setLoggedIn(true);
     }
-  }, [accountData?.address]);
+  }, [address]);
 
   useEffect(() => {
     currentUser();

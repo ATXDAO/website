@@ -1,70 +1,19 @@
+// import { RainbowKitSiweNextAuthProvider } from '@rainbow-me/rainbowkit-siwe-next-auth';
 import { UIProvider } from 'components/ui-provider';
-import { providers } from 'ethers';
 import { AppProvider } from 'hooks/app-hooks';
 import type { NextComponentType, NextPageContext } from 'next';
+import type { Session } from 'next-auth';
+// import { SessionProvider } from 'next-auth/react';
 import type { NextRouter } from 'next/router';
 import { FunctionComponent } from 'react';
-import { defaultChains, WagmiProvider, createClient } from 'wagmi';
-import { CoinbaseWalletConnector } from 'wagmi/connectors/coinbaseWallet';
-import { InjectedConnector } from 'wagmi/connectors/injected';
-import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
+import { publicClient, webSocketPublicClient, connectors } from 'utils/clients';
+import { WagmiConfig, createConfig } from 'wagmi';
 
-// Get environment variables
-const alchemy = process.env.NEXT_PUBLIC_ALCHEMY_ID as string;
-const etherscan = process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY as string;
-const infuraId = process.env.NEXT_PUBLIC_INFURA_ID as string;
-
-// Pick chains
-const supportedChainIds = new Set([1, 11155111]); // mainnet, sepolia
-
-const chains = defaultChains.filter((_chain) =>
-  supportedChainIds.has(_chain.id)
-);
-
-const defaultChain = defaultChains.find((chain) => chain.id === 1);
-
-const isChainSupported = (chainId?: number): boolean =>
-  chains.some((x) => x.id === chainId);
-
-const wagmiClient = createClient({
+const wagmiConfig = createConfig({
   autoConnect: true,
-  connectors({ chainId }) {
-    const rpcUrl =
-      chains.find((x) => x.id === chainId)?.rpcUrls?.[0] ??
-      defaultChain?.rpcUrls[0];
-    return [
-      new InjectedConnector({ chains }),
-      new WalletConnectConnector({
-        chains,
-        options: {
-          infuraId,
-          qrcode: true,
-        },
-      }),
-      new CoinbaseWalletConnector({
-        chains,
-        options: {
-          appName: 'wagmi',
-          jsonRpcUrl: `${rpcUrl}/${infuraId}`,
-        },
-      }),
-    ];
-  },
-  provider({ chainId }) {
-    return providers.getDefaultProvider(
-      isChainSupported(chainId) ? chainId : 1,
-      {
-        alchemy,
-        etherscan,
-        infuraId,
-      }
-    );
-  },
-  webSocketProvider({ chainId }) {
-    return isChainSupported(chainId)
-      ? new providers.InfuraWebSocketProvider(chainId, infuraId)
-      : undefined;
-  },
+  publicClient,
+  webSocketPublicClient,
+  connectors,
 });
 
 export interface AppRenderProps {
@@ -77,22 +26,27 @@ export interface AppRenderProps {
   >;
   cookies: string;
   router: NextRouter;
+  session: Session;
 }
 
 const App: FunctionComponent<AppRenderProps> = ({
   Component,
   pageProps,
   cookies,
+  // session,
 }) => (
-  <WagmiProvider client={wagmiClient}>
+  <WagmiConfig config={wagmiConfig}>
+    {/* <SessionProvider session={session}> */}
+    {/* <RainbowKitSiweNextAuthProvider enabled={false}> */}
     <UIProvider cookies={cookies}>
       <AppProvider>
         <Component {...pageProps} />
       </AppProvider>
     </UIProvider>
-  </WagmiProvider>
+    {/* </RainbowKitSiweNextAuthProvider> */}
+    {/* </SessionProvider> */}
+  </WagmiConfig>
 );
-
 export default App;
 
 export { getServerSideProps } from 'components/ui-provider';

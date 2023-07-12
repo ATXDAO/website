@@ -1,23 +1,18 @@
-import ATXDAONFT_V2_ABI from '../contracts/ATXDAONFT_V2.json';
-import { mintContractByNetwork } from './constants';
+import { nftContractByNetwork, ATXDAONFT_V2_ABI } from './constants';
+import { mainnetClient } from './clients';
 import { getContract } from '@wagmi/core';
-import { ATXDAONFT_V2 } from 'contracts/types';
-import { providers } from 'ethers';
 import { SiweMessage } from 'siwe';
 
 export async function addressHasToken(address: string): Promise<boolean> {
-  const provider = new providers.AlchemyProvider(
-    undefined,
-    process.env.NEXT_PUBLIC_ALCHEMY_ID
-  );
-
-  const nft = getContract<ATXDAONFT_V2>({
-    addressOrName: mintContractByNetwork.ethereum.address,
-    contractInterface: ATXDAONFT_V2_ABI,
-    signerOrProvider: provider,
+  const nftContract = getContract({
+    address: nftContractByNetwork.ethereum.address,
+    abi: ATXDAONFT_V2_ABI,
+    walletClient: mainnetClient,
   });
 
-  return (await nft.balanceOf(address)).gt(0);
+  const [balance] = (await nftContract.read.balanceOf([address])) as [bigint];
+
+  return balance > 0n;
 }
 
 type AuthResponse =
