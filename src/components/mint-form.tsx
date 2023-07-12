@@ -30,10 +30,7 @@ import {
   useWalletClient,
   useContractRead,
   useContractWrite,
-  getContract,
-  // useSigner,
 } from 'wagmi';
-import { publicClient } from 'utils/clients';
 
 const tryParseError = (errorMsg: string): string => {
   const requireRevertError = errorMsg.match(
