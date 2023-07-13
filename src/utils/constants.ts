@@ -46,7 +46,7 @@ export const mintContractByNetwork: Record<SupportedNetwork, MintContractData> =
     },
     sepolia: {
       address: getAddress('0x0688F217A56623DeB137d7ca674ab2b2dF884999'),
-      merkleTree: require('./bluebonnet-merkle-tree') as MerkleTreeData,
+      merkleTree: require('./test-bluebonnet-merkle-tree') as MerkleTreeData,
     },
   };
 

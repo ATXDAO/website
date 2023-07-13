@@ -50,8 +50,6 @@ const MintForm: FC = () => {
   const [, setFireworks] = useFireworks();
   const { address } = useAccount();
 
-  console.log({ chain, address });
-
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState<'unsubmitted' | 'error' | 'success'>(
     'unsubmitted'
@@ -81,9 +79,9 @@ const MintForm: FC = () => {
 
   const { proof, isNewMember, tokenURI } = addressData;
 
-  if (tokenURI) {
-    console.log('address found:', { proof, isNewMember, tokenURI });
-  }
+  useEffect(() => {
+    console.log({ chain, address, proof, isNewMember, tokenURI });
+  }, [chain, address, tokenURI]);
 
   const { data: mintPriceData, isLoading: isMintPriceLoading } =
     useContractRead({
@@ -161,7 +159,9 @@ const MintForm: FC = () => {
   // });
 
   const mintTxHash = mintTransaction?.hash; // || tradeInTransaction?.hash;
-  console.log('mint tx:', mintTxHash);
+  if (mintTxHash) {
+    console.log('mint tx:', mintTxHash);
+  }
 
   const isBalanceSufficient =
     mintPrice && balanceData && balanceData.value >= mintPrice;
