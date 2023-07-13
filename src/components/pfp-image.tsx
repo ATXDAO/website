@@ -34,7 +34,8 @@ export const PfpImage: FC<PfpImageProps> = ({
   }, [imageHash, active]);
   return (
     <Image
-      src={`/img/bluebonnet/${imageHash}.png`}
+      // src={`/img/bluebonnet/${imageHash}.png`}
+      src="/img/atxdao-logo-square-color.png"
       transition="all 800ms ease-out"
       filter={active ? 'grayscale(1%)' : 'grayscale(95%)'}
       borderRadius="50%"

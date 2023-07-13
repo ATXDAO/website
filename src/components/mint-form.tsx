@@ -22,14 +22,16 @@ import {
   mintContractByNetwork, // EventArgs,
   SupportedNetwork,
   ATXDAOMINTER_ABI,
+  ATXDAONFT_V2_ABI,
+  nftContractByNetwork,
 } from 'utils/constants';
 import {
   useAccount,
   useBalance,
   useNetwork,
   useWalletClient,
-  useContractRead,
   useContractWrite,
+  useContractReads,
 } from 'wagmi';
 
 const tryParseError = (errorMsg: string): string => {
@@ -49,6 +51,10 @@ const MintForm: FC = () => {
   const { chain } = useNetwork();
   const [, setFireworks] = useFireworks();
   const { address } = useAccount();
+
+  if (!address) {
+    throw new Error('no address');
+  }
 
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState<'unsubmitted' | 'error' | 'success'>(
@@ -83,32 +89,79 @@ const MintForm: FC = () => {
     console.log({ chain, address, proof, isNewMember, tokenURI });
   }, [chain, address, tokenURI]);
 
-  const { data: mintPriceData, isLoading: isMintPriceLoading } =
-    useContractRead({
-      abi: ATXDAOMINTER_ABI,
-      address: contractAddress,
-      functionName: 'price',
-      cacheTime: 600000, // 10 minutes
-    });
-  const mintPrice = mintPriceData as bigint | undefined;
-
-  const { data: isMintableData, isLoading: isMintableLoading } =
-    useContractRead({
-      abi: ATXDAOMINTER_ABI,
-      address: contractAddress,
-      functionName: 'isMintable',
-      cacheTime: 600000, // 10 minutes
-    });
-  const isMintable = isMintableData as boolean | undefined;
-
-  const { data: hasMintedData } = useContractRead({
+  const minterContractMeta = {
     abi: ATXDAOMINTER_ABI,
     address: contractAddress,
-    functionName: 'hasMinted',
-    args: [address],
-    cacheOnBlock: true, // 10 minutes
+  };
+
+  const nftContractMeta = {
+    abi: ATXDAONFT_V2_ABI,
+    address: nftContractByNetwork[networkName].address,
+  };
+
+  const {
+    data: mintableAndPriceData,
+    isLoading: mintableAndPriceLoading,
+    isError: mintableAndPriceDataError,
+  } = useContractReads({
+    cacheTime: 600_000, // 10 minutes
+    contracts: [
+      {
+        ...minterContractMeta,
+        functionName: 'isMintable',
+      },
+      {
+        ...minterContractMeta,
+        functionName: 'price',
+      },
+    ],
   });
-  const hasMinted = hasMintedData as boolean | undefined;
+  const [isMintable, mintPrice] =
+    mintableAndPriceData && !mintableAndPriceDataError
+      ? [
+          mintableAndPriceData[0].result as boolean | undefined,
+          mintableAndPriceData[1].result as bigint | undefined,
+        ]
+      : [undefined, undefined];
+
+  const {
+    data: authData,
+    isLoading: isAuthLoading,
+    isError: isAuthError,
+  } = useContractReads({
+    cacheOnBlock: true,
+    contracts: [
+      {
+        ...minterContractMeta,
+        functionName: 'hasMinted',
+        args: [address],
+      },
+      {
+        ...minterContractMeta,
+        functionName: 'canMint',
+        args: [address, proof, tokenURI],
+      },
+      {
+        ...minterContractMeta,
+        functionName: 'canTradeIn',
+        args: [address, proof, tokenURI],
+      },
+      {
+        ...nftContractMeta,
+        functionName: 'balanceOf',
+        args: [address],
+      },
+    ],
+  });
+  const [hasMinted, canMint, canTradeIn, nftBalance] =
+    authData && !isAuthError
+      ? [
+          authData[0].result as boolean | undefined,
+          authData[1].result as boolean | undefined,
+          authData[2].result as boolean | undefined,
+          authData[3].result as bigint | undefined,
+        ]
+      : [undefined, undefined, undefined];
 
   function mintSuccess(): void {
     console.log('your nft was minted!!');
@@ -164,14 +217,14 @@ const MintForm: FC = () => {
   }
 
   const isBalanceSufficient =
-    mintPrice && balanceData && balanceData.value >= mintPrice;
+    canTradeIn || (mintPrice && balanceData && balanceData.value >= mintPrice);
 
   useEffect(() => {
     if (
-      isMintableLoading ||
-      isMintPriceLoading ||
+      mintableAndPriceLoading ||
       signerLoading ||
-      isBalanceLoading
+      isBalanceLoading ||
+      isAuthLoading
     ) {
       setButtonText('Loading...');
     } else if (!isMintable) {
@@ -180,6 +233,19 @@ const MintForm: FC = () => {
       setButtonText('Not on the whitelist!');
     } else if (hasMinted) {
       setButtonText('Already minted!');
+    } else if (nftBalance && !canTradeIn) {
+      setButtonText('Already own an NFT!');
+    } else if (!canMint && !canTradeIn) {
+      console.error({
+        error: 'not authorized',
+        canMint,
+        canTradeIn,
+        address,
+        proof,
+        tokenURI,
+        hasMinted,
+      });
+      setButtonText('Not authorized, contact support');
     } else if (isMinting) {
       setButtonText('Minting...');
     } else if (!isBalanceSufficient) {
@@ -190,20 +256,17 @@ const MintForm: FC = () => {
   }, [
     isMintable,
     signerLoading,
-    isMintPriceLoading,
+    mintableAndPriceLoading,
     hasMinted,
     isBalanceSufficient,
   ]);
 
-  // mintContract._mintPrice();
-
   const onMint = async (): Promise<void> => {
-    if (!proof || isMintableLoading || isMintPriceLoading) {
+    if (!proof || mintableAndPriceLoading) {
       // eslint-disable-next-line no-console
       console.error({
         proof,
-        isMintableLoading,
-        isMintPriceLoading,
+        mintableAndPriceLoading,
       });
       return;
     }
@@ -241,20 +304,17 @@ const MintForm: FC = () => {
             <Code>{address}</Code>
           </Stack>
           <Button
-            isLoading={
-              isMintableLoading ||
-              isMintPriceLoading ||
-              signerLoading ||
-              isMinting
-            }
+            isLoading={mintableAndPriceLoading || signerLoading || isMinting}
             loadingText={buttonText}
             onClick={onMint}
-            disabled={
+            isDisabled={
               !!(
                 !proof ||
+                isAuthLoading ||
+                (!canMint && !canTradeIn) ||
                 signerLoading ||
                 signerError ||
-                isMintPriceLoading ||
+                mintableAndPriceLoading ||
                 !isMintable ||
                 buttonText === 'Minted!' ||
                 hasMinted ||
