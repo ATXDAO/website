@@ -50,8 +50,6 @@ const MintForm: FC = () => {
   const [, setFireworks] = useFireworks();
   const { address } = useAccount();
 
-  console.log({ chain, address });
-
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState<'unsubmitted' | 'error' | 'success'>(
     'unsubmitted'
@@ -70,18 +68,20 @@ const MintForm: FC = () => {
   const [buttonText, setButtonText] = useState('Loading...');
 
   const networkName = chain?.name?.toLowerCase() as SupportedNetwork;
-  const {
-    address: contractAddress,
-    merkleTree,
-    blockExplorer,
-    minterMap,
-  } = mintContractByNetwork[networkName];
+  const { address: contractAddress, merkleTree } =
+    mintContractByNetwork[networkName];
 
-  const proof = address
-    ? merkleTree.proofs[address?.toLowerCase() || '']
-    : undefined;
+  const blockExplorer =
+    chain?.blockExplorers?.etherscan || 'https://etherscan.io';
 
-  const tokenURI = minterMap[address || '']?.tokenURI;
+  const addressData =
+    merkleTree.addressData[address?.toLowerCase() || ''] || {};
+
+  const { proof, isNewMember, tokenURI } = addressData;
+
+  useEffect(() => {
+    console.log({ chain, address, proof, isNewMember, tokenURI });
+  }, [chain, address, tokenURI]);
 
   const { data: mintPriceData, isLoading: isMintPriceLoading } =
     useContractRead({
@@ -159,7 +159,9 @@ const MintForm: FC = () => {
   // });
 
   const mintTxHash = mintTransaction?.hash; // || tradeInTransaction?.hash;
-  console.log('mint tx:', mintTxHash);
+  if (mintTxHash) {
+    console.log('mint tx:', mintTxHash);
+  }
 
   const isBalanceSufficient =
     mintPrice && balanceData && balanceData.value >= mintPrice;

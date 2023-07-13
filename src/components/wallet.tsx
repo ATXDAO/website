@@ -78,6 +78,7 @@ export const Wallet: FC = () => {
               >
                 <Text pl="3">
                   {_chain.name}
+                  {_chain.testnet && ' (testnet)'}
                   <Badge
                     variant="outline"
                     colorScheme="green"

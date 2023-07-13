@@ -5,14 +5,16 @@ import { getAddress } from 'viem';
 
 interface MerkleTreeData {
   root: string;
-  proofs: Record<string, string[]>;
+  addressData: Record<
+    string,
+    { tokenURI: string; isNewMember: boolean; proof: string[] }
+  >;
 }
 
-export type SupportedNetwork = 'ethereum';
+export type SupportedNetwork = 'ethereum' | 'sepolia';
 export type AddressStr = `0x${string}`;
 
 interface ContractData {
-  blockExplorer: string;
   address: AddressStr;
 }
 
@@ -24,7 +26,6 @@ export interface MinterData {
 
 export interface MintContractData extends ContractData {
   merkleTree: MerkleTreeData;
-  minterMap: Record<string, MinterData>;
 }
 
 export type EventArgs = [
@@ -37,36 +38,23 @@ export type EventArgs = [
 export const ATXDAOMINTER_ABI = require('../contracts/ATXDAOMinter.json');
 export const ATXDAONFT_V2_ABI = require('../contracts/ATXDAONFT_V2.json');
 
-export const testMinterMap: Record<string, MinterData> = {};
-(require('./test-bluebonnet-list.json') as MinterData[]).forEach((minter) => {
-  testMinterMap[minter.address] = minter;
-});
-
-export const minterMap: Record<string, MinterData> = {};
-(require('./bluebonnet-list.json') as MinterData[]).forEach((minter) => {
-  minterMap[minter.address] = minter;
-});
-
 export const mintContractByNetwork: Record<SupportedNetwork, MintContractData> =
   {
     ethereum: {
-      blockExplorer: 'https://etherscan.io',
       address: getAddress('0xf4c9a61D56B7645bE89ecA17CE6BAcB3F164b2F1'),
       merkleTree: require('./bluebonnet-merkle-tree') as MerkleTreeData,
-      minterMap,
     },
-    // localhost: {
-    //   blockExplorer: 'https://etherscan.io',
-    //   address: '0xe7f1725e7734ce288f8367e1bb143e90bb3f0512',
-    //   merkleTree:
-    //     require('./test-bluebonnet-merkle-tree.json') as MerkleTreeData,
-    //   minterMap: testMinterMap,
-    // },
+    sepolia: {
+      address: getAddress('0x0688F217A56623DeB137d7ca674ab2b2dF884999'),
+      merkleTree: require('./test-bluebonnet-merkle-tree') as MerkleTreeData,
+    },
   };
 
 export const nftContractByNetwork: Record<SupportedNetwork, ContractData> = {
   ethereum: {
-    blockExplorer: 'https://etherscan.io',
     address: getAddress('0x63f8F23ce0f3648097447622209E95A391c44b00'),
+  },
+  sepolia: {
+    address: getAddress('0x6d22c11f7fA3f67174Eec9eBc8bFf129978BE90d'),
   },
 };
