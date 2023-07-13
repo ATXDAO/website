@@ -32,7 +32,9 @@ import {
   useWalletClient,
   useContractWrite,
   useContractReads,
+  useContractEvent,
 } from 'wagmi';
+import { getAddress } from 'ethers';
 
 const tryParseError = (errorMsg: string): string => {
   const requireRevertError = errorMsg.match(
@@ -78,7 +80,7 @@ const MintForm: FC = () => {
     mintContractByNetwork[networkName];
 
   const blockExplorer =
-    chain?.blockExplorers?.etherscan || 'https://etherscan.io';
+    chain?.blockExplorers?.etherscan.url || 'https://etherscan.io';
 
   const addressData =
     merkleTree.addressData[address?.toLowerCase() || ''] || {};
@@ -184,8 +186,7 @@ const MintForm: FC = () => {
     args: [proof, tokenURI],
     value: mintPrice,
     onSuccess(data, variables, context) {
-      console.log('minted', { data, variables, context });
-      mintSuccess();
+      console.log('transaction submitted!', { data, variables, context });
     },
     onError(error, variables, context) {
       console.log('error minting!', { error, variables, context });
@@ -277,19 +278,25 @@ const MintForm: FC = () => {
   // const [imageHash /* , setPfpId */] = useState<number | undefined>();
 
   // celebration thing
-  // useContractEvent(
-  //   {
-  //     addressOrName: contractAddress,
-  //     contractInterface: ATXDAO_MINTER_ABI,
-  //   },
-  //   'Transfer',
-  //   async (args: EventArgs) => {
-  //     const [from, to, tokenId, event] = args;
-  //     console.log({ from, to, tokenId, event });
-  //     if (to.toLowerCase() === accountData?.address?.toLowerCase()) {
-  //     }
-  //   }
-  // );
+  useContractEvent({
+    ...nftContractMeta,
+    eventName: 'Transfer',
+    listener: (logs) => {
+      logs.forEach((log) => {
+        const { args } = log as unknown as {
+          args: { from: string; to: string; tokenId: bigint };
+        };
+        const { from, to, tokenId } = args;
+        console.log({ from, to, tokenId });
+
+        if (getAddress(to) === getAddress(address)) {
+          mintSuccess();
+        }
+      });
+      // console.log({ from, to, tokenId });
+      // console.log(args.node, args.label, args.owner);
+    },
+  });
 
   return (
     <Container p={6} maxWidth="400px" display="block" overflow="none">
