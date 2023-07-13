@@ -70,18 +70,20 @@ const MintForm: FC = () => {
   const [buttonText, setButtonText] = useState('Loading...');
 
   const networkName = chain?.name?.toLowerCase() as SupportedNetwork;
-  const {
-    address: contractAddress,
-    merkleTree,
-    blockExplorer,
-    minterMap,
-  } = mintContractByNetwork[networkName];
+  const { address: contractAddress, merkleTree } =
+    mintContractByNetwork[networkName];
 
-  const proof = address
-    ? merkleTree.proofs[address?.toLowerCase() || '']
-    : undefined;
+  const blockExplorer =
+    chain?.blockExplorers?.etherscan || 'https://etherscan.io';
 
-  const tokenURI = minterMap[address || '']?.tokenURI;
+  const addressData =
+    merkleTree.addressData[address?.toLowerCase() || ''] || {};
+
+  const { proof, isNewMember, tokenURI } = addressData;
+
+  if (tokenURI) {
+    console.log('address found:', { proof, isNewMember, tokenURI });
+  }
 
   const { data: mintPriceData, isLoading: isMintPriceLoading } =
     useContractRead({
