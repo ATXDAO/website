@@ -1,5 +1,5 @@
 {
-  "root": "0x7ee2dcd2a719699cc78051649539508af2ed128303181fa0751dc62919baaed0",
+  "root": "0x8c2f6db338905d87efcfe4c306c7df42e5d7d34b21b8db220664fe3313d8bb74",
   "addressData": {
     "0xabc1000000000000000000000000000000000000": {
       "tokenURI": "ipfs://QmYVgQoE74xp5TigTe1EC9vDQw7tx39t3U9ySTaNHa7CdV/26.json",
@@ -7,7 +7,8 @@
       "proof": [
         "0x25dffc87238c566203023ffd7d26a3833fa08ab1a98d8bcef029bca26b1d2dc9",
         "0xfbf4ceb2f1443e5e03dc05000b9e1fcbc597fd489f0caa8c80802afaac41e808",
-        "0xea8ad6ad448b67b5846b8ff7d25198f19577af4819932e98d7e6a5f9446998fb"
+        "0x965fb30df0532b6b55d803da0dc7087a12cb5e3a257aa66d70aca69d6e95f66f",
+        "0x23113e81aee92ab5a744d19e7f27bab402756615e24a24cec6ce3fbc6951c17b"
       ]
     },
     "0xabc2000000000000000000000000000000000000": {
@@ -16,7 +17,8 @@
       "proof": [
         "0xa5d2a00dc1d4eeb07ec917686e56fe00c240c6f85ff79abfc6bd03704755c01a",
         "0xfbf4ceb2f1443e5e03dc05000b9e1fcbc597fd489f0caa8c80802afaac41e808",
-        "0xea8ad6ad448b67b5846b8ff7d25198f19577af4819932e98d7e6a5f9446998fb"
+        "0x965fb30df0532b6b55d803da0dc7087a12cb5e3a257aa66d70aca69d6e95f66f",
+        "0x23113e81aee92ab5a744d19e7f27bab402756615e24a24cec6ce3fbc6951c17b"
       ]
     },
     "0xabc3000000000000000000000000000000000000": {
@@ -25,7 +27,8 @@
       "proof": [
         "0x62bb8c08e43e16e4b5fdbea7bb1225253e2415e73ac9cb49e49d0cfabd286c97",
         "0xf281f139d4a1621bf1b7dda51af7021da60d554583b18cf8ab6f6e53fbcb8103",
-        "0xea8ad6ad448b67b5846b8ff7d25198f19577af4819932e98d7e6a5f9446998fb"
+        "0x965fb30df0532b6b55d803da0dc7087a12cb5e3a257aa66d70aca69d6e95f66f",
+        "0x23113e81aee92ab5a744d19e7f27bab402756615e24a24cec6ce3fbc6951c17b"
       ]
     },
     "0x51040ce6fc9b9c5da69b044109f637dc997e92de": {
@@ -34,14 +37,55 @@
       "proof": [
         "0x842a993e94b3de757ffa3b3f96d183e7267b35c5b11cb6fda2573d9bfe2a144e",
         "0xf281f139d4a1621bf1b7dda51af7021da60d554583b18cf8ab6f6e53fbcb8103",
-        "0xea8ad6ad448b67b5846b8ff7d25198f19577af4819932e98d7e6a5f9446998fb"
+        "0x965fb30df0532b6b55d803da0dc7087a12cb5e3a257aa66d70aca69d6e95f66f",
+        "0x23113e81aee92ab5a744d19e7f27bab402756615e24a24cec6ce3fbc6951c17b"
       ]
     },
     "0x6d7ddd863eb2dad990bc05bdd3357e32850509e9": {
       "tokenURI": "ipfs://QmYVgQoE74xp5TigTe1EC9vDQw7tx39t3U9ySTaNHa7CdV/30.json",
       "isNewMember": false,
       "proof": [
-        "0xf5b3cf2222887d42bd8a10e83c542861256f7dc8f2777c62fa661942bbaf15ca"
+        "0x08f7fbcdef08a5698ce00994c4093c6156da5907b867c8d4664f4cb518a4ab7b",
+        "0xe6a00e49ecf84bf704c2552552016e9832b576957ccf0d106de22e48ad108f14",
+        "0xf5b3cf2222887d42bd8a10e83c542861256f7dc8f2777c62fa661942bbaf15ca",
+        "0x23113e81aee92ab5a744d19e7f27bab402756615e24a24cec6ce3fbc6951c17b"
+      ]
+    },
+    "0x05a1ff0a32bc24265bcb39499d0c5d9a6cb2011c": {
+      "tokenURI": "ipfs://QmUHL3QB4UvmzvBBNzkuy1tx3jjbKWKbRVtuS2zw5pGyNv/fb95e7.json",
+      "isNewMember": true,
+      "proof": [
+        "0xea8ad6ad448b67b5846b8ff7d25198f19577af4819932e98d7e6a5f9446998fb",
+        "0xe6a00e49ecf84bf704c2552552016e9832b576957ccf0d106de22e48ad108f14",
+        "0xf5b3cf2222887d42bd8a10e83c542861256f7dc8f2777c62fa661942bbaf15ca",
+        "0x23113e81aee92ab5a744d19e7f27bab402756615e24a24cec6ce3fbc6951c17b"
+      ]
+    },
+    "0x1d56abefec79e302808c9e392d846e8666152c1c": {
+      "tokenURI": "ipfs://QmUHL3QB4UvmzvBBNzkuy1tx3jjbKWKbRVtuS2zw5pGyNv/fb95e7.json",
+      "isNewMember": true,
+      "proof": [
+        "0x4e1ae88effc245d71c84d6aa84e47627904dc77809b8cfbf8f2cd80088df1048",
+        "0x0584c3dfc76544dde2c34bb5434ec299b81d4b554ffb1c62c3bed104f42040c3",
+        "0xf5b3cf2222887d42bd8a10e83c542861256f7dc8f2777c62fa661942bbaf15ca",
+        "0x23113e81aee92ab5a744d19e7f27bab402756615e24a24cec6ce3fbc6951c17b"
+      ]
+    },
+    "0xd4ed6f78ee9540aa95a41939cf346830165bb75b": {
+      "tokenURI": "ipfs://QmUHL3QB4UvmzvBBNzkuy1tx3jjbKWKbRVtuS2zw5pGyNv/fb95e7.json",
+      "isNewMember": true,
+      "proof": [
+        "0x5d8455bb96e0b79aa9624a2b9cdcab9a529d0452f8874c906f64de6c8d15e468",
+        "0x0584c3dfc76544dde2c34bb5434ec299b81d4b554ffb1c62c3bed104f42040c3",
+        "0xf5b3cf2222887d42bd8a10e83c542861256f7dc8f2777c62fa661942bbaf15ca",
+        "0x23113e81aee92ab5a744d19e7f27bab402756615e24a24cec6ce3fbc6951c17b"
+      ]
+    },
+    "0x007b04a611ee3fb9b80a8f6c0eb3d251cd67cef7": {
+      "tokenURI": "ipfs://QmUHL3QB4UvmzvBBNzkuy1tx3jjbKWKbRVtuS2zw5pGyNv/fb95e7.json",
+      "isNewMember": true,
+      "proof": [
+        "0xa828f58a179fc82d0cb0923408203f193fb250811e8294d27e0b9d7de8187fe9"
       ]
     }
   }
