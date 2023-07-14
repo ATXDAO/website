@@ -250,9 +250,9 @@ const MintForm: FC = () => {
     } else if (isMinting) {
       setButtonText('Minting...');
     } else if (!isBalanceSufficient) {
-      setButtonText(`Must have at least ${formatEther(mintPrice || 1n)} Ξ`);
+      setButtonText(`Must have at least ${formatEther(mintPrice || 1n)} ETH`);
     } else {
-      setButtonText(`Mint for ${formatEther(mintPrice || 1n)} Ξ`);
+      setButtonText(`Mint for ${formatEther(mintPrice || 1n)} ETH`);
     }
   }, [
     isMintable,
