@@ -86,6 +86,8 @@ const MintForm: FC = () => {
 
   const [isMinting, setIsMinting] = useState(false);
   const [buttonText, setButtonText] = useState('Loading...');
+  const [selectedNft, setSelectedNft] = useState<bigint | undefined>();
+  const [waitingForApproval, setWaitingForApproval] = useState(false);
 
   const networkName = chain?.name?.toLowerCase() as SupportedNetwork;
   const { address: contractAddress, merkleTree } =
@@ -161,17 +163,25 @@ const MintForm: FC = () => {
         functionName: 'balanceOf',
         args: [address],
       },
+      {
+        ...nftContractMeta,
+        functionName: 'getApproved',
+        args: [selectedNft || 0n],
+      },
     ],
   });
-  const [hasMinted, canMint, canTradeIn, nftBalance] =
+  const [hasMinted, canMint, canTradeIn, nftBalance, isNftApproved] =
     authData && !isAuthError
       ? [
           authData[0].result as boolean | undefined,
           authData[1].result as boolean | undefined,
           authData[2].result as boolean | undefined,
           authData[3].result as bigint | undefined,
+          authData[4].result &&
+            getAddress(authData[4].result as unknown as string) ===
+              getAddress(minterContractMeta.address),
         ]
-      : [undefined, undefined, undefined];
+      : [];
 
   const {
     data: nftResponse,
@@ -184,16 +194,17 @@ const MintForm: FC = () => {
     fetch
   );
   const [ownedNfts, setOwnedNfts] = useState<ExistingNft[]>([]);
-  const [selectedNft, setSelectedNft] = useState<bigint | undefined>();
 
   useEffect(() => {
-    nftResponse?.json().then((data: OwnedNft) => {
-      const results = data.ownedNfts.map((nft) => ({
-        tokenId: hexToBigInt(nft.id.tokenId as `0x${string}`),
-        thumbnail: nft.media[0]?.thumbnail,
-      }));
-      setOwnedNfts(results);
-    });
+    if (!nftResponse?.bodyUsed) {
+      nftResponse?.json().then((data: OwnedNft) => {
+        const results = data.ownedNfts.map((nft) => ({
+          tokenId: hexToBigInt(nft.id.tokenId as `0x${string}`),
+          thumbnail: nft.media[0]?.thumbnail,
+        }));
+        setOwnedNfts(results);
+      });
+    }
   }, [nftResponse]);
 
   if (nftError) {
@@ -221,7 +232,7 @@ const MintForm: FC = () => {
     args: [proof, tokenURI],
     value: mintPrice,
     onSuccess(data, variables, context) {
-      console.log('transaction submitted!', { data, variables, context });
+      console.log('mint tx submitted', { data, variables, context });
     },
     onError(error, variables, context) {
       console.log('error minting!', { error, variables, context });
@@ -236,11 +247,35 @@ const MintForm: FC = () => {
     functionName: 'tradeIn',
     args: [proof, tokenURI, selectedNft],
     onSuccess(data, variables, context) {
-      console.log('minted', { data, variables, context });
+      console.log('trade in tx submitted', { data, variables, context });
       mintSuccess();
     },
     onError(error, variables, context) {
-      console.log('error minting!', { error, variables, context });
+      console.log('error trading in!', { error, variables, context });
+      mintFailure(error);
+    },
+  });
+
+  const {
+    data: approveTransaction,
+    write: approveNft,
+    isLoading: isApproving,
+  } = useContractWrite({
+    abi: ATXDAONFT_V2_ABI,
+    address: nftContractMeta.address,
+    functionName: 'approve',
+    args: [minterContractMeta.address, selectedNft],
+    onSuccess(data, variables, context) {
+      setWaitingForApproval(true);
+      console.log('approve transaction submitted!', {
+        data,
+        variables,
+        context,
+      });
+      setIsMinting(false);
+    },
+    onError(error, variables, context) {
+      console.log('error approving!', { error, variables, context });
       mintFailure(error);
     },
   });
@@ -257,8 +292,9 @@ const MintForm: FC = () => {
       canMint,
       canTradeIn,
       ownedNfts,
+      approveTransaction,
     });
-  }, [mintTxHash, isAuthLoading, ownedNfts]);
+  }, [mintTxHash, isAuthLoading, ownedNfts, approveTransaction]);
 
   const isBalanceSufficient =
     canTradeIn || (mintPrice && balanceData && balanceData.value >= mintPrice);
@@ -323,7 +359,7 @@ const MintForm: FC = () => {
       return;
     }
     setIsMinting(true);
-    if (selectedNft) {
+    if (selectedNft && canTradeIn) {
       tradeInNft();
     } else {
       mintNft();
@@ -397,6 +433,14 @@ const MintForm: FC = () => {
             </Center>
           )}
           <Button
+            hidden={!canTradeIn || !selectedNft}
+            isDisabled={isNftApproved || isApproving}
+            isLoading={waitingForApproval || isApproving}
+            onClick={() => approveNft()}
+          >
+            Approve {selectedNft?.toString()}
+          </Button>
+          <Button
             isLoading={mintableAndPriceLoading || signerLoading || isMinting}
             loadingText={buttonText}
             onClick={onMint}
@@ -404,7 +448,7 @@ const MintForm: FC = () => {
               !!(
                 !proof ||
                 isAuthLoading ||
-                (!canMint && (!canTradeIn || !selectedNft)) ||
+                (!canMint && (!canTradeIn || !selectedNft || !isNftApproved)) ||
                 signerLoading ||
                 signerError ||
                 mintableAndPriceLoading ||
