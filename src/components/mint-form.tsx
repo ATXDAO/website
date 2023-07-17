@@ -12,8 +12,12 @@ import {
   Flex,
   FormControl,
   FormErrorMessage,
+  Image,
+  Radio,
+  RadioGroup,
   Stack,
   Text,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { getAddress } from 'ethers';
 import { useFireworks } from 'hooks/app-hooks';
@@ -51,6 +55,11 @@ const tryParseError = (errorMsg: string): string => {
   }
   return errorMsg;
 };
+
+interface ExistingNft {
+  tokenId: bigint;
+  thumbnail: string;
+}
 
 const MintForm: FC = () => {
   const { chain } = useNetwork();
@@ -174,18 +183,16 @@ const MintForm: FC = () => {
       : null,
     fetch
   );
-  const [ownedNfts, setOwnedNfts] = useState<
-    { tokenId: bigint; thumbnail: string }[]
-  >([]);
+  const [ownedNfts, setOwnedNfts] = useState<ExistingNft[]>([]);
+  const [selectedNft, setSelectedNft] = useState<bigint | undefined>();
 
   useEffect(() => {
     nftResponse?.json().then((data: OwnedNft) => {
-      setOwnedNfts(
-        data.ownedNfts.map((nft) => ({
-          tokenId: hexToBigInt(nft.id.tokenId as `0x${string}`),
-          thumbnail: nft.media[0]?.thumbnail,
-        }))
-      );
+      const results = data.ownedNfts.map((nft) => ({
+        tokenId: hexToBigInt(nft.id.tokenId as `0x${string}`),
+        thumbnail: nft.media[0]?.thumbnail,
+      }));
+      setOwnedNfts(results);
     });
   }, [nftResponse]);
 
@@ -223,24 +230,22 @@ const MintForm: FC = () => {
   });
 
   // trade-in logic
-  // const [tradeInTokenId, setTradeInTokenId] = useState<bigint | undefined>();
-  // const { data: tradeInTransaction, write: tradeInNft } = useContractWrite({
-  //   abi: ATXDAOMINTER_ABI,
-  //   address: contractAddress,
-  //   functionName: 'tradeIn',
-  //   args: [proof, tokenURI, tradeInTokenId],
-  //   value: mintPrice,
-  //   onSuccess(data, variables, context) {
-  //     console.log('minted', { data, variables, context });
-  //     mintSuccess();
-  //   },
-  //   onError(error, variables, context) {
-  //     console.log('error minting!', { error, variables, context });
-  //     mintFailure(error);
-  //   },
-  // });
+  const { data: tradeInTransaction, write: tradeInNft } = useContractWrite({
+    abi: ATXDAOMINTER_ABI,
+    address: contractAddress,
+    functionName: 'tradeIn',
+    args: [proof, tokenURI, selectedNft],
+    onSuccess(data, variables, context) {
+      console.log('minted', { data, variables, context });
+      mintSuccess();
+    },
+    onError(error, variables, context) {
+      console.log('error minting!', { error, variables, context });
+      mintFailure(error);
+    },
+  });
 
-  const mintTxHash = mintTransaction?.hash; // || tradeInTransaction?.hash;
+  const mintTxHash = mintTransaction?.hash || tradeInTransaction?.hash;
   useEffect(() => {
     console.log({
       chain,
@@ -290,7 +295,11 @@ const MintForm: FC = () => {
     } else if (!isBalanceSufficient) {
       setButtonText(`Must have at least ${formatEther(mintPrice || 1n)} ETH`);
     } else if (!canMint && canTradeIn) {
-      setButtonText('Trade-in not enabled yet');
+      if (selectedNft) {
+        setButtonText(`Trade in ${selectedNft}`);
+      } else {
+        setButtonText('Select NFT to trade in');
+      }
     } else {
       setButtonText(`Mint for ${formatEther(mintPrice || 1n)} ETH`);
     }
@@ -300,6 +309,8 @@ const MintForm: FC = () => {
     mintableAndPriceLoading,
     hasMinted,
     isBalanceSufficient,
+    selectedNft,
+    isAuthLoading,
   ]);
 
   const onMint = async (): Promise<void> => {
@@ -312,7 +323,11 @@ const MintForm: FC = () => {
       return;
     }
     setIsMinting(true);
-    mintNft();
+    if (selectedNft) {
+      tradeInNft();
+    } else {
+      mintNft();
+    }
   };
 
   // const [imageHash /* , setPfpId */] = useState<number | undefined>();
@@ -350,6 +365,37 @@ const MintForm: FC = () => {
             <Text>Your address is not on the whitelist. </Text>
             <Code>{address}</Code>
           </Stack>
+          {canTradeIn && ownedNfts.length && (
+            <Center>
+              <RadioGroup
+                value={selectedNft?.toString()}
+                onChange={(value) => setSelectedNft(BigInt(value))}
+              >
+                <Text fontSize="sm" pb="1.5em">
+                  NFT to trade in:
+                </Text>
+                <Stack direction="row" spacing="1em">
+                  {ownedNfts.map(({ tokenId, thumbnail }) => (
+                    <Radio value={tokenId.toString()} hidden>
+                      <Image
+                        src={thumbnail}
+                        alt={tokenId.toString()}
+                        height="6em"
+                        borderRadius="3em"
+                        outline={
+                          tokenId === selectedNft ? '0.5em solid' : undefined
+                        }
+                        filter={
+                          tokenId === selectedNft ? undefined : 'grayscale(90%)'
+                        }
+                        outlineColor={useColorModeValue('blue.500', 'blue.100')}
+                      />
+                    </Radio>
+                  ))}
+                </Stack>
+              </RadioGroup>
+            </Center>
+          )}
           <Button
             isLoading={mintableAndPriceLoading || signerLoading || isMinting}
             loadingText={buttonText}
@@ -358,7 +404,7 @@ const MintForm: FC = () => {
               !!(
                 !proof ||
                 isAuthLoading ||
-                !canMint ||
+                (!canMint && (!canTradeIn || !selectedNft)) ||
                 signerLoading ||
                 signerError ||
                 mintableAndPriceLoading ||
