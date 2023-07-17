@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable global-require */
 
+/* eslint-disable global-require */
 import { getAddress } from 'viem';
 
 interface MerkleTreeData {

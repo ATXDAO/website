@@ -1,3 +1,4 @@
+import { SupportedNetwork } from './constants';
 import { getDefaultWallets } from '@rainbow-me/rainbowkit';
 import { createPublicClient, http } from 'viem';
 import { mainnet, sepolia } from 'viem/chains';
@@ -35,3 +36,20 @@ export const { chains, publicClient, webSocketPublicClient } = configureChains(
     publicProvider(),
   ]
 );
+
+export const alchemyNftEndpoint = (
+  networkName: SupportedNetwork,
+  contract: `0x${string}`,
+  address: `0x${string}`
+): string => {
+  let baseUrl = '';
+  if (networkName === 'ethereum') {
+    baseUrl = 'https://eth-mainnet.g.alchemy.com/nft/v2';
+  } else if (networkName === 'sepolia') {
+    baseUrl = 'https://eth-sepolia.g.alchemy.com/nft/v2';
+  } else {
+    throw new Error('Network not supported');
+  }
+  const apiKey = networkName === 'ethereum' ? alchemyApiKey : sepoliaApiKey;
+  return `${baseUrl}/${apiKey}/getNFTs?owner=${address}&withMetadata=true&contractAddresses%5B%5D=${contract}`;
+};
