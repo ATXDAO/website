@@ -18,6 +18,9 @@ import {
 import { getAddress } from 'ethers';
 import { useFireworks } from 'hooks/app-hooks';
 import { FC, useEffect, useState } from 'react';
+import useSWR from 'swr';
+import { OwnedNft } from 'types/alchemy';
+import { alchemyNftEndpoint } from 'utils/clients';
 import {
   mintContractByNetwork, // EventArgs,
   SupportedNetwork,
@@ -25,7 +28,7 @@ import {
   ATXDAONFT_V2_ABI,
   nftContractByNetwork,
 } from 'utils/constants';
-import { formatEther } from 'viem';
+import { formatEther, hexToBigInt } from 'viem';
 import {
   useAccount,
   useBalance,
@@ -161,6 +164,35 @@ const MintForm: FC = () => {
         ]
       : [undefined, undefined, undefined];
 
+  const {
+    data: nftResponse,
+    error: nftError,
+    // isLoading: nftIsLoading,
+  } = useSWR(
+    canTradeIn
+      ? alchemyNftEndpoint(networkName, nftContractMeta.address, address)
+      : null,
+    fetch
+  );
+  const [ownedNfts, setOwnedNfts] = useState<
+    { tokenId: bigint; thumbnail: string }[]
+  >([]);
+
+  useEffect(() => {
+    nftResponse?.json().then((data: OwnedNft) => {
+      setOwnedNfts(
+        data.ownedNfts.map((nft) => ({
+          tokenId: hexToBigInt(nft.id.tokenId as `0x${string}`),
+          thumbnail: nft.media[0]?.thumbnail,
+        }))
+      );
+    });
+  }, [nftResponse]);
+
+  if (nftError) {
+    console.error('error fetching nft metadata from opensea!', { nftError });
+  }
+
   function mintSuccess(): void {
     console.log('your nft was minted!!');
     setButtonText('Minted!');
@@ -219,8 +251,9 @@ const MintForm: FC = () => {
       mintTxHash,
       canMint,
       canTradeIn,
+      ownedNfts,
     });
-  }, [mintTxHash, isAuthLoading]);
+  }, [mintTxHash, isAuthLoading, ownedNfts]);
 
   const isBalanceSufficient =
     canTradeIn || (mintPrice && balanceData && balanceData.value >= mintPrice);
