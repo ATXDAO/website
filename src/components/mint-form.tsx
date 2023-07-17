@@ -87,10 +87,6 @@ const MintForm: FC = () => {
 
   const { proof, isNewMember, tokenURI } = addressData;
 
-  useEffect(() => {
-    console.log({ chain, address, proof, isNewMember, tokenURI });
-  }, [chain, address, tokenURI]);
-
   const minterContractMeta = {
     abi: ATXDAOMINTER_ABI,
     address: contractAddress,
@@ -213,9 +209,18 @@ const MintForm: FC = () => {
   // });
 
   const mintTxHash = mintTransaction?.hash; // || tradeInTransaction?.hash;
-  if (mintTxHash) {
-    console.log('mint tx:', mintTxHash);
-  }
+  useEffect(() => {
+    console.log({
+      chain,
+      address,
+      proof,
+      isNewMember,
+      tokenURI,
+      mintTxHash,
+      canMint,
+      canTradeIn,
+    });
+  }, [mintTxHash, isAuthLoading]);
 
   const isBalanceSufficient =
     canTradeIn || (mintPrice && balanceData && balanceData.value >= mintPrice);
@@ -251,6 +256,8 @@ const MintForm: FC = () => {
       setButtonText('Minting...');
     } else if (!isBalanceSufficient) {
       setButtonText(`Must have at least ${formatEther(mintPrice || 1n)} ETH`);
+    } else if (!canMint && canTradeIn) {
+      setButtonText('Trade-in not enabled yet');
     } else {
       setButtonText(`Mint for ${formatEther(mintPrice || 1n)} ETH`);
     }
@@ -318,7 +325,7 @@ const MintForm: FC = () => {
               !!(
                 !proof ||
                 isAuthLoading ||
-                (!canMint && !canTradeIn) ||
+                !canMint ||
                 signerLoading ||
                 signerError ||
                 mintableAndPriceLoading ||
