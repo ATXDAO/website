@@ -1,5 +1,5 @@
-import { nftContractByNetwork, ATXDAONFT_V2_ABI } from './constants';
 import { mainnetClient } from './clients';
+import { nftContractByNetwork, ATXDAONFT_V2_ABI } from './constants';
 import { getContract } from '@wagmi/core';
 import { SiweMessage } from 'siwe';
 

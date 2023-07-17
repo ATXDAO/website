@@ -15,7 +15,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react';
-import { formatEther } from 'viem';
+import { getAddress } from 'ethers';
 import { useFireworks } from 'hooks/app-hooks';
 import { FC, useEffect, useState } from 'react';
 import {
@@ -25,6 +25,7 @@ import {
   ATXDAONFT_V2_ABI,
   nftContractByNetwork,
 } from 'utils/constants';
+import { formatEther } from 'viem';
 import {
   useAccount,
   useBalance,
@@ -34,7 +35,6 @@ import {
   useContractReads,
   useContractEvent,
 } from 'wagmi';
-import { getAddress } from 'ethers';
 
 const tryParseError = (errorMsg: string): string => {
   const requireRevertError = errorMsg.match(

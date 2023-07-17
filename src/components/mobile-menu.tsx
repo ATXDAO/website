@@ -25,9 +25,6 @@ export const MobileMenu: FC = () => {
         <MenuItem icon={<FaHome />}>
           <Link href="/">Home</Link>
         </MenuItem>
-        {/* <MenuItem icon={<FaInfoCircle />}>
-          <Link href="/events">Events</Link>
-        </MenuItem> */}
         <MenuDivider />
         <MenuItem>
           <Flex gap="1rem">
