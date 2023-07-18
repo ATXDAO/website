@@ -222,6 +222,7 @@ const MintForm: FC = () => {
   function mintFailure(error: Error): void {
     setStatus('error');
     setIsMinting(false);
+    console.error({ error });
     setErrorMessage(tryParseError(error.message));
   }
 
