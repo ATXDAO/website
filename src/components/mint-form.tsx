@@ -142,7 +142,7 @@ const MintForm: FC = () => {
       : [undefined, undefined];
 
   const isMerkleRootValid =
-    !mintableAndPriceLoading &&
+    mintableAndPriceLoading ||
     merkleRoot?.toLowerCase() === merkleTree.root.toLowerCase();
 
   const {
