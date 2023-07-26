@@ -126,15 +126,24 @@ const MintForm: FC = () => {
         ...minterContractMeta,
         functionName: 'price',
       },
+      {
+        ...minterContractMeta,
+        functionName: 'merkleRoot',
+      },
     ],
   });
-  const [isMintable, mintPrice] =
+  const [isMintable, mintPrice, merkleRoot] =
     mintableAndPriceData && !mintableAndPriceDataError
       ? [
           mintableAndPriceData[0].result as boolean | undefined,
           mintableAndPriceData[1].result as bigint | undefined,
+          (mintableAndPriceData[2].result as unknown as string) || 'invalid',
         ]
       : [undefined, undefined];
+
+  const isMerkleRootValid =
+    mintableAndPriceLoading ||
+    merkleRoot?.toLowerCase() === merkleTree.root.toLowerCase();
 
   const {
     data: authData,
@@ -310,6 +319,8 @@ const MintForm: FC = () => {
       setButtonText('Loading...');
     } else if (!isMintable) {
       setButtonText('Minting disabled');
+    } else if (!isMerkleRootValid) {
+      setButtonText('Merkle root out of sync!');
     } else if (!proof) {
       setButtonText('Not on the whitelist!');
     } else if (hasMinted) {
@@ -402,6 +413,11 @@ const MintForm: FC = () => {
             <Text>Your address is not on the whitelist. </Text>
             <Code>{address}</Code>
           </Stack>
+          <Stack spacing={2} hidden={isMerkleRootValid}>
+            <Text fontSize="sm">
+              Merkle root out of sync! Contact an admin.
+            </Text>
+          </Stack>
           {canTradeIn && ownedNfts.length && (
             <Center>
               <RadioGroup
@@ -447,6 +463,7 @@ const MintForm: FC = () => {
             onClick={onMint}
             isDisabled={
               !!(
+                !isMerkleRootValid ||
                 !proof ||
                 isAuthLoading ||
                 (!canMint && (!canTradeIn || !selectedNft || !isNftApproved)) ||
