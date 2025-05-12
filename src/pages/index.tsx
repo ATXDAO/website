@@ -30,6 +30,10 @@ const IndexPage: NextPage = () => {
                 },
               ]}
             />
+            {/* This is a hidden comment that will be visible in view source */}
+            <Box display="none" aria-hidden="true">
+              Updated 2025-05-12
+            </Box>
           </VStack>
         </Grid>
       </Box>

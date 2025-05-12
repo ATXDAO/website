@@ -3,9 +3,9 @@
   "editor.tabSize": 2,
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true,
-    "eslint.autoFixOnSave": true,
-    "eslint.run": true,
+    "source.fixAll.eslint": "explicit",
+    "eslint.autoFixOnSave": "explicit",
+    "eslint.run": "explicit"
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "typescript.updateImportsOnFileMove.enabled": "always",
